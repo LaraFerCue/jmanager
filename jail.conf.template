@@ -1,0 +1,13 @@
+path = /usr/jails/$name
+exec.start = 'sh /etc/rc'
+exec.shutdown = 'sh /etc/rc.shutdown'
+
+%name% {
+	ip4 = inherit
+	host = inherit
+	enforce_statfs = 1
+	osrelease = 12.0-RELEASE
+	allow.raw_sockets
+	allow.mount.devfs
+	allow.socket_af
+}
