@@ -1,0 +1,4 @@
+- name: test
+  version: 12.0-RELEASE
+  architecture: amd64
+  components: src lib32 # Base is mandatory
