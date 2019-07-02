@@ -1,4 +1,4 @@
-# jmanager - A(nother) jail manager
+# jmanager - A(nother) jail manager ![build status](https://travis-ci.org/LaraFerCue/jmanager.svg?branch=master)
 
 ## Introduction
 
