@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from models.jail import Jail, Architecture, Version, VersionType
-from src.fetch_utils import fetch_tarballs_into
+from src.utils.fetch import fetch_tarballs_into
 
 
 class TestFetchUtils:
