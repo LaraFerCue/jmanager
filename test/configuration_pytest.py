@@ -1,6 +1,6 @@
 from pathlib import PosixPath
 from tempfile import mkstemp
-from typing import List, Dict
+from typing import List, Dict, Union
 
 import pytest
 import yaml
@@ -8,7 +8,7 @@ import yaml
 from src.configuration import read_configuration_file, parse_configuration_file
 
 SAMPLE_CONFIGURATION_FILE = PosixPath('test/resources/test_config_file.yaml')
-JAIL_CONFIGURATION_EXAMPLE: List[Dict[str, str]] = [
+JAIL_CONFIGURATION_EXAMPLE: List[Dict[str, Union[List[str], str]]] = [
     {
         "name": "test",
         "version": "12.0-RELEASE",
@@ -51,3 +51,10 @@ class TestConfigurationFile:
         assert str(jail_list[0].version) == JAIL_CONFIGURATION_EXAMPLE[0]['version']
         assert jail_list[0].architecture == JAIL_CONFIGURATION_EXAMPLE[0]['architecture']
         assert set(jail_list[0].components) == set(JAIL_CONFIGURATION_EXAMPLE[0]['components'])
+
+    def test_parsing_wrong_type_name(self):
+        configuration = JAIL_CONFIGURATION_EXAMPLE
+        configuration[0]['name'] = ['name']
+
+        with pytest.raises(ValueError):
+            parse_configuration_file(configuration)

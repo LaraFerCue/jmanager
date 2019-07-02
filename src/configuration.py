@@ -20,6 +20,8 @@ def parse_configuration_file(jail_dictionary_list: List[Dict[str, Union[List, st
     jail_list: List[Jail] = []
 
     for jail_dictionary in jail_dictionary_list:
+        if not isinstance(jail_dictionary['name'], str):
+            raise ValueError(f"Property name must be of type 'str' not '{type(jail_dictionary['name'])}'")
         jail_list.append(Jail(name=jail_dictionary['name'],
                               version=Version.from_string(jail_dictionary['version']),
                               components=jail_dictionary['components'],
