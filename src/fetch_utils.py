@@ -2,6 +2,7 @@ from ftplib import FTP
 from pathlib import PosixPath
 
 from models.architecture import Architecture
+from models.component import Component
 from models.jail import Jail
 from models.version import VersionType, Version
 
@@ -17,11 +18,11 @@ def fetch_tarballs_into(jail_info: Jail, temp_dir: PosixPath):
     ftp_connector.cwd(directory.as_posix())
 
     components = jail_info.components.copy()
-    components.append('base')
+    components.append(Component.BASE)
 
     for component in components:
-        temp_file = temp_dir.joinpath(f"{component}.txz").as_posix()
-        ftp_connector.retrbinary(f"RETR {component}.txz", open(temp_file, 'wb').write)
+        temp_file = temp_dir.joinpath(f"{component.value}.txz").as_posix()
+        ftp_connector.retrbinary(f"RETR {component.value}.txz", open(temp_file, 'wb').write)
 
     ftp_connector.quit()
 

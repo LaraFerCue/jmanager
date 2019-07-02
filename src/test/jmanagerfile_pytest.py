@@ -26,7 +26,8 @@ class TestJmanagerfile:
         assert jail_list[0].name == JAIL_CONFIGURATION_EXAMPLE[0]['name']
         assert str(jail_list[0].version) == JAIL_CONFIGURATION_EXAMPLE[0]['version']
         assert jail_list[0].architecture.value == JAIL_CONFIGURATION_EXAMPLE[0]['architecture']
-        assert set(jail_list[0].components) == set(JAIL_CONFIGURATION_EXAMPLE[0]['components'])
+        for component in jail_list[0].components:
+            assert component.value in JAIL_CONFIGURATION_EXAMPLE[0]['components']
 
     def test_parsing_wrong_type_name(self):
         configuration = [JAIL_CONFIGURATION_EXAMPLE[0].copy()]

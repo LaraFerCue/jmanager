@@ -1,5 +1,8 @@
+import ftplib
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
+
+import pytest
 
 from models.architecture import Architecture
 from models.jail import Jail
@@ -16,3 +19,10 @@ class TestFetchUtils:
             temp_dir_path = PosixPath(temp_dir)
             fetch_tarballs_into(jail, temp_dir_path)
             assert temp_dir_path.joinpath('base.txz').is_file()
+
+    def test_fetch_tarballs_invalid_version(self):
+        jail_version = Version(major=10, minor=6, version_type=VersionType.RELEASE)
+        jail = Jail(name='name', version=jail_version, architecture=Architecture.AMD64, components=[])
+
+        with pytest.raises(ftplib.error_perm, match='550 Failed to change directory'):
+            fetch_tarballs_into(jail, PosixPath('/tmp'))

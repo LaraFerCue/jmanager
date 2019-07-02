@@ -1,11 +1,12 @@
 from typing import List
 
 from models.architecture import Architecture
+from models.component import Component
 from models.version import Version
 
 
 class Jail:
-    def __init__(self, name: str, version: Version, architecture: Architecture, components: List[str]):
+    def __init__(self, name: str, version: Version, architecture: Architecture, components: List[Component]):
         self._name = name
         self._version = version
         self._components = components
@@ -24,5 +25,5 @@ class Jail:
         return self._architecture
 
     @property
-    def components(self) -> List[str]:
+    def components(self) -> List[Component]:
         return self._components
