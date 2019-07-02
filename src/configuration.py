@@ -14,7 +14,7 @@ CONFIGURATION_SCHEMA: Dict[str, type] = {
 }
 
 
-def read_configuration_file(path_to_file: PosixPath) -> List[Dict[str, str]]:
+def read_jmanagerfile(path_to_file: PosixPath) -> List[Dict[str, str]]:
     if not path_to_file.is_file():
         raise FileNotFoundError("error: The configuration file has not been found")
 
@@ -23,7 +23,7 @@ def read_configuration_file(path_to_file: PosixPath) -> List[Dict[str, str]]:
     return data
 
 
-def parse_configuration_file(jail_dictionary_list: List[Dict[str, Union[List, str]]]) -> List[Jail]:
+def parse_jmanagerfile(jail_dictionary_list: List[Dict[str, Union[List, str]]]) -> List[Jail]:
     jail_list: List[Jail] = []
 
     for jail_dictionary in jail_dictionary_list:
