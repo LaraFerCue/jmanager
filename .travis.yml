@@ -5,6 +5,7 @@ python:
 install:
     - pip install pipenv
     - pipenv install
+    - pipenv graph
 
 script:
     - pipenv run pytest
