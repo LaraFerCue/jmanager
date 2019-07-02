@@ -5,7 +5,7 @@ import pytest
 
 from src.configuration import read_configuration_file, parse_configuration_file
 
-SAMPLE_CONFIGURATION_FILE = PosixPath('test/resources/test_config_file.yaml')
+SAMPLE_CONFIGURATION_FILE = PosixPath('src/test/resources/test_config_file.yaml')
 JAIL_CONFIGURATION_EXAMPLE: List[Dict[str, Union[List[str], str]]] = [
     {
         "name": "test",
