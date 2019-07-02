@@ -58,3 +58,10 @@ class TestConfigurationFile:
 
         with pytest.raises(ValueError):
             parse_configuration_file(configuration)
+
+    def test_parsing_wrong_version_type(self):
+        configuration = JAIL_CONFIGURATION_EXAMPLE
+        configuration[0]['version'] = ['version']
+
+        with pytest.raises(ValueError):
+            parse_configuration_file(configuration)
