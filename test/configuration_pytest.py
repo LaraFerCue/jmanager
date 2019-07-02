@@ -53,15 +53,29 @@ class TestConfigurationFile:
         assert set(jail_list[0].components) == set(JAIL_CONFIGURATION_EXAMPLE[0]['components'])
 
     def test_parsing_wrong_type_name(self):
-        configuration = JAIL_CONFIGURATION_EXAMPLE
+        configuration = [JAIL_CONFIGURATION_EXAMPLE[0].copy()]
         configuration[0]['name'] = ['name']
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Property name must be of type 'str' not 'list'"):
             parse_configuration_file(configuration)
 
     def test_parsing_wrong_version_type(self):
-        configuration = JAIL_CONFIGURATION_EXAMPLE
+        configuration = [JAIL_CONFIGURATION_EXAMPLE[0].copy()]
         configuration[0]['version'] = ['version']
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Property version must be of type 'str' not 'list'"):
+            parse_configuration_file(configuration)
+
+    def test_parsing_wrong_architecture_type(self):
+        configuration = [JAIL_CONFIGURATION_EXAMPLE[0].copy()]
+        configuration[0]['architecture'] = ['architecture']
+
+        with pytest.raises(ValueError, match=r"Property architecture must be of type 'str' not 'list'"):
+            parse_configuration_file(configuration)
+
+    def test_parsing_wrong_components_type(self):
+        configuration = [JAIL_CONFIGURATION_EXAMPLE[0].copy()]
+        configuration[0]['components'] = 'components'
+
+        with pytest.raises(ValueError, match=r"Property components must be of type 'list' not 'str'"):
             parse_configuration_file(configuration)

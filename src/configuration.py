@@ -6,6 +6,13 @@ from yaml import load, Loader
 from models.jail import Jail
 from models.version import Version
 
+CONFIGURATION_SCHEMA: Dict[str, type] = {
+    'name': str,
+    'version': str,
+    'architecture': str,
+    'components': list
+}
+
 
 def read_configuration_file(path_to_file: PosixPath) -> List[Dict[str, str]]:
     if not path_to_file.is_file():
@@ -20,11 +27,19 @@ def parse_configuration_file(jail_dictionary_list: List[Dict[str, Union[List, st
     jail_list: List[Jail] = []
 
     for jail_dictionary in jail_dictionary_list:
-        if not isinstance(jail_dictionary['name'], str):
-            raise ValueError(f"Property name must be of type 'str' not '{type(jail_dictionary['name'])}'")
+        sanitize_input(jail_dictionary)
+
         jail_list.append(Jail(name=jail_dictionary['name'],
                               version=Version.from_string(jail_dictionary['version']),
                               components=jail_dictionary['components'],
                               architecture=jail_dictionary['architecture']
                               ))
     return jail_list
+
+
+def sanitize_input(jail_dictionary: Dict[str, Union[List, str]]):
+    for key in jail_dictionary.keys():
+        if type(jail_dictionary[key]) != CONFIGURATION_SCHEMA[key]:
+            raise ValueError(
+                f"Property {key} must be of type '{CONFIGURATION_SCHEMA[key].__name__}' not " +
+                f"'{type(jail_dictionary[key]).__name__}'")
