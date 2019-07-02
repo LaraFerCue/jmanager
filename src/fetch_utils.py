@@ -1,10 +1,7 @@
 from ftplib import FTP
 from pathlib import PosixPath
 
-from models.architecture import Architecture
-from models.component import Component
-from models.jail import Jail
-from models.version import VersionType, Version
+from models.jail import Jail, Architecture, Component, Version, VersionType
 
 SERVER_URL = "ftp.FreeBSD.org"
 FTP_BASE_DIRECTORY = PosixPath('pub/FreeBSD')

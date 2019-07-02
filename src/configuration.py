@@ -3,10 +3,7 @@ from typing import List, Dict, Union
 
 from yaml import load, Loader
 
-from models.architecture import Architecture
-from models.component import Component
-from models.jail import Jail
-from models.version import Version
+from models.jail import Jail, Architecture, Component, Version
 
 CONFIGURATION_SCHEMA: Dict[str, type] = {
     'name': str,
