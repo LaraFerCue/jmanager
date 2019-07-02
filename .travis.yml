@@ -8,8 +8,7 @@ install:
     - pipenv graph
 
 script:
-    - pipenv run pytest --ignore='src/test/fetch_utils_pytest.py'
-    - pipenv run pytest --cov-report term --cov=src
+    - make test
 
 after_success:
     - pipenv run codecov --token 64da669b-222d-4a41-8747-01434fb8ad44
