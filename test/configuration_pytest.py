@@ -1,9 +1,7 @@
 from pathlib import PosixPath
-from tempfile import mkstemp
 from typing import List, Dict, Union
 
 import pytest
-import yaml
 
 from src.configuration import read_configuration_file, parse_configuration_file
 
@@ -19,15 +17,6 @@ JAIL_CONFIGURATION_EXAMPLE: List[Dict[str, Union[List[str], str]]] = [
         ]
     }
 ]
-
-
-def write_configuration_file(configuration: List[Dict[str, str]],
-                             tmp_directory: str) -> PosixPath:
-    _, tempfile = mkstemp(dir=tmp_directory)
-
-    with open(tempfile, "w") as yaml_file:
-        yaml.dump(data=configuration, stream=yaml_file)
-    return tempfile
 
 
 class TestConfigurationFile:
