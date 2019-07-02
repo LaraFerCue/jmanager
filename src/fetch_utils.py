@@ -1,6 +1,7 @@
 from ftplib import FTP
 from pathlib import PosixPath
 
+from models.architecture import Architecture
 from models.jail import Jail
 from models.version import VersionType, Version
 
@@ -25,10 +26,10 @@ def fetch_tarballs_into(jail_info: Jail, temp_dir: PosixPath):
     ftp_connector.quit()
 
 
-def get_directory_path(architecture: str, version: Version):
+def get_directory_path(architecture: Architecture, version: Version):
     if version.version_type == VersionType.RELEASE:
         directory = FTP_BASE_DIRECTORY.joinpath('releases')
     else:
         directory = FTP_BASE_DIRECTORY.joinpath('snapshots')
-    directory = directory.joinpath(architecture, str(version))
+    directory = directory.joinpath(architecture.value, str(version))
     return directory

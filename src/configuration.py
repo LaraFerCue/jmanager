@@ -3,6 +3,7 @@ from typing import List, Dict, Union
 
 from yaml import load, Loader
 
+from models.architecture import Architecture
 from models.jail import Jail
 from models.version import Version
 
@@ -32,7 +33,7 @@ def parse_jmanagerfile(jail_dictionary_list: List[Dict[str, Union[List, str]]]) 
         jail_list.append(Jail(name=jail_dictionary['name'],
                               version=Version.from_string(jail_dictionary['version']),
                               components=jail_dictionary['components'],
-                              architecture=jail_dictionary['architecture']
+                              architecture=Architecture(jail_dictionary['architecture'])
                               ))
     return jail_list
 

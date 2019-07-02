@@ -25,7 +25,7 @@ class TestJmanagerfile:
 
         assert jail_list[0].name == JAIL_CONFIGURATION_EXAMPLE[0]['name']
         assert str(jail_list[0].version) == JAIL_CONFIGURATION_EXAMPLE[0]['version']
-        assert jail_list[0].architecture == JAIL_CONFIGURATION_EXAMPLE[0]['architecture']
+        assert jail_list[0].architecture.value == JAIL_CONFIGURATION_EXAMPLE[0]['architecture']
         assert set(jail_list[0].components) == set(JAIL_CONFIGURATION_EXAMPLE[0]['components'])
 
     def test_parsing_wrong_type_name(self):
@@ -55,5 +55,3 @@ class TestJmanagerfile:
 
         with pytest.raises(ValueError, match=r"Property components must be of type 'list' not 'str'"):
             parse_jmanagerfile(configuration)
-
-
