@@ -9,3 +9,19 @@ class Jail:
         self._version = version
         self._components = components
         self._architecture = architecture
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def version(self) -> Version:
+        return self._version
+
+    @property
+    def architecture(self) -> str:
+        return self._architecture
+
+    @property
+    def components(self) -> List[str]:
+        return self._components
