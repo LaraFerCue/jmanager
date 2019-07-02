@@ -6,7 +6,9 @@ name = "pypi"
 [packages]
 request = "*"
 pyyaml = "*"
+codecov = "*"
 
 [dev-packages]
 pytest = "*"
-coverage = "*"
+pytest-cov = "*"
+codecov = "*"

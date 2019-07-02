@@ -8,3 +8,7 @@ install:
 
 script:
     - pipenv run pytest
+    - pipenv --cov-report term --cov=src
+
+after_success:
+    - pipenv run codecov --token 64da669b-222d-4a41-8747-01434fb8ad44
