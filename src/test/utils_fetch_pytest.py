@@ -18,7 +18,7 @@ def get_http_fetcher():
     http_fetcher.SERVER_URL = f"file://{tmp_dir}"
     http_fetcher.FTP_BASE_DIRECTORY = PosixPath()
 
-    for folder in [ TEMPORARY_RELEASE_FTP_DIR, TEMPORARY_SNAPSHOT_FTP_DIR]:
+    for folder in [TEMPORARY_RELEASE_FTP_DIR, TEMPORARY_SNAPSHOT_FTP_DIR]:
         temporary_folder = f"{tmp_dir}/{folder}"
         os.makedirs(temporary_folder)
 
@@ -28,6 +28,9 @@ def get_http_fetcher():
 
 
 class TestFetchUtils:
+    class ErrorToBeRaised(BaseException):
+        pass
+
     def test_fetch_base_tarball(self):
         http_fetcher = get_http_fetcher()
 
@@ -57,3 +60,16 @@ class TestFetchUtils:
             temp_dir_path = PosixPath(temp_dir)
             http_fetcher.fetch_tarballs_into(jail, temp_dir_path)
             assert temp_dir_path.joinpath('base.txz').is_file()
+
+    def test_fetch_with_callback_function(self):
+        def callback_function(received_bytes: int, total_bytes: int):
+            assert isinstance(received_bytes, int)
+            assert isinstance(total_bytes, int)
+            raise TestFetchUtils.ErrorToBeRaised(f"test message")
+
+        http_fetcher = get_http_fetcher()
+        jail_version = Version(major=12, minor=0, version_type=VersionType.STABLE)
+        jail = Jail(name='name', version=jail_version, architecture=Architecture.AMD64, components=[])
+
+        with pytest.raises(TestFetchUtils.ErrorToBeRaised):
+            http_fetcher.fetch_tarballs_into(jail, PosixPath('/tmp'), callback_function)
