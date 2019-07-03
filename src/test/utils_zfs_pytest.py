@@ -25,3 +25,11 @@ class TestZFS:
             assert ZFSProperty.NAME in data_set and data_set[ZFSProperty.NAME] == 'zroot'
             assert ZFSProperty.USED in data_set and ZFSProperty.AVAIL in data_set and ZFSProperty.REFER in data_set
             assert ZFSProperty.MOUNTPOINT in data_set and data_set[ZFSProperty.MOUNTPOINT] == '/zroot'
+
+    def test_zfs_list_depth_option(self):
+        output = zfs_list(data_set='zroot', depth=1)
+        depth_one_output = len(output)
+        assert len(output) > 1
+
+        output = zfs_list(data_set='zroot', depth=-1)
+        assert len(output) > depth_one_output

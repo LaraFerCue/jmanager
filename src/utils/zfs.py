@@ -56,10 +56,17 @@ def zfs_list(data_set: str = "", depth: int = 0, exact_numbers: bool = False,
 
     :return: A dictionary containing properties retrieved by the command.
     """
-    output = zfs_cmd(cmd='list', arguments=['-H'], options={}, data_set=data_set)
-
     if properties == ():
         properties = (ZFSProperty.NAME, ZFSProperty.USED, ZFSProperty.AVAIL, ZFSProperty.REFER, ZFSProperty.MOUNTPOINT)
+    arguments = ['-H']
+
+    if depth < 0:
+        arguments.append('-r')
+    elif depth > 0:
+        arguments.append('-d')
+        arguments.append(str(depth))
+
+    output = zfs_cmd(cmd='list', arguments=arguments, options={}, data_set=data_set)
 
     zfs_data_sets = []
     for line in output.split('\n'):
