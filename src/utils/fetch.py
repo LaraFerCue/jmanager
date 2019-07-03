@@ -1,33 +1,46 @@
-from ftplib import FTP
 from pathlib import PosixPath
+from typing import Callable
+from urllib.request import urlopen
 
 from models.jail import Jail, Architecture, Component, Version, VersionType
 
-SERVER_URL = "ftp.FreeBSD.org"
-FTP_BASE_DIRECTORY = PosixPath('pub/FreeBSD')
 
+class HTTPFetcher:
+    SERVER_URL = "http://ftp.FreeBSD.org"
+    FTP_BASE_DIRECTORY = PosixPath('pub/FreeBSD')
+    BLOCK_SIZE = 8192
 
-def fetch_tarballs_into(jail_info: Jail, temp_dir: PosixPath):
-    ftp_connector = FTP(SERVER_URL)
-    ftp_connector.login()
+    def fetch_file(self, url: str, destination: PosixPath, callback: Callable[[int, int], None] = None):
+        fetcher = urlopen(url)
+        file_size = int(fetcher.headers["content-length"])
 
-    directory = get_directory_path(jail_info.architecture, jail_info.version)
-    ftp_connector.cwd(directory.as_posix())
+        received_bytes = 0
+        with open(destination.as_posix(), 'wb') as destination_file:
+            while True:
+                buffer = fetcher.read(self.BLOCK_SIZE)
+                if not buffer:
+                    break
 
-    components = jail_info.components.copy()
-    components.append(Component.BASE)
+                received_bytes += len(buffer)
+                if callback is not None:
+                    callback(received_bytes=received_bytes, total_bytes=file_size)
+                destination_file.write(buffer)
 
-    for component in components:
-        temp_file = temp_dir.joinpath(f"{component.value}.txz").as_posix()
-        ftp_connector.retrbinary(f"RETR {component.value}.txz", open(temp_file, 'wb').write)
+    def fetch_tarballs_into(self, jail_info: Jail, temp_dir: PosixPath, callback: Callable[[int, int], None] = None):
+        directory = self.get_directory_path(jail_info.architecture, jail_info.version)
+        base_url = f"{self.SERVER_URL}/{directory.as_posix()}"
 
-    ftp_connector.quit()
+        components = jail_info.components.copy()
+        components.append(Component.BASE)
 
+        for component in components:
+            temp_file = temp_dir.joinpath(f"{component.value}.txz")
+            self.fetch_file(url=f"{base_url}/{component.value}.txz", destination=temp_file, callback=callback)
 
-def get_directory_path(architecture: Architecture, version: Version):
-    if version.version_type == VersionType.RELEASE:
-        directory = FTP_BASE_DIRECTORY.joinpath('releases')
-    else:
-        directory = FTP_BASE_DIRECTORY.joinpath('snapshots')
-    directory = directory.joinpath(architecture.value, str(version))
-    return directory
+    def get_directory_path(self, architecture: Architecture, version: Version) -> PosixPath:
+        if version.version_type == VersionType.RELEASE:
+            directory = self.FTP_BASE_DIRECTORY.joinpath('releases')
+        else:
+            directory = self.FTP_BASE_DIRECTORY.joinpath('snapshots')
+        directory = directory.joinpath(architecture.value, str(version))
+        return directory
