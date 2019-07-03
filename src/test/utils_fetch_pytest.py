@@ -8,7 +8,8 @@ import pytest
 from models.jail import Jail, Architecture, Version, VersionType
 from src.utils.fetch import HTTPFetcher
 
-TEMPORARY_FTP_DIR = "releases/amd64/12.0-RELEASE"
+TEMPORARY_RELEASE_FTP_DIR = "releases/amd64/12.0-RELEASE"
+TEMPORARY_SNAPSHOT_FTP_DIR = "snapshots/amd64/12.0-STABLE"
 
 
 def get_http_fetcher():
@@ -16,11 +17,13 @@ def get_http_fetcher():
     tmp_dir = mkdtemp()
     http_fetcher.SERVER_URL = f"file://{tmp_dir}"
     http_fetcher.FTP_BASE_DIRECTORY = PosixPath()
-    temporary_folder = f"{tmp_dir}/{TEMPORARY_FTP_DIR}"
-    os.makedirs(temporary_folder)
 
-    with open(f"{temporary_folder}/base.txz", "w") as base_file:
-        base_file.write("base.txz")
+    for folder in [ TEMPORARY_RELEASE_FTP_DIR, TEMPORARY_SNAPSHOT_FTP_DIR]:
+        temporary_folder = f"{tmp_dir}/{folder}"
+        os.makedirs(temporary_folder)
+
+        with open(f"{temporary_folder}/base.txz", "w") as base_file:
+            base_file.write("base.txz")
     return http_fetcher
 
 
@@ -44,3 +47,13 @@ class TestFetchUtils:
 
         with pytest.raises(URLError, match=r'\[Errno 2\] No such file or directory: '):
             http_fetcher.fetch_tarballs_into(jail, PosixPath('/tmp'))
+
+    def test_fetch_tarballs_from_snapshots(self):
+        http_fetcher = get_http_fetcher()
+        jail_version = Version(major=12, minor=0, version_type=VersionType.STABLE)
+        jail = Jail(name='name', version=jail_version, architecture=Architecture.AMD64, components=[])
+
+        with TemporaryDirectory() as temp_dir:
+            temp_dir_path = PosixPath(temp_dir)
+            http_fetcher.fetch_tarballs_into(jail, temp_dir_path)
+            assert temp_dir_path.joinpath('base.txz').is_file()
