@@ -4,7 +4,7 @@ USER=${1:?A user is needed}
 PERMISSIONS="create,clone,destroy,hold,mount,release,rename,snapshot"
 
 if ! [ "$(uname -o)" = "FreeBSD" ] ; then
-    mkdir "${HOME}/bin"
+    mkdir -p "${HOME}/bin"
 	cp "$(dirname "${0}")/zfs.sh" "${HOME}/bin/zfs"
 	chmod a+x /usr/local/bin/zfs
 	exit 0
