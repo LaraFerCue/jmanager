@@ -38,7 +38,10 @@ if ${DELEGATE_TEST_DATESET} ; then
 		exit 1
 	fi
 
+	zfs umount "${ZPOOL_NAME}/jmanager_test"
 	zfs allow -u "${USER}" "${PERMISSIONS}" "${ZPOOL_NAME}/jmanager_test"
 	zfs allow -c "${PERMISSIONS}" "${ZPOOL_NAME}/jmanager_test"
+	chown -R "${USER}" "/${ZPOOL_NAME}/jmanager_test"
+	su - lara -c "/sbin/zfs mount ${ZPOOL_NAME}/jmanager_test"
 	chown -R "${USER}" "/${ZPOOL_NAME}/jmanager_test"
 fi
