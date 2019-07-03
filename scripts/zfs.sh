@@ -1,46 +1,74 @@
 #!/bin/sh
+# shellcheck disable=SC2039
+# SC2039: local is defined in Bourne Shell and Bash
 
-check_create()
+check_dataset_name()
 {
-	while [ "${1}" ] ; do
-		case "${1}" in
-			-p|-u)
-				;;
-			-o)
-				if echo "${2}" | grep -qvE '^[^=]+=.+$' ; then
-					return 1
-				fi
-				shift
-				;;
-			-V)
-				if echo "${2}" | grep -qvE '^[0-9]+[kKmMgG]*$' ; then
-					return 1
-				fi
-				shift
-				;;
-			*)
-				break
-				;;
-		esac
-		shift
-	done
-
 	if echo "${1}" | grep -qE '^-' ; then
 		return 1
 	fi
 	return 0
 }
 
+check_value()
+{
+	local value=${1}
+	local regex=${2}
+
+	echo "${value}" | grep -qE "${regex}"
+}
+
+check_create()
+{
+	local args
+	while getopts "puo:V:" "args" ; do
+		echo "${args}"
+		case "${args}" in
+			p|u)
+				;;
+			o)
+				if ! check_value "${OPTARG}" '^[^=]+=.+$' ; then
+					return 1
+				fi
+				;;
+			V)
+				if ! check_value "${OPTARG}" '^[0-9]+[kKmMgG]*$' ; then
+					return 1
+				fi
+				;;
+			*)
+				break
+				;;
+		esac
+	done
+	check_dataset_name "$(eval echo "\${${OPTIND}}")"
+}
+
+check_destroy()
+{
+	local args
+
+	while getopts "fnpRrv" "args" ; do
+		echo "${OPTIND}"
+		case "${args}" in
+			f|n|p|R|r|v)
+				;;
+			*)
+				break
+				;;
+		esac
+	done
+	check_dataset_name "$(eval echo "\${${OPTIND}}")"
+}
+
 case "${1}" in
-	error)
-		exit 1
-       ;;
-	create)
+	create|destroy)
+		cmd=${1}
 		shift
-		check_create "${@}"
+		"check_${cmd}" "${@}"
 		exit "${?}"
 		;;
 	*)
-		exit 0
+		exit 1
 		;;
 esac
