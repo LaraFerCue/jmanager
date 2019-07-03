@@ -1,7 +1,7 @@
 #!/bin/sh
 
 USER=${1:?A user is needed}
-PERMISSIONS="create,clone,destroy,hold,mount,release,rename,snapshot"
+PERMISSIONS="create,clone,destroy,hold,mount,release,rename,snapshot,canmount"
 
 if ! [ "$(uname -o)" = "FreeBSD" ] ; then
     mkdir -p "${HOME}/bin"
