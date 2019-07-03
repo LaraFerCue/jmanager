@@ -11,7 +11,8 @@ def zfs_cmd(cmd: str, arguments: List[str], options: Dict[str, str], data_set: s
         arguments.append('-o')
         arguments.append(f"{option}={value}")
     try:
-        subprocess.run([cmd, *arguments, data_set])
+        subprocess.run(' '.join(['zfs', cmd, *arguments, data_set]), shell=True, check=True, stdout=subprocess.PIPE,
+                       stderr=subprocess.STDOUT, universal_newlines=True)
     except subprocess.CalledProcessError as error:
         raise ZFSError(error) from error
 
