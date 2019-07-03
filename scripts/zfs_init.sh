@@ -20,7 +20,7 @@ DELEGATE_TEST_DATESET=false
 if ! zfs list -o name -H | grep "${ZPOOL_NAME}/jmanager_test" ; then
 	CREATE_TEST_DATASET=true
 	DELEGATE_TEST_DATESET=true
-elif [ "$(zfs allow "${ZPOOL_NAME}/jmanager_test")" ] ; then
+elif [ -z "$(zfs allow "${ZPOOL_NAME}/jmanager_test")" ] ; then
 	DELEGATE_TEST_DATESET=true
 fi
 
