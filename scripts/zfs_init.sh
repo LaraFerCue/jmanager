@@ -3,7 +3,7 @@
 USER=${1:?A user is needed}
 PERMISSIONS="create,clone,destroy,hold,mount,release,rename,snapshot,canmount"
 
-SCRIPTS_PATH="$(realpath "$(dirname "${0}")")"
+SCRIPTS_PATH="${PWD}/scripts"
 if ! [ "$(uname -o)" = "FreeBSD" ] ; then
 	mkdir -p "${HOME}/bin"
 	sed "s,%ZFSLIB_PATH%,${SCRIPTS_PATH}/zfslib,g" \
