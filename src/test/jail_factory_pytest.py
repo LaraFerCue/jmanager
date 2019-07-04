@@ -20,7 +20,7 @@ def create_dummy_tarball_in_folder(path_to_folder: PosixPath):
         tarfile.add('.', recursive=True)
 
 
-class TestUtilsJail:
+class TestJailFactory:
     def test_create_base_data_set_without_tarballs(self):
         jail_factory = MockingJailFactory(TMP_PATH, TEST_DATA_SET)
         distribution = Distribution(version=Version(12, 0, VersionType.RELEASE), architecture=Architecture.AMD64,
