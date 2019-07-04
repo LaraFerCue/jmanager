@@ -27,9 +27,11 @@ class TestZFS:
             assert ZFSProperty.MOUNTPOINT in data_set and data_set[ZFSProperty.MOUNTPOINT] == f"/{TEST_DATA_SET}"
 
     def test_zfs_list_depth_option(self):
-        output = zfs_list(data_set='zroot', depth=1)
+        zfs_cmd(cmd="create", arguments=["-p"], options={},
+                data_set=f"{TEST_DATA_SET}/test/with/multiple/levels/more/than/one")
+        output = zfs_list(data_set=TEST_DATA_SET, depth=1)
         depth_one_output = len(output)
         assert len(output) > 1
 
-        output = zfs_list(data_set='zroot', depth=-1)
+        output = zfs_list(data_set=TEST_DATA_SET, depth=-1)
         assert len(output) > depth_one_output
