@@ -3,10 +3,13 @@
 USER=${1:?A user is needed}
 PERMISSIONS="create,clone,destroy,hold,mount,release,rename,snapshot,canmount"
 
+SCRIPTS_PATH="$(realpath "$(dirname "${0}")")"
 if ! [ "$(uname -o)" = "FreeBSD" ] ; then
-    mkdir -p "${HOME}/bin"
-	cp "$(dirname "${0}")/zfs.sh" "${HOME}/bin/zfs"
+	mkdir -p "${HOME}/bin"
+	sed "s,%ZFSLIB_PATH%,${SCRIPTS_PATH}/zfslib,g" \
+		"${SCRIPTS_PATH}/zfs.sh" > "${HOME}/bin/zfs"
 	chmod a+x "${HOME}/bin/zfs"
+	chmod -R a+x "${SCRIPTS_PATH}/zfslib/"
 	exit 0
 fi
 
