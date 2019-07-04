@@ -64,22 +64,22 @@ class TestZFS:
         assert len(data_sets[0].keys()) == 2
 
     def test_zfs_list_types(self, zfs):
-        zfs = MockingZFS()
-        zfs.zfs_cmd(cmd="create", arguments=["-V", "2G"], options={}, data_set=f"{TEST_DATA_SET}/volume")
+        snapshot_name = f"{TEST_DATA_SET}@pytest_test"
+        zfs.zfs_cmd(cmd="snapshot", arguments=[], options={}, data_set=snapshot_name)
 
         try:
-            output = zfs.zfs_list(data_set=TEST_DATA_SET, depth=-1, types=[ZFSType.VOLUME])
+            output = zfs.zfs_list(data_set=TEST_DATA_SET, depth=-1, types=[ZFSType.SNAPSHOT])
             assert len(output) == 1
-            assert output[0][ZFSProperty.NAME] == f"{TEST_DATA_SET}/volume"
+            assert output[0][ZFSProperty.NAME] == snapshot_name
 
             output = zfs.zfs_list(data_set=TEST_DATA_SET, depth=-1, types=[ZFSType.FILESYSTEM])
             for data_set in output:
-                assert data_set[ZFSProperty.NAME] != f"{TEST_DATA_SET}/volume"
+                assert data_set[ZFSProperty.NAME] != snapshot_name
 
-            output = zfs.zfs_list(data_set=TEST_DATA_SET, depth=-1, types=[ZFSType.FILESYSTEM, ZFSType.VOLUME])
+            output = zfs.zfs_list(data_set=TEST_DATA_SET, depth=-1, types=[ZFSType.FILESYSTEM, ZFSType.SNAPSHOT])
             data_set_names = [x[ZFSProperty.NAME] for x in output]
-            assert f"{TEST_DATA_SET}/volume" in data_set_names
+            assert snapshot_name in data_set_names
             assert TEST_DATA_SET in data_set_names
 
         finally:
-            zfs.zfs_cmd(cmd="destroy", arguments=[], options={}, data_set=f"{TEST_DATA_SET}/volume")
+            zfs.zfs_cmd(cmd="destroy", arguments=[], options={}, data_set=snapshot_name)
