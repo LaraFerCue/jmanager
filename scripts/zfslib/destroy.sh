@@ -36,8 +36,7 @@ if ! "${dry_run}" ; then
 		grep -vE "^${dataset_name};" "${ZFS_TEST_DATABASE}" \
 			> "${ZFS_TEST_DATABASE}.tmp"
 	else
-		grep -vE "^${dataset_name}" "${ZFS_TEST_DATABASE}" |\
-			grep -vE ";(${types});" \
+		grep -vE "^${dataset_name}.+;(${types});" "${ZFS_TEST_DATABASE}" \
 			> "${ZFS_TEST_DATABASE}.tmp"
 	fi
 	mv "${ZFS_TEST_DATABASE}.tmp" "${ZFS_TEST_DATABASE}"
