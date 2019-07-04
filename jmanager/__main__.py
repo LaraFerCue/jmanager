@@ -5,7 +5,7 @@ from pathlib import PosixPath
 
 from src.configuration import read_configuration_file, parse_jmanagerfile
 
-parser = argparse.ArgumentParser(description="Jail Manager")
+parser = argparse.ArgumentParser(description="FreeBSD Manager")
 parser.add_argument("--jmanager-config",
                     type=str,
                     help="path to the configuration file for the program",

@@ -60,7 +60,7 @@ class Version:
         return Version(int(major_minor[0]), int(major_minor[1]), VersionType(version_type))
 
 
-class Jail:
+class FreeBSD:
     def __init__(self, name: str, version: Version, architecture: Architecture, components: List[Component]):
         self._name = name
         self._version = version

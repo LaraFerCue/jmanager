@@ -1,6 +1,6 @@
 import pytest
 
-from models.jail import Version, VersionType
+from models.freebsd import Version, VersionType
 
 
 class TestModelVersion:
