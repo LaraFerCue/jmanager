@@ -48,6 +48,7 @@ if ${DELEGATE_TEST_DATESET} ; then
 	zfs allow -u "${USER}" "${PERMISSIONS}" "${ZPOOL_NAME}/jmanager_test"
 	zfs allow -c "${PERMISSIONS}" "${ZPOOL_NAME}/jmanager_test"
 	chown -R "${USER}" "/${ZPOOL_NAME}/jmanager_test"
+	sysctl vfs.usermount=1
 	su - lara -c "/sbin/zfs mount ${ZPOOL_NAME}/jmanager_test"
 	chown -R "${USER}" "/${ZPOOL_NAME}/jmanager_test"
 fi
