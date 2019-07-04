@@ -2,13 +2,8 @@ import platform
 
 import pytest
 
+from src.test.globals import TEST_DATA_SET, MockingZFS
 from src.utils.zfs import ZFSError, ZFSProperty, ZFS, ZFSType
-
-TEST_DATA_SET = 'zroot/jmanager_test'
-
-
-class MockingZFS(ZFS):
-    ZFS_CMD = "sh scripts/zfs.sh"
 
 
 def pytest_generate_tests(metafunc):
