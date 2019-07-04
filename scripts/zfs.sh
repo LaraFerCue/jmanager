@@ -11,7 +11,7 @@ ZFSLIB_PATH=%ZFSLIB_PATH%
 
 init_db()
 {
-	if ! [ -r "${ZFS_TEST_DATABASE}" ] ; then
+	if ! [ -s "${ZFS_TEST_DATABASE}" ] ; then
 		echo "${ZFS_ENTRY}" | sed \
 			-e "s,%name%,${ZFS_TEST_DATASET},g" \
 			-e "s,%type%,filesystem,g" >\
