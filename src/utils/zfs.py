@@ -42,6 +42,9 @@ class ZFS:
     def zfs_create(self, data_set: str, options: Dict[str, str]):
         self.zfs_cmd(cmd='create', arguments=['-p'], options=options, data_set=data_set)
 
+    def zfs_destroy(self, data_set: str, arguments: List[str] = ()):
+        self.zfs_cmd(cmd='destroy', arguments=['-f', *arguments], options={}, data_set=data_set)
+
     def zfs_list(self, data_set: str = "", depth: int = 0, properties: List[ZFSProperty] = (),
                  types: List[ZFSType] = (), arguments: List[str] = ()) -> List[Dict[ZFSProperty, str]]:
         """

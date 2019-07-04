@@ -35,7 +35,7 @@ class TestZFS:
 
     def test_zfs_cmd_with_options(self, zfs):
         zfs.zfs_create(options={'canmount': 'on'}, data_set=f"{TEST_DATA_SET}/test")
-        zfs.zfs_cmd(cmd="destroy", arguments=[], options={}, data_set=f"{TEST_DATA_SET}/test")
+        zfs.zfs_destroy(arguments=[], data_set=f"{TEST_DATA_SET}/test")
 
     def test_zfs_list_without_options(self, zfs):
         output = zfs.zfs_list(data_set=TEST_DATA_SET)
@@ -55,7 +55,7 @@ class TestZFS:
             output = zfs.zfs_list(data_set=TEST_DATA_SET, depth=-1)
             assert len(output) > depth_one_output
         finally:
-            zfs.zfs_cmd(cmd='destroy', arguments=['-r'], options={}, data_set=f"{TEST_DATA_SET}/test")
+            zfs.zfs_destroy(arguments=['-r'], data_set=f"{TEST_DATA_SET}/test")
 
     def test_zfs_list_properties(self, zfs):
         data_sets = zfs.zfs_list(data_set=TEST_DATA_SET, properties=[ZFSProperty.NAME, ZFSProperty.MOUNTPOINT])
@@ -81,4 +81,4 @@ class TestZFS:
             assert TEST_DATA_SET in data_set_names
 
         finally:
-            zfs.zfs_cmd(cmd="destroy", arguments=[], options={}, data_set=snapshot_name)
+            zfs.zfs_destroy(arguments=[], data_set=snapshot_name)
