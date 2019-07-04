@@ -41,18 +41,15 @@ def zfs_create(data_set: str, options: Dict[str, str]):
     zfs_cmd(cmd='create', arguments=['-p'], options=options, data_set=data_set)
 
 
-def zfs_list(data_set: str = "", depth: int = 0, exact_numbers: bool = False,
-             properties: List[ZFSProperty] = (), types: List[ZFSType] = (), sort_by: List[ZFSProperty] = (),
-             sort_by_reversed: List[ZFSProperty] = ()) -> List[Dict[ZFSProperty, str]]:
+def zfs_list(data_set: str = "", depth: int = 0, properties: List[ZFSProperty] = (),
+             types: List[ZFSType] = (), arguments: List[str] = ()) -> List[Dict[ZFSProperty, str]]:
     """
     Lists the dataset given as an argument
     :param data_set: The dataset whose information is to be retrieved.
     :param depth: Indicates if only the dataset is to be shown, all children or just upto some depth.
-    :param exact_numbers: Get information using exact numbers.
     :param properties: Only display the given properties.
     :param types: Only retrieve information for the given type of datasets.
-    :param sort_by: Sort the entries by this properties.
-    :param sort_by_reversed: Sort the entries in reverse order by this properties.
+    :param arguments: Extra arguments for the command.
 
     :return: A dictionary containing properties retrieved by the command.
     """
