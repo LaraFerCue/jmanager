@@ -2,7 +2,6 @@
 # shellcheck disable=SC2039
 # SC2039: local is defined in Bourne Shell and Bash
 
-set -x
 : "${ZFSLIB_PATH:?Error: ZFSLIB_PATH not set}"
 
 # shellcheck source=zfslib/common.sh
