@@ -3,7 +3,7 @@
 # SC2039: local is defined in Bourne Shell and Bash
 
 set -x
-ZFSLIB_PATH="$(realpath "$(dirname "${0}")")"
+: "${ZFSLIB_PATH:?Error: ZFSLIB_PATH not set}"
 
 # shellcheck source=zfslib/common.sh
 . "${ZFSLIB_PATH}/common.sh"

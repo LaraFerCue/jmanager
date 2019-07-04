@@ -25,6 +25,7 @@ init_db
 CMD=${1}
 shift
 if [ -x "${ZFSLIB_PATH}/${CMD}.sh" ] ; then
+	export ZFSLIB_PATH
 	"${ZFSLIB_PATH}/${CMD}.sh" ${@}
 	exit "${?}"
 else
