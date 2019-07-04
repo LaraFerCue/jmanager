@@ -47,3 +47,9 @@ class TestZFS:
             assert len(output) > depth_one_output
         finally:
             zfs.zfs_cmd(cmd='destroy', arguments=['-r'], options={}, data_set=f"{TEST_DATA_SET}/test")
+
+    def test_zfs_list_properties(self):
+        zfs = MockingZFS()
+        data_sets = zfs.zfs_list(data_set=TEST_DATA_SET, properties=[ZFSProperty.NAME, ZFSProperty.MOUNTPOINT])
+
+        assert len(data_sets[0].keys()) == 2
