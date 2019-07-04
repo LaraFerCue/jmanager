@@ -63,7 +63,7 @@ class Version:
 class Distribution:
     def __init__(self, version: Version, architecture: Architecture, components: List[Component]):
         self._version = version
-        self._components = components
+        self._components = [Component.BASE, *components]
         self._architecture = architecture
 
     @property
