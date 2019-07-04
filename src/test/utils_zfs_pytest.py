@@ -29,9 +29,12 @@ class TestZFS:
     def test_zfs_list_depth_option(self):
         zfs_cmd(cmd="create", arguments=["-p"], options={},
                 data_set=f"{TEST_DATA_SET}/test/with/multiple/levels/more/than/one")
-        output = zfs_list(data_set=TEST_DATA_SET, depth=1)
-        depth_one_output = len(output)
-        assert len(output) > 1
+        try:
+            output = zfs_list(data_set=TEST_DATA_SET, depth=1)
+            depth_one_output = len(output)
+            assert len(output) > 1
 
-        output = zfs_list(data_set=TEST_DATA_SET, depth=-1)
-        assert len(output) > depth_one_output
+            output = zfs_list(data_set=TEST_DATA_SET, depth=-1)
+            assert len(output) > depth_one_output
+        finally:
+            zfs_cmd(cmd='destroy', arguments=['-r'], options={}, data_set=f"{TEST_DATA_SET}/test")
