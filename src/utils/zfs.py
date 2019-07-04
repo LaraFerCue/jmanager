@@ -55,15 +55,14 @@ def zfs_list(data_set: str = "", depth: int = 0, properties: List[ZFSProperty] =
     """
     if properties == ():
         properties = (ZFSProperty.NAME, ZFSProperty.USED, ZFSProperty.AVAIL, ZFSProperty.REFER, ZFSProperty.MOUNTPOINT)
-    arguments = ['-H']
-
+    zfs_arguments = ['-H', *arguments]
     if depth < 0:
-        arguments.append('-r')
+        zfs_arguments.append('-r')
     elif depth > 0:
-        arguments.append('-d')
-        arguments.append(str(depth))
+        zfs_arguments.append('-d')
+        zfs_arguments.append(str(depth))
 
-    output = zfs_cmd(cmd='list', arguments=arguments, options={}, data_set=data_set)
+    output = zfs_cmd(cmd='list', arguments=zfs_arguments, options={}, data_set=data_set)
 
     zfs_data_sets = []
     for line in output.split('\n'):
