@@ -31,7 +31,7 @@ show_entries()
 
 	while read -r entry ; do
 		echo "${entry}" | tr ';' '\t'
-	done | cut -w -f "${columns}"
+	done | cut -f "${columns}"
 }
 
 filter_entries()
