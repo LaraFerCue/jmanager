@@ -19,14 +19,14 @@ JAIL_CONFIGURATION_EXAMPLE: List[Dict[str, Union[List[str], str]]] = [
 ]
 
 
-class TestJmanagerfile:
+class TestJManagerFile:
     def test_parsing_correct_configuration(self):
-        jail_list = parse_jmanagerfile(JAIL_CONFIGURATION_EXAMPLE)
+        jmanager_file = parse_jmanagerfile(JAIL_CONFIGURATION_EXAMPLE)
 
-        assert jail_list[0].jail.name == JAIL_CONFIGURATION_EXAMPLE[0]['name']
-        assert str(jail_list[0].distribution.version) == JAIL_CONFIGURATION_EXAMPLE[0]['version']
-        assert jail_list[0].distribution.architecture.value == JAIL_CONFIGURATION_EXAMPLE[0]['architecture']
-        for component in jail_list[0].distribution.components:
+        assert jmanager_file[0].jail.name == JAIL_CONFIGURATION_EXAMPLE[0]['name']
+        assert str(jmanager_file[0].distribution.version) == JAIL_CONFIGURATION_EXAMPLE[0]['version']
+        assert jmanager_file[0].distribution.architecture.value == JAIL_CONFIGURATION_EXAMPLE[0]['architecture']
+        for component in jmanager_file[0].distribution.components:
             assert component.value in ['base', *JAIL_CONFIGURATION_EXAMPLE[0]['components']]
 
     def test_parsing_wrong_type_name(self):
