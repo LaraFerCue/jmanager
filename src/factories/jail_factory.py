@@ -28,7 +28,7 @@ class JailFactory:
             with TarFile(path_to_tarballs.joinpath(f"{component.value}.txz").as_posix()) as tarfile:
                 tarfile.extractall(path=f"{self._jail_root_path}/{jail_path}")
 
-    def exists_jail(self, distribution: Distribution):
+    def jail_exists(self, distribution: Distribution):
         list_of_datasets = self.ZFS_FACTORY.zfs_list(
             f"{self._zfs_root_data_set}/{distribution.version}_{distribution.architecture.value}")
         return len(list_of_datasets) > 0

@@ -21,6 +21,18 @@ def create_dummy_tarball_in_folder(path_to_folder: PosixPath):
 
 
 class TestJailFactory:
+    def test_exists_base_jail(self):
+        jail_factory = MockingJailFactory(TMP_PATH, TEST_DATA_SET)
+        distribution = Distribution(version=Version(12, 0, VersionType.RELEASE), architecture=Architecture.AMD64,
+                                    components=[])
+        assert not jail_factory.jail_exists(distribution)
+
+        jail_path = f"{distribution.version}_{distribution.architecture.value}"
+        jail_factory.ZFS_FACTORY.zfs_create(f"{TEST_DATA_SET}/{jail_path}", options={})
+        jail_exists = jail_factory.jail_exists(distribution)
+        jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}")
+        assert jail_exists
+
     def test_create_base_data_set_without_tarballs(self):
         jail_factory = MockingJailFactory(TMP_PATH, TEST_DATA_SET)
         distribution = Distribution(version=Version(12, 0, VersionType.RELEASE), architecture=Architecture.AMD64,
@@ -39,7 +51,7 @@ class TestJailFactory:
             create_dummy_tarball_in_folder(PosixPath(temp_dir))
             try:
                 jail_factory.create_base_jail(distribution=distribution, path_to_tarballs=PosixPath(temp_dir))
-                assert jail_factory.exists_jail(distribution=distribution)
+                assert jail_factory.jail_exists(distribution=distribution)
                 assert PosixPath(temp_dir).joinpath(
                     f"{distribution.version}_{distribution.architecture.value}").iterdir()
             finally:
