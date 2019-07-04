@@ -1,25 +1,33 @@
 import pytest
 
-from src.utils.zfs import zfs_cmd, ZFSError, zfs_list, ZFSProperty
+from src.utils.zfs import ZFSError, ZFSProperty, ZFS
 
 TEST_DATA_SET = 'zroot/jmanager_test'
 
 
+class MockingZFS(ZFS):
+    ZFS_CMD = "sh scripts/zfs.sh"
+
+
 class TestZFS:
     def test_zfs_cmd(self):
-        zfs_cmd(cmd="list", arguments=[], options={}, data_set='zroot')
+        zfs = MockingZFS()
+        zfs.zfs_cmd(cmd="list", arguments=[], options={}, data_set='zroot')
         assert True
 
     def test_zfs_error(self):
+        zfs = MockingZFS()
         with pytest.raises(ZFSError):
-            zfs_cmd(cmd='error', arguments=[], options={}, data_set='zroot')
+            zfs.zfs_cmd(cmd='error', arguments=[], options={}, data_set='zroot')
 
     def test_zfs_cmd_with_options(self):
-        zfs_cmd(cmd="create", arguments=["-u"], options={'canmount': 'on'}, data_set=f"{TEST_DATA_SET}/test")
-        zfs_cmd(cmd="destroy", arguments=[], options={}, data_set=f"{TEST_DATA_SET}/test")
+        zfs = MockingZFS()
+        zfs.zfs_cmd(cmd="create", arguments=["-u"], options={'canmount': 'on'}, data_set=f"{TEST_DATA_SET}/test")
+        zfs.zfs_cmd(cmd="destroy", arguments=[], options={}, data_set=f"{TEST_DATA_SET}/test")
 
     def test_zfs_list_without_options(self):
-        output = zfs_list(data_set=TEST_DATA_SET)
+        zfs = MockingZFS()
+        output = zfs.zfs_list(data_set=TEST_DATA_SET)
 
         for data_set in output:
             assert ZFSProperty.NAME in data_set and data_set[ZFSProperty.NAME] == TEST_DATA_SET
@@ -27,14 +35,15 @@ class TestZFS:
             assert ZFSProperty.MOUNTPOINT in data_set and data_set[ZFSProperty.MOUNTPOINT] == f"/{TEST_DATA_SET}"
 
     def test_zfs_list_depth_option(self):
-        zfs_cmd(cmd="create", arguments=["-p"], options={},
-                data_set=f"{TEST_DATA_SET}/test/with/multiple/levels/more/than/one")
+        zfs = MockingZFS()
+        zfs.zfs_cmd(cmd="create", arguments=["-p"], options={},
+                    data_set=f"{TEST_DATA_SET}/test/with/multiple/levels/more/than/one")
         try:
-            output = zfs_list(data_set=TEST_DATA_SET, depth=1)
+            output = zfs.zfs_list(data_set=TEST_DATA_SET, depth=1)
             depth_one_output = len(output)
             assert len(output) > 1
 
-            output = zfs_list(data_set=TEST_DATA_SET, depth=-1)
+            output = zfs.zfs_list(data_set=TEST_DATA_SET, depth=-1)
             assert len(output) > depth_one_output
         finally:
-            zfs_cmd(cmd='destroy', arguments=['-r'], options={}, data_set=f"{TEST_DATA_SET}/test")
+            zfs.zfs_cmd(cmd='destroy', arguments=['-r'], options={}, data_set=f"{TEST_DATA_SET}/test")
