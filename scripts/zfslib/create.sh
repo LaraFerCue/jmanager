@@ -6,38 +6,6 @@
 
 # shellcheck source=zfslib/common.sh
 . "${ZFSLIB_PATH}/common.sh"
-
-get_parent_dataset()
-{
-	local dataset=${1}
-
-	echo "${dataset}" | awk -F '/' \
-		'{ printf "%s", $1; for (i=2;i<NF;i++) printf "/%s", $i }'
-}
-
-create_recursive_datasets()
-{
-	local dataset=${1}
-	local zfs_type=${2:-filesystem}
-	local options=${3:-}
-	local parent_dataset
-
-	parent_dataset=$(get_parent_dataset "${dataset}")
-	if ! grep -qE "^${parent_dataset};" "${ZFS_TEST_DATABASE}" ; then
-		create_recursive_datasets "${parent_dataset}"
-	fi
-	create_dataset "${dataset}" "${zfs_type}" "${options}"
-}
-
-create_dataset()
-{
-	local dataset=${1}
-	local zfs_type=${2:-filesystem}
-	local options=${3:-}
-	replace_wildcards "${ZFS_ENTRY}${options}" "${dataset}" "${zfs_type}"\
-		>> "${ZFS_TEST_DATABASE}"
-}
-
 options=""
 zfs_type=filesystem
 create_parents=false

@@ -8,30 +8,6 @@
 . "${ZFSLIB_PATH}/common.sh"
 
 ZFS_TYPES="filesystem|snapshot|snap|volume|bookmark|all"
-get_entries()
-{
-	local dataset=${1:-""}
-	local depth=${2:-0}
-
-	if [ "${depth}" -eq -2 ] ; then
-		grep -E "^${dataset}" "${ZFS_TEST_DATABASE}"
-	elif [ "${depth}" -eq -1 ] ; then
-		return 0
-	else
-		grep -E "^${dataset};" "${ZFS_TEST_DATABASE}"
-		get_entries "${dataset}/[^/]+" "$((depth - 1))"
-	fi
-}
-
-show_entries()
-{
-	local columns=${1:-1,2,3,4,5}
-	local entry
-
-	while read -r entry ; do
-		echo "${entry}" | tr ';' '\t'
-	done | cut -f "${columns}"
-}
 
 filter_entries()
 {
