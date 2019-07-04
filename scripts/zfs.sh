@@ -3,8 +3,7 @@
 # SC2039: local is defined in Bourne Shell and Bash
 # SC2068: the parameters should be passed to the real command
 
-ZFSLIB_PATH=%ZFSLIB_PATH%
-#ZFSLIB_PATH="$(realpath "$(dirname "${0}")")/zfslib"
+ZFSLIB_PATH="${PWD}/scripts/zfslib"
 
 # shellcheck source=zfslib/common.sh
 . "${ZFSLIB_PATH}/common.sh"
