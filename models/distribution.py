@@ -61,15 +61,10 @@ class Version:
 
 
 class Distribution:
-    def __init__(self, name: str, version: Version, architecture: Architecture, components: List[Component]):
-        self._name = name
+    def __init__(self, version: Version, architecture: Architecture, components: List[Component]):
         self._version = version
         self._components = components
         self._architecture = architecture
-
-    @property
-    def name(self) -> str:
-        return self._name
 
     @property
     def version(self) -> Version:
