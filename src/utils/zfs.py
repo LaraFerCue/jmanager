@@ -45,6 +45,15 @@ class ZFS:
     def zfs_destroy(self, data_set: str, arguments: List[str] = ()):
         self.zfs_cmd(cmd='destroy', arguments=['-f', *arguments], options={}, data_set=data_set)
 
+    def zfs_snapshot(self, data_set: str, snapshot_name: str, options: Dict[str, str] = None, recursive: bool = False):
+        zfs_arguments = []
+        if recursive:
+            zfs_arguments.append('-r')
+
+        if options is None:
+            options = {}
+        self.zfs_cmd(cmd="snapshot", arguments=zfs_arguments, options=options, data_set=f"{data_set}@{snapshot_name}")
+
     def zfs_list(self, data_set: str = "", depth: int = 0, properties: List[ZFSProperty] = (),
                  types: List[ZFSType] = (), arguments: List[str] = ()) -> List[Dict[ZFSProperty, str]]:
         """

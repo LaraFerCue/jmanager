@@ -64,7 +64,7 @@ class TestZFS:
 
     def test_zfs_list_types(self, zfs):
         snapshot_name = f"{TEST_DATA_SET}@pytest_test"
-        zfs.zfs_cmd(cmd="snapshot", arguments=[], options={}, data_set=snapshot_name)
+        zfs.zfs_snapshot(data_set=TEST_DATA_SET, snapshot_name="pytest_test")
 
         try:
             output = zfs.zfs_list(data_set=TEST_DATA_SET, depth=-1, types=[ZFSType.SNAPSHOT])
@@ -82,3 +82,27 @@ class TestZFS:
 
         finally:
             zfs.zfs_destroy(arguments=[], data_set=snapshot_name)
+
+    def test_zfs_snapshot_recursive(self, zfs):
+        data_set_path = "a/lot/of/nested/datasets"
+        zfs.zfs_create(data_set=f"{TEST_DATA_SET}/{data_set_path}", options={})
+
+        try:
+            zfs.zfs_snapshot(data_set=f"{TEST_DATA_SET}/a", snapshot_name="pytest_test", recursive=True)
+
+            snapshots_names = [
+                f'{TEST_DATA_SET}/a@pytest_test',
+                f'{TEST_DATA_SET}/a/lot@pytest_test',
+                f'{TEST_DATA_SET}/a/lot/of@pytest_test',
+                f'{TEST_DATA_SET}/a/lot/of/nested@pytest_test',
+                f'{TEST_DATA_SET}/a/lot/of/nested/datasets@pytest_test',
+            ]
+            snapshots = [snap[ZFSProperty.NAME] for snap in zfs.zfs_list(data_set=f"{TEST_DATA_SET}/a", depth=-1,
+                                                                         types=[ZFSType.SNAPSHOT],
+                                                                         properties=[ZFSProperty.NAME])]
+
+            for dataset in snapshots_names:
+                assert dataset in snapshots
+
+        finally:
+            zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/a", arguments=['-R'])
