@@ -34,7 +34,7 @@ class TestZFS:
             zfs.zfs_cmd(cmd='error', arguments=[], options={}, data_set='zroot')
 
     def test_zfs_cmd_with_options(self, zfs):
-        zfs.zfs_cmd(cmd="create", arguments=["-u"], options={'canmount': 'on'}, data_set=f"{TEST_DATA_SET}/test")
+        zfs.zfs_create(options={'canmount': 'on'}, data_set=f"{TEST_DATA_SET}/test")
         zfs.zfs_cmd(cmd="destroy", arguments=[], options={}, data_set=f"{TEST_DATA_SET}/test")
 
     def test_zfs_list_without_options(self, zfs):
@@ -46,8 +46,7 @@ class TestZFS:
             assert ZFSProperty.MOUNTPOINT in data_set and data_set[ZFSProperty.MOUNTPOINT] == f"/{TEST_DATA_SET}"
 
     def test_zfs_list_depth_option(self, zfs):
-        zfs.zfs_cmd(cmd="create", arguments=["-p"], options={},
-                    data_set=f"{TEST_DATA_SET}/test/with/multiple/levels/more/than/one")
+        zfs.zfs_create(options={}, data_set=f"{TEST_DATA_SET}/test/with/multiple/levels/more/than/one")
         try:
             output = zfs.zfs_list(data_set=TEST_DATA_SET, depth=1)
             depth_one_output = len(output)
