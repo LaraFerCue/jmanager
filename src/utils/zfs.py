@@ -81,7 +81,10 @@ class ZFS:
             zfs_arguments.append('-t')
             zfs_arguments.append(zfs_types)
 
-        output = self.zfs_cmd(cmd='list', arguments=zfs_arguments, options={}, data_set=data_set)
+        try:
+            output = self.zfs_cmd(cmd='list', arguments=zfs_arguments, options={}, data_set=data_set)
+        except ZFSError:
+            return []
 
         zfs_data_sets = []
         for line in output.split('\n'):

@@ -26,7 +26,7 @@ def pytest_generate_tests(metafunc):
 class TestZFS:
 
     def test_zfs_cmd(self, zfs):
-        zfs.zfs_cmd(cmd="list", arguments=[], options={}, data_set='zroot')
+        zfs.zfs_cmd(cmd="list", arguments=[], options={}, data_set=TEST_DATA_SET)
         assert True
 
     def test_zfs_error(self, zfs):
@@ -36,6 +36,10 @@ class TestZFS:
     def test_zfs_cmd_with_options(self, zfs):
         zfs.zfs_create(options={'canmount': 'on'}, data_set=f"{TEST_DATA_SET}/test")
         zfs.zfs_destroy(arguments=[], data_set=f"{TEST_DATA_SET}/test")
+
+    def test_zfs_list_missing_data_set(self, zfs):
+        data_sets = zfs.zfs_list(data_set=f"{TEST_DATA_SET}/missing_data_set")
+        assert len(data_sets) == 0
 
     def test_zfs_list_without_options(self, zfs):
         output = zfs.zfs_list(data_set=TEST_DATA_SET)

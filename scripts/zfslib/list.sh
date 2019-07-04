@@ -88,6 +88,11 @@ done
 dataset_name="$(eval echo "\${${OPTIND}}")"
 check_dataset_name "${dataset_name}"
 
+if [ "${dataset_name}" ] ;then
+	if ! grep -qE "^${dataset_name};" "${ZFS_TEST_DATABASE}"; then
+		exit 1
+	fi
+fi
 get_entries "${dataset_name}" "${depth}" | filter_entries "${types}" | \
 	show_entries "${columns}"
 
