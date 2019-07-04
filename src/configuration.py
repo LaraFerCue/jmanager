@@ -3,7 +3,7 @@ from typing import List, Dict, Union
 
 from yaml import load, Loader
 
-from models.freebsd import FreeBSD, Architecture, Component, Version
+from models.distribution import Distribution, Architecture, Component, Version
 
 CONFIGURATION_SCHEMA: Dict[str, type] = {
     'name': str,
@@ -22,8 +22,8 @@ def read_configuration_file(path_to_file: PosixPath) -> List[Dict[str, str]]:
     return data
 
 
-def parse_jmanagerfile(jail_dictionary_list: List[Dict[str, Union[List, str]]]) -> List[FreeBSD]:
-    jail_list: List[FreeBSD] = []
+def parse_jmanagerfile(jail_dictionary_list: List[Dict[str, Union[List, str]]]) -> List[Distribution]:
+    jail_list: List[Distribution] = []
 
     for jail_dictionary in jail_dictionary_list:
         sanitize_input(jail_dictionary)
@@ -32,11 +32,11 @@ def parse_jmanagerfile(jail_dictionary_list: List[Dict[str, Union[List, str]]]) 
         for component in jail_dictionary['components']:
             components.append(Component(component))
 
-        jail_list.append(FreeBSD(name=jail_dictionary['name'],
-                                 version=Version.from_string(jail_dictionary['version']),
-                                 components=components,
-                                 architecture=Architecture(jail_dictionary['architecture'])
-                                 ))
+        jail_list.append(Distribution(name=jail_dictionary['name'],
+                                      version=Version.from_string(jail_dictionary['version']),
+                                      components=components,
+                                      architecture=Architecture(jail_dictionary['architecture'])
+                                      ))
     return jail_list
 
 

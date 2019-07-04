@@ -1,6 +1,6 @@
 import pytest
 
-from models.freebsd import Version, VersionType
+from models.distribution import Version, VersionType
 
 
 class TestModelVersion:

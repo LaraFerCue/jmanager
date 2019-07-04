@@ -6,7 +6,7 @@ from urllib.error import URLError
 
 import pytest
 
-from models.freebsd import FreeBSD, Architecture, Version, VersionType
+from models.distribution import Distribution, Architecture, Version, VersionType
 from src.utils.fetch import HTTPFetcher
 
 TEMPORARY_RELEASE_FTP_DIR = "releases/amd64/12.0-RELEASE"
@@ -39,7 +39,7 @@ class TestFetchUtils:
 
     def test_fetch_base_tarball(self):
         jail_version = Version(major=12, minor=0, version_type=VersionType.RELEASE)
-        jail = FreeBSD(name='name', version=jail_version, architecture=Architecture.AMD64, components=[])
+        jail = Distribution(name='name', version=jail_version, architecture=Architecture.AMD64, components=[])
 
         with MockingFetcher() as http_fetcher:
             with TemporaryDirectory() as temp_dir:
@@ -49,7 +49,7 @@ class TestFetchUtils:
 
     def test_fetch_tarballs_invalid_version(self):
         jail_version = Version(major=10, minor=6, version_type=VersionType.RELEASE)
-        jail = FreeBSD(name='name', version=jail_version, architecture=Architecture.AMD64, components=[])
+        jail = Distribution(name='name', version=jail_version, architecture=Architecture.AMD64, components=[])
 
         with MockingFetcher() as http_fetcher:
             with pytest.raises(URLError, match=r'\[Errno 2\] No such file or directory: '):
@@ -57,7 +57,7 @@ class TestFetchUtils:
 
     def test_fetch_tarballs_from_snapshots(self):
         jail_version = Version(major=12, minor=0, version_type=VersionType.STABLE)
-        jail = FreeBSD(name='name', version=jail_version, architecture=Architecture.AMD64, components=[])
+        jail = Distribution(name='name', version=jail_version, architecture=Architecture.AMD64, components=[])
 
         with MockingFetcher() as http_fetcher:
             with TemporaryDirectory() as temp_dir:
@@ -72,7 +72,7 @@ class TestFetchUtils:
             raise TestFetchUtils.ErrorToBeRaised(f"test message")
 
         jail_version = Version(major=12, minor=0, version_type=VersionType.STABLE)
-        jail = FreeBSD(name='name', version=jail_version, architecture=Architecture.AMD64, components=[])
+        jail = Distribution(name='name', version=jail_version, architecture=Architecture.AMD64, components=[])
 
         with pytest.raises(TestFetchUtils.ErrorToBeRaised):
             with MockingFetcher() as http_fetcher:
