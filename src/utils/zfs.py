@@ -64,6 +64,11 @@ class ZFS:
             zfs_arguments.append('-d')
             zfs_arguments.append(str(depth))
 
+        zfs_types = ','.join([x.value for x in types])
+        if zfs_types:
+            zfs_arguments.append('-t')
+            zfs_arguments.append(zfs_types)
+
         output = self.zfs_cmd(cmd='list', arguments=zfs_arguments, options={}, data_set=data_set)
 
         zfs_data_sets = []
