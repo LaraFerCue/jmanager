@@ -49,9 +49,4 @@ class TestJail:
             config_file_path = PosixPath(f"{temp_dir}/jail.conf")
             jail.write_config_file(config_file_path)
 
-            if not filecmp.cmp(JAIL_CONFIGURATION_FILE, config_file_path, shallow=False):
-                with open(JAIL_CONFIGURATION_FILE) as config_file:
-                    original_file = config_file.read()
-                with open(config_file_path.as_posix()) as config_file:
-                    written_file = config_file.read()
-                assert original_file == written_file
+            assert filecmp.cmp(JAIL_CONFIGURATION_FILE, config_file_path, shallow=False)
