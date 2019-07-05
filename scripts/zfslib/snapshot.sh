@@ -7,7 +7,6 @@
 # shellcheck source=zfslib/common.sh
 . "${ZFSLIB_PATH}/common.sh"
 
-set -x
 check_snapshot_name()
 {
 	local snapshot_name=${1}
