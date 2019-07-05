@@ -12,6 +12,11 @@ class JailOption(Enum):
     EXEC_STOP = 'exec.stop'
 
 
+HEADER = '# This file has been writen with JManager. Please, do not modify it\n' \
+         '# If any change is needed use JManager to modify the options and/or\n' \
+         '# name.\n\n'
+
+
 class Jail:
     def __init__(self, name: str, options: Dict[JailOption, str] = None):
         self._name = name
@@ -26,6 +31,14 @@ class Jail:
     @property
     def options(self) -> Dict[JailOption, str]:
         return self._options
+
+    def write_config_file(self, file_path: PosixPath):
+        with open(file_path.as_posix(), 'w') as config_file:
+            config_file.write(HEADER)
+            config_file.write(f"{self.name} " + "{\n")
+            for option, value in self.options.items():
+                config_file.write(f"\t{option.value} = \"{value}\";\n")
+            config_file.write("}\n")
 
     @staticmethod
     def get_jail_name_from_lines(lines_of_file: List[str]) -> str:

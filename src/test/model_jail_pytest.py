@@ -1,3 +1,7 @@
+import filecmp
+from pathlib import PosixPath
+from tempfile import TemporaryDirectory
+
 from models.jail import Jail, JailOption
 from src.test.globals import RESOURCES_PATH
 
@@ -11,9 +15,7 @@ JAIL_CONFIGURATION_DICT = {
     'exec.stop': "sh /etc/rc.shutdown"
 }
 
-JAIL_CONFIGURATION_FILES = {
-    'no_options': RESOURCES_PATH.joinpath('test_jail_default_options.conf')
-}
+JAIL_CONFIGURATION_FILE = RESOURCES_PATH.joinpath('test_jail_default_options.conf')
 
 
 class TestJail:
@@ -22,15 +24,34 @@ class TestJail:
             assert Jail.remove_comments(comment_file.read()) == "\n\nthis is the result"
 
     def test_remove_comments_from_file_without_comments(self):
-        with open(JAIL_CONFIGURATION_FILES['no_options'].as_posix(), 'r') as file_without_comments:
+        with open(RESOURCES_PATH.joinpath('file_without_comments').as_posix(), 'r') as file_without_comments:
             original_file = file_without_comments.read()
             assert Jail.remove_comments(original_file) == original_file
 
     def test_parse_jail_config_file_without_options(self):
-        jail = Jail.read_jail_config_file(JAIL_CONFIGURATION_FILES['no_options'])
+        jail = Jail.read_jail_config_file(JAIL_CONFIGURATION_FILE)
 
         for key in JAIL_CONFIGURATION_DICT.keys():
             if key == 'name':
                 assert jail.name == JAIL_CONFIGURATION_DICT[key]
             else:
                 assert jail.options[JailOption(key)] == JAIL_CONFIGURATION_DICT[key]
+
+    def test_write_configuration_file_with_default_options(self):
+        jail_options = {}
+        for key, value in JAIL_CONFIGURATION_DICT.items():
+            if key == "name":
+                continue
+            jail_options[JailOption(key)] = value
+        jail = Jail(JAIL_CONFIGURATION_DICT['name'], jail_options)
+
+        with TemporaryDirectory() as temp_dir:
+            config_file_path = PosixPath(f"{temp_dir}/jail.conf")
+            jail.write_config_file(config_file_path)
+
+            if not filecmp.cmp(JAIL_CONFIGURATION_FILE, config_file_path, shallow=False):
+                with open(JAIL_CONFIGURATION_FILE) as config_file:
+                    original_file = config_file.read()
+                with open(config_file_path.as_posix()) as config_file:
+                    written_file = config_file.read()
+                assert original_file == written_file
