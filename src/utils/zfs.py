@@ -96,3 +96,6 @@ class ZFS:
                 data_set[properties[i]] = data[i]
             zfs_data_sets.append(data_set)
         return zfs_data_sets
+
+    def zfs_clone(self, snapshot: str, data_set: str, options: Dict[str, str]):
+        self.zfs_cmd(cmd='clone', data_set=f"{snapshot} {data_set}", options=options, arguments=['-p'])

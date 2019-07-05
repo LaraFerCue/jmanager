@@ -105,3 +105,18 @@ class TestZFS:
 
         finally:
             zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/a", arguments=['-R'])
+
+    def test_zfs_clone_from_dataset(self, zfs):
+        with pytest.raises(ZFSError):
+            zfs.zfs_clone(snapshot=f"{TEST_DATA_SET}", data_set=f"{TEST_DATA_SET}/clone", options={})
+
+    def test_zfs_clone_from_snapshot(self, zfs):
+        snapshot_name = "clone_snap"
+        zfs.zfs_snapshot(data_set=TEST_DATA_SET, snapshot_name=snapshot_name)
+
+        try:
+            zfs.zfs_clone(snapshot=f"{TEST_DATA_SET}@{snapshot_name}", data_set=f"{TEST_DATA_SET}/clone", options={})
+        finally:
+            if zfs.zfs_list(data_set=f"{TEST_DATA_SET}/clone"):
+                zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/clone")
+            zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}@{snapshot_name}")
