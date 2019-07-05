@@ -10,6 +10,12 @@ class JailOption(Enum):
     OS_REL_DATE = 'osreldate'
     EXEC_START = 'exec.start'
     EXEC_STOP = 'exec.stop'
+    IP4 = 'ip4'
+    IP4_ADDR = 'ip4.addr'
+    IP4_SADDR_SEL = 'ip4.saddrsel'
+    IP6 = 'ip6'
+    IP6_ADDR = 'ip6.addr'
+    IP6_SADDR_SEL = 'ip6.saddrsel'
 
 
 HEADER = '# This file has been writen with JManager. Please, do not modify it\n' \
