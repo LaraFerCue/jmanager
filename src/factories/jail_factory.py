@@ -8,6 +8,7 @@ from src.utils.zfs import ZFS
 
 class JailFactory:
     ZFS_FACTORY = ZFS()
+    SNAPSHOT_NAME = "jmanager_base_jail"
 
     def __init__(self, jail_root_path: PosixPath, zfs_root_data_set: str, jail_config_folder: PosixPath):
         self._jail_root_path = jail_root_path
@@ -33,11 +34,15 @@ class JailFactory:
         for component in distribution.components:
             with TarFile(path_to_tarballs.joinpath(f"{component.value}.txz").as_posix()) as tarfile:
                 tarfile.extractall(path=f"{self._jail_root_path}/{jail_path}")
+        self.ZFS_FACTORY.zfs_snapshot(f"{self._zfs_root_data_set}/{jail_path}", snapshot_name=self.SNAPSHOT_NAME)
 
-    def jail_exists(self, distribution: Distribution):
-        list_of_datasets = self.ZFS_FACTORY.zfs_list(
-            f"{self._zfs_root_data_set}/{distribution.version}_{distribution.architecture.value}")
+    def base_jail_exists(self, distribution: Distribution):
+        base_jail_dataset = f"{self._zfs_root_data_set}/{distribution.version}_{distribution.architecture.value}"
+        list_of_datasets = self.ZFS_FACTORY.zfs_list(f"{base_jail_dataset}@{self.SNAPSHOT_NAME}")
+        if not len(list_of_datasets) and len(self.ZFS_FACTORY.zfs_list(base_jail_dataset)):
+            self.ZFS_FACTORY.zfs_destroy(base_jail_dataset)
         return len(list_of_datasets) > 0
 
     def create_jail(self, jail_data: Jail, os_version: Version, architecture: Architecture):
-        pass
+        base_jail_dataset = f"{self._zfs_root_data_set}/{os_version}_{architecture}"
+        self.ZFS_FACTORY.zfs_clone()

@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
+from models.jail import Jail
 from src.factories.jail_factory import JailFactory
 from src.test.globals import MockingZFS, TEST_DATA_SET, TEST_DISTRIBUTION
 
@@ -39,11 +40,13 @@ class TestJailFactory:
                                           zfs_root_data_set=TEST_DATA_SET,
                                           jail_config_folder=TMP_PATH)
         distribution = TEST_DISTRIBUTION
-        assert not jail_factory.jail_exists(distribution)
+        assert not jail_factory.base_jail_exists(distribution)
 
         jail_path = f"{distribution.version}_{distribution.architecture.value}"
         jail_factory.ZFS_FACTORY.zfs_create(f"{TEST_DATA_SET}/{jail_path}", options={})
-        jail_exists = jail_factory.jail_exists(distribution)
+        jail_factory.ZFS_FACTORY.zfs_create(f"{TEST_DATA_SET}/{jail_path}@{jail_factory.SNAPSHOT_NAME}", options={})
+        jail_exists = jail_factory.base_jail_exists(distribution)
+        jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}@{jail_factory.SNAPSHOT_NAME}")
         jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}")
         assert jail_exists
 
@@ -67,12 +70,12 @@ class TestJailFactory:
             create_dummy_tarball_in_folder(PosixPath(temp_dir))
             try:
                 jail_factory.create_base_jail(distribution=distribution, path_to_tarballs=PosixPath(temp_dir))
-                assert jail_factory.jail_exists(distribution=distribution)
+                assert jail_factory.base_jail_exists(distribution=distribution)
                 assert PosixPath(temp_dir).joinpath(
                     f"{distribution.version}_{distribution.architecture.value}").iterdir()
             finally:
                 jail_factory.ZFS_FACTORY.zfs_destroy(
-                    f"{TEST_DATA_SET}/{distribution.version}_{distribution.architecture.value}")
+                    f"{TEST_DATA_SET}/{distribution.version}_{distribution.architecture.value}", arguments=['-R'])
 
     # def test_create_jail_without_options(self):
     #     jail_name = "test_no_options"
