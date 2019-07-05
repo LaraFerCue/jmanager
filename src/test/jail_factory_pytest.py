@@ -1,24 +1,13 @@
 import shutil
 from pathlib import PosixPath
-from tarfile import TarFile
 from tempfile import TemporaryDirectory
 
 import pytest
 
 from models.jail import Jail, JailOption
-from src.factories.jail_factory import JailFactory
-from src.test.globals import MockingZFS, TEST_DATA_SET, TEST_DISTRIBUTION
+from src.test.globals import TEST_DATA_SET, TEST_DISTRIBUTION, MockingJailFactory, create_dummy_tarball_in_folder
 
 TMP_PATH = PosixPath('/tmp').joinpath('jmanager')
-
-
-class MockingJailFactory(JailFactory):
-    ZFS_FACTORY = MockingZFS()
-
-
-def create_dummy_tarball_in_folder(path_to_folder: PosixPath):
-    with TarFile(name=path_to_folder.joinpath('base.txz').as_posix(), mode='w') as tarfile:
-        tarfile.add('.', recursive=True)
 
 
 class TestJailFactory:
@@ -122,7 +111,7 @@ class TestJailFactory:
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
             assert loaded_jail.name == jail_name
             assert jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
-            for option, value in jail_factory.DEFAULT_JAIL_OPTIONS.items():
+            for option, value in jail_factory.get_jail_default_options(jail_info, TEST_DISTRIBUTION.version).items():
                 assert loaded_jail.options[option] == value
         finally:
             jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
@@ -144,11 +133,7 @@ class TestJailFactory:
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
             assert loaded_jail.name == jail_name
             assert jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
-            for option, value in jail_factory.DEFAULT_JAIL_OPTIONS.items():
-                if option == JailOption.HOSTNAME:
-                    assert loaded_jail.options[option] == "no host name"
-                else:
-                    assert loaded_jail.options[option] == value
+            assert loaded_jail.options[JailOption.HOSTNAME] == "no host name"
         finally:
             jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
             jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
@@ -163,16 +148,31 @@ class TestJailFactory:
         jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
         jail_factory.ZFS_FACTORY.zfs_snapshot(data_set=dataset_name, snapshot_name=jail_factory.SNAPSHOT_NAME)
 
-        jail_options = jail_factory.DEFAULT_JAIL_OPTIONS.copy()
-        jail_options[JailOption.IP4] = "new"
         try:
             jail_factory.create_jail(jail_data=jail_info, os_version=TEST_DISTRIBUTION.version,
                                      architecture=TEST_DISTRIBUTION.architecture)
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
             assert loaded_jail.name == jail_name
             assert jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
-            for option, value in jail_options.items():
-                assert loaded_jail.options[option] == value
+            assert loaded_jail.options[JailOption.IP4] == "new"
         finally:
             jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
+
+    def test_destroy_jail(self):
+        jail_name = "test_no_options"
+        jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
+                                          zfs_root_data_set=TEST_DATA_SET,
+                                          jail_config_folder=TMP_PATH)
+        dataset_name = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
+        jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
+        jail_factory.ZFS_FACTORY.zfs_snapshot(data_set=dataset_name, snapshot_name=jail_factory.SNAPSHOT_NAME)
+
+        try:
+            jail_factory.create_jail(jail_data=Jail(jail_name), os_version=TEST_DISTRIBUTION.version,
+                                     architecture=TEST_DISTRIBUTION.architecture)
+            jail_factory.destroy_jail(jail_name=jail_name)
+            assert not TMP_PATH.joinpath(f"{jail_name}.conf").is_file()
+            assert not len(jail_factory.ZFS_FACTORY.zfs_list(f"{TEST_DATA_SET}/{jail_name}"))
+        finally:
             jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)

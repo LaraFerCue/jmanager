@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import PosixPath
 from tarfile import TarFile
 from typing import Dict
@@ -10,6 +11,8 @@ from src.utils.zfs import ZFS
 class JailFactory:
     ZFS_FACTORY = ZFS()
     SNAPSHOT_NAME = "jmanager_base_jail"
+    JAIL_CMD = "jail"
+
     DEFAULT_JAIL_OPTIONS: Dict[JailOption, str] = {
         JailOption.PATH: '',
         JailOption.HOSTNAME: '',
@@ -61,13 +64,36 @@ class JailFactory:
         list_of_datasets = self.ZFS_FACTORY.zfs_list(f"{base_jail_dataset}@{self.SNAPSHOT_NAME}")
         return len(list_of_datasets) > 0
 
+    def get_jail_default_options(self, jail_data: Jail, os_version: Version) -> Dict[JailOption, str]:
+        jail_options = self.DEFAULT_JAIL_OPTIONS.copy()
+        jail_options[JailOption.PATH] = self._jail_root_path.joinpath(jail_data.name).as_posix()
+        jail_options[JailOption.HOSTNAME] = jail_data.name
+        jail_options[JailOption.OS_RELEASE] = str(os_version)
+        jail_options.update(jail_data.options)
+        return jail_options
+
     def create_jail(self, jail_data: Jail, os_version: Version, architecture: Architecture):
         base_jail_dataset = f"{self._zfs_root_data_set}/{os_version}_{architecture.value}"
         self.ZFS_FACTORY.zfs_clone(snapshot=f"{base_jail_dataset}@{self.SNAPSHOT_NAME}",
                                    data_set=f"{self._zfs_root_data_set}/{jail_data.name}",
                                    options={})
-        jail_options = self.DEFAULT_JAIL_OPTIONS.copy()
-        jail_options.update(jail_data.options)
 
+        jail_options = self.get_jail_default_options(jail_data, os_version)
         final_jail = Jail(name=jail_data.name, options=jail_options)
         final_jail.write_config_file(self._jail_config_folder.joinpath(f"{jail_data.name}.conf"))
+
+    def destroy_jail(self, jail_name: str):
+        self._jail_config_folder.joinpath(f"{jail_name}.conf").unlink()
+        self.ZFS_FACTORY.zfs_destroy(f"{self._zfs_root_data_set}/{jail_name}")
+
+    def start_jail(self, jail_name: str) -> str:
+        jail_config_file = self._jail_config_folder.joinpath(f"{jail_name}.conf")
+        cmd = f"{self.JAIL_CMD} -f {jail_config_file} -c {jail_name}"
+        return subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, check=True,
+                              universal_newlines=True).stdout
+
+    def stop_jail(self, jail_name: str):
+        jail_config_file = self._jail_config_folder.joinpath(f"{jail_name}.conf")
+        cmd = f"{self.JAIL_CMD} -f {jail_config_file} -r {jail_name}"
+        return subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, check=True,
+                              universal_newlines=True).stdout
