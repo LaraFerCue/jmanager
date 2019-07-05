@@ -28,7 +28,7 @@ while getopts "dfnpRrv" "args" ; do
 	esac
 done
 dataset_name="$(eval echo "\${${OPTIND}}")"
-check_dataset_name "${dataset_name}"
+check_dataset_name "${dataset_name}" || exit 1
 
 grep -qE "^${dataset_name};" "${ZFS_TEST_DATABASE}" || return 1
 if ! "${dry_run}" ; then

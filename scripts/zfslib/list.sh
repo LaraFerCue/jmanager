@@ -86,7 +86,7 @@ while getopts "rd:Hpo:t:s:S:" "args" ; do
 	esac
 done
 dataset_name="$(eval echo "\${${OPTIND}}")"
-check_dataset_name "${dataset_name}"
+check_dataset_name "${dataset_name}" || return 1
 
 if [ "${dataset_name}" ] ;then
 	if ! grep -qE "^${dataset_name};" "${ZFS_TEST_DATABASE}"; then
