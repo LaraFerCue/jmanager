@@ -31,6 +31,7 @@ dataset_name="$(eval echo "\${${OPTIND}}")"
 snapshot_name=$(echo "${dataset_name}" | awk -F '@' '{ print $2 }')
 dataset_name=${dataset_name%%@${snapshot_name}}
 
+echo "${snapshot_name}" | grep -E '^[a-zA-Z0-9_-]+$' || exit 1
 shift
 clone_name="$(eval echo "\${${OPTIND}}")"
 check_dataset_name "${dataset_name}" || exit 1
