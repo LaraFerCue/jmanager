@@ -7,6 +7,7 @@ from urllib.error import URLError
 import pytest
 
 from models.distribution import Distribution, Architecture, Version, VersionType
+from src.test.globals import TEST_DISTRIBUTION
 from src.utils.fetch import HTTPFetcher
 
 TEMPORARY_RELEASE_FTP_DIR = "releases/amd64/12.0-RELEASE"
@@ -38,31 +39,30 @@ class TestFetchUtils:
         pass
 
     def test_fetch_base_tarball(self):
-        jail_version = Version(major=12, minor=0, version_type=VersionType.RELEASE)
-        jail = Distribution(version=jail_version, architecture=Architecture.AMD64, components=[])
+        distribution_info = TEST_DISTRIBUTION
 
         with MockingFetcher() as http_fetcher:
             with TemporaryDirectory() as temp_dir:
                 temp_dir_path = PosixPath(temp_dir)
-                http_fetcher.fetch_tarballs_into(jail, temp_dir_path)
+                http_fetcher.fetch_tarballs_into(distribution_info, temp_dir_path)
                 assert temp_dir_path.joinpath('base.txz').is_file()
 
     def test_fetch_tarballs_invalid_version(self):
-        jail_version = Version(major=10, minor=6, version_type=VersionType.RELEASE)
-        jail = Distribution(version=jail_version, architecture=Architecture.AMD64, components=[])
+        distribution_version = Version(major=10, minor=6, version_type=VersionType.RELEASE)
+        distribution_info = Distribution(version=distribution_version, architecture=Architecture.AMD64, components=[])
 
         with MockingFetcher() as http_fetcher:
             with pytest.raises(URLError, match=r'\[Errno 2\] No such file or directory: '):
-                http_fetcher.fetch_tarballs_into(jail, PosixPath('/tmp'))
+                http_fetcher.fetch_tarballs_into(distribution_info, PosixPath('/tmp'))
 
     def test_fetch_tarballs_from_snapshots(self):
-        jail_version = Version(major=12, minor=0, version_type=VersionType.STABLE)
-        jail = Distribution(version=jail_version, architecture=Architecture.AMD64, components=[])
+        distribution_version = Version(major=12, minor=0, version_type=VersionType.STABLE)
+        distribution_info = Distribution(version=distribution_version, architecture=Architecture.AMD64, components=[])
 
         with MockingFetcher() as http_fetcher:
             with TemporaryDirectory() as temp_dir:
                 temp_dir_path = PosixPath(temp_dir)
-                http_fetcher.fetch_tarballs_into(jail, temp_dir_path)
+                http_fetcher.fetch_tarballs_into(distribution_info, temp_dir_path)
                 assert temp_dir_path.joinpath('base.txz').is_file()
 
     def test_fetch_with_callback_function(self):
@@ -71,9 +71,9 @@ class TestFetchUtils:
             assert isinstance(total_bytes, int)
             raise TestFetchUtils.ErrorToBeRaised(f"test message")
 
-        jail_version = Version(major=12, minor=0, version_type=VersionType.STABLE)
-        jail = Distribution(version=jail_version, architecture=Architecture.AMD64, components=[])
+        distribution_version = Version(major=12, minor=0, version_type=VersionType.STABLE)
+        distribution_info = Distribution(version=distribution_version, architecture=Architecture.AMD64, components=[])
 
         with pytest.raises(TestFetchUtils.ErrorToBeRaised):
             with MockingFetcher() as http_fetcher:
-                http_fetcher.fetch_tarballs_into(jail, PosixPath('/tmp'), callback_function)
+                http_fetcher.fetch_tarballs_into(distribution_info, PosixPath('/tmp'), callback_function)

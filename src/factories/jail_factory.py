@@ -1,7 +1,7 @@
 from pathlib import PosixPath
 from tarfile import TarFile
 
-from models.distribution import Distribution
+from models.distribution import Distribution, Version, Architecture
 from models.jail import Jail
 from src.utils.zfs import ZFS
 
@@ -39,5 +39,5 @@ class JailFactory:
             f"{self._zfs_root_data_set}/{distribution.version}_{distribution.architecture.value}")
         return len(list_of_datasets) > 0
 
-    def create_jail(self, jail_data: Jail):
+    def create_jail(self, jail_data: Jail, os_version: Version, architecture: Architecture):
         pass
