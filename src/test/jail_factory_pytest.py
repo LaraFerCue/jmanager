@@ -68,6 +68,18 @@ class TestJailFactory:
                 jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}@{jail_factory.SNAPSHOT_NAME}")
             jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}")
 
+    def test_destroy_base_jail(self):
+        dataset_name = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
+        jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
+                                          zfs_root_data_set=TEST_DATA_SET,
+                                          jail_config_folder=TMP_PATH)
+        jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
+        jail_factory.ZFS_FACTORY.zfs_create(data_set=f"{dataset_name}@{jail_factory.SNAPSHOT_NAME}", options={})
+
+        jail_factory.destroy_base_jail(TEST_DISTRIBUTION)
+        assert not jail_factory.base_jail_incomplete(TEST_DISTRIBUTION)
+        assert not jail_factory.base_jail_exists(TEST_DISTRIBUTION)
+
     def test_create_base_data_set_without_tarballs(self):
         jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
                                           zfs_root_data_set=TEST_DATA_SET,
@@ -92,8 +104,7 @@ class TestJailFactory:
                 assert PosixPath(temp_dir).joinpath(
                     f"{distribution.version}_{distribution.architecture.value}").iterdir()
             finally:
-                jail_factory.ZFS_FACTORY.zfs_destroy(
-                    f"{TEST_DATA_SET}/{distribution.version}_{distribution.architecture.value}", arguments=['-R'])
+                jail_factory.destroy_base_jail(distribution=distribution)
 
     def test_create_jail_without_options(self):
         jail_name = "test_no_options"
@@ -113,5 +124,4 @@ class TestJailFactory:
             assert jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
         finally:
             jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
-            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{dataset_name}@{jail_factory.SNAPSHOT_NAME}")
-            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=dataset_name)
+            jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)

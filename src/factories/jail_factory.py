@@ -36,6 +36,13 @@ class JailFactory:
                 tarfile.extractall(path=f"{self._jail_root_path}/{jail_path}")
         self.ZFS_FACTORY.zfs_snapshot(f"{self._zfs_root_data_set}/{jail_path}", snapshot_name=self.SNAPSHOT_NAME)
 
+    def destroy_base_jail(self, distribution: Distribution):
+        base_jail_dataset = f"{self._zfs_root_data_set}/{distribution.version}_{distribution.architecture.value}"
+        if self.base_jail_exists(distribution=distribution):
+            self.ZFS_FACTORY.zfs_destroy(data_set=f"{base_jail_dataset}@{self.SNAPSHOT_NAME}")
+        if self.base_jail_incomplete(distribution=distribution):
+            self.ZFS_FACTORY.zfs_destroy(data_set=f"{base_jail_dataset}")
+
     def base_jail_incomplete(self, distribution: Distribution):
         base_jail_dataset = f"{self._zfs_root_data_set}/{distribution.version}_{distribution.architecture.value}"
         return not self.base_jail_exists(distribution) and len(self.ZFS_FACTORY.zfs_list(base_jail_dataset))
