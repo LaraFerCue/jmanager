@@ -9,9 +9,15 @@ from src.utils.zfs import ZFS
 class JailFactory:
     ZFS_FACTORY = ZFS()
 
-    def __init__(self, jail_root_path: PosixPath, zfs_root_data_set: str):
+    def __init__(self, jail_root_path: PosixPath, zfs_root_data_set: str, jail_config_folder: PosixPath):
         self._jail_root_path = jail_root_path
         self._zfs_root_data_set = zfs_root_data_set
+        self._jail_config_folder = jail_config_folder
+
+        if jail_root_path.exists() and not jail_root_path.is_dir():
+            raise PermissionError("The jail root path exists and it is not a directory")
+        elif not jail_root_path.exists():
+            jail_root_path.mkdir(parents=True)
 
     def create_base_jail(self, distribution: Distribution, path_to_tarballs: PosixPath):
         for component in distribution.components:
@@ -33,5 +39,5 @@ class JailFactory:
             f"{self._zfs_root_data_set}/{distribution.version}_{distribution.architecture.value}")
         return len(list_of_datasets) > 0
 
-    def create_jail(self, jail_data: Jail, distribution: Distribution, path_to_tarballs: PosixPath):
+    def create_jail(self, jail_data: Jail):
         pass

@@ -1,3 +1,4 @@
+import shutil
 from pathlib import PosixPath
 from tarfile import TarFile
 from tempfile import TemporaryDirectory
@@ -5,10 +6,11 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from models.distribution import Distribution, Version, VersionType, Architecture
+from models.jail import Jail
 from src.factories.jail_factory import JailFactory
 from src.test.globals import MockingZFS, TEST_DATA_SET
 
-TMP_PATH = PosixPath('/tmp')
+TMP_PATH = PosixPath('/tmp').joinpath('jmanager')
 
 
 class MockingJailFactory(JailFactory):
@@ -21,8 +23,23 @@ def create_dummy_tarball_in_folder(path_to_folder: PosixPath):
 
 
 class TestJailFactory:
+    def test_jail_factory_jail_path_do_not_exist(self):
+        MockingJailFactory(jail_root_path=TMP_PATH, zfs_root_data_set=TEST_DATA_SET, jail_config_folder=TMP_PATH)
+        assert TMP_PATH.is_dir()
+
+    def test_jail_factory_jail_path_is_a_file(self):
+        if TMP_PATH.exists():
+            shutil.rmtree(TMP_PATH.as_posix(), ignore_errors=True)
+        open(TMP_PATH.as_posix(), 'w').close()
+
+        with pytest.raises(PermissionError, match=r"The jail root path exists and it is not a directory"):
+            MockingJailFactory(jail_root_path=TMP_PATH, zfs_root_data_set=TEST_DATA_SET, jail_config_folder=TMP_PATH)
+        TMP_PATH.unlink()
+
     def test_exists_base_jail(self):
-        jail_factory = MockingJailFactory(TMP_PATH, TEST_DATA_SET)
+        jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
+                                          zfs_root_data_set=TEST_DATA_SET,
+                                          jail_config_folder=TMP_PATH)
         distribution = Distribution(version=Version(12, 0, VersionType.RELEASE), architecture=Architecture.AMD64,
                                     components=[])
         assert not jail_factory.jail_exists(distribution)
@@ -34,7 +51,9 @@ class TestJailFactory:
         assert jail_exists
 
     def test_create_base_data_set_without_tarballs(self):
-        jail_factory = MockingJailFactory(TMP_PATH, TEST_DATA_SET)
+        jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
+                                          zfs_root_data_set=TEST_DATA_SET,
+                                          jail_config_folder=TMP_PATH)
         distribution = Distribution(version=Version(12, 0, VersionType.RELEASE), architecture=Architecture.AMD64,
                                     components=[])
 
@@ -47,7 +66,9 @@ class TestJailFactory:
                                     components=[])
 
         with TemporaryDirectory() as temp_dir:
-            jail_factory = MockingJailFactory(temp_dir, TEST_DATA_SET)
+            jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
+                                              zfs_root_data_set=TEST_DATA_SET,
+                                              jail_config_folder=TMP_PATH)
             create_dummy_tarball_in_folder(PosixPath(temp_dir))
             try:
                 jail_factory.create_base_jail(distribution=distribution, path_to_tarballs=PosixPath(temp_dir))
@@ -57,3 +78,13 @@ class TestJailFactory:
             finally:
                 jail_factory.ZFS_FACTORY.zfs_destroy(
                     f"{TEST_DATA_SET}/{distribution.version}_{distribution.architecture.value}")
+
+    def test_create_jail_without_options(self):
+        jail_name = "test_no_options"
+        jail_info = Jail(name=jail_name)
+        jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
+                                          zfs_root_data_set=TEST_DATA_SET,
+                                          jail_config_folder=TMP_PATH)
+        jail_factory.create_jail(jail_data=jail_info)
+        # with open(TMP_PATH.joinpath(jail_name).as_posix(), 'r') as jail_config_file:
+        #     pass
