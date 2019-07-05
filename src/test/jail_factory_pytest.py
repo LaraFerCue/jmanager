@@ -50,6 +50,24 @@ class TestJailFactory:
         jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}")
         assert jail_exists
 
+    def test_base_jail_imcomplete(self):
+        jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
+                                          zfs_root_data_set=TEST_DATA_SET,
+                                          jail_config_folder=TMP_PATH)
+        distribution = TEST_DISTRIBUTION
+        jail_path = f"{distribution.version}_{distribution.architecture.value}"
+
+        try:
+            jail_factory.ZFS_FACTORY.zfs_create(f"{TEST_DATA_SET}/{jail_path}", options={})
+            assert jail_factory.base_jail_incomplete(distribution=distribution)
+
+            jail_factory.ZFS_FACTORY.zfs_create(f"{TEST_DATA_SET}/{jail_path}@{jail_factory.SNAPSHOT_NAME}", options={})
+            assert not jail_factory.base_jail_incomplete(distribution=distribution)
+        finally:
+            if jail_factory.base_jail_exists(distribution):
+                jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}@{jail_factory.SNAPSHOT_NAME}")
+            jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}")
+
     def test_create_base_data_set_without_tarballs(self):
         jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
                                           zfs_root_data_set=TEST_DATA_SET,
