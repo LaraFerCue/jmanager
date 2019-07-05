@@ -1,11 +1,11 @@
-from pathlib import PosixPath
 from typing import List, Dict, Union
 
 import pytest
 
 from src.configuration import parse_jmanagerfile
+from src.test.globals import RESOURCES_PATH
 
-SAMPLE_JMANAGER_FILE = PosixPath('src/test/resources/test_jmanagerfile.yaml')
+SAMPLE_JMANAGER_FILE = RESOURCES_PATH.joinpath('test_jmanagerfile.yaml')
 JAIL_CONFIGURATION_EXAMPLE: List[Dict[str, Union[List[str], str]]] = [
     {
         "name": "test",

@@ -1,0 +1,7 @@
+# this is a shell comment
+// this is a one line C/C++ comment
+
+/* this is a multiline C/C++ comment
+    and it continues several lines
+    on this document */
+this is the result
