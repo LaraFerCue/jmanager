@@ -7,7 +7,7 @@ if ! [ "$(uname -o)" = "FreeBSD" ] ; then
 	exit 0
 fi
 
-ZPOOL_NAME=$(zpool list -H | awk '{print $1;}')
+ZPOOL_NAME=$(zfs list -o name,mountpoint | grep -E '/$' | awk -F'/' '{print $1;}')
 if ! [ "${ZPOOL_NAME}" ] ; then
 	exit 0
 fi
