@@ -1,14 +1,23 @@
 from pathlib import PosixPath
 from tarfile import TarFile
+from typing import Dict
 
 from models.distribution import Distribution, Version, Architecture
-from models.jail import Jail
+from models.jail import Jail, JailOption
 from src.utils.zfs import ZFS
 
 
 class JailFactory:
     ZFS_FACTORY = ZFS()
     SNAPSHOT_NAME = "jmanager_base_jail"
+    DEFAULT_JAIL_OPTIONS: Dict[JailOption, str] = {
+        JailOption.PATH: '',
+        JailOption.HOSTNAME: '',
+        JailOption.OS_RELEASE: '',
+        JailOption.OS_REL_DATE: '',
+        JailOption.EXEC_START: 'sh /etc/rc',
+        JailOption.EXEC_STOP: 'sh /etc/rc.shutdown',
+    }
 
     def __init__(self, jail_root_path: PosixPath, zfs_root_data_set: str, jail_config_folder: PosixPath):
         self._jail_root_path = jail_root_path
@@ -57,4 +66,8 @@ class JailFactory:
         self.ZFS_FACTORY.zfs_clone(snapshot=f"{base_jail_dataset}@{self.SNAPSHOT_NAME}",
                                    data_set=f"{self._zfs_root_data_set}/{jail_data.name}",
                                    options={})
-        jail_data.write_config_file(self._jail_config_folder.joinpath(f"{jail_data.name}.conf"))
+        jail_options = self.DEFAULT_JAIL_OPTIONS.copy()
+        jail_options.update(jail_data.options)
+
+        final_jail = Jail(name=jail_data.name, options=jail_options)
+        final_jail.write_config_file(self._jail_config_folder.joinpath(f"{jail_data.name}.conf"))

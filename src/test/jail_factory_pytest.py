@@ -122,6 +122,8 @@ class TestJailFactory:
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
             assert loaded_jail.name == jail_name
             assert jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            for option, value in jail_factory.DEFAULT_JAIL_OPTIONS.items():
+                assert loaded_jail.options[option] == value
         finally:
             jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
             jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
