@@ -95,14 +95,23 @@ class TestJailFactory:
                 jail_factory.ZFS_FACTORY.zfs_destroy(
                     f"{TEST_DATA_SET}/{distribution.version}_{distribution.architecture.value}", arguments=['-R'])
 
-    # def test_create_jail_without_options(self):
-    #     jail_name = "test_no_options"
-    #     jail_info = Jail(name=jail_name)
-    #     jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
-    #                                       zfs_root_data_set=TEST_DATA_SET,
-    #                                       jail_config_folder=TMP_PATH)
-    #     jail_factory.ZFS_FACTORY.zfs_create(data_set=f"{TEST_DATA_SET}")
-    #     jail_factory.create_jail(jail_data=jail_info, os_version=Version(12, 0, VersionType.RELEASE),
-    #                              architecture=Architecture.AMD64)
-    #     loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
-    #     assert loaded_jail.name == jail_name
+    def test_create_jail_without_options(self):
+        jail_name = "test_no_options"
+        jail_info = Jail(name=jail_name)
+        jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
+                                          zfs_root_data_set=TEST_DATA_SET,
+                                          jail_config_folder=TMP_PATH)
+        dataset_name = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
+        jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
+        jail_factory.ZFS_FACTORY.zfs_snapshot(data_set=dataset_name, snapshot_name=jail_factory.SNAPSHOT_NAME)
+
+        try:
+            jail_factory.create_jail(jail_data=jail_info, os_version=TEST_DISTRIBUTION.version,
+                                     architecture=TEST_DISTRIBUTION.architecture)
+            loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
+            assert loaded_jail.name == jail_name
+            assert jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
+        finally:
+            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{dataset_name}@{jail_factory.SNAPSHOT_NAME}")
+            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=dataset_name)
