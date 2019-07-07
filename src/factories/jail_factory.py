@@ -17,7 +17,6 @@ class JailFactory:
         JailOption.PATH: '',
         JailOption.HOSTNAME: '',
         JailOption.OS_RELEASE: '',
-        JailOption.OS_REL_DATE: '',
         JailOption.EXEC_START: 'sh /etc/rc',
         JailOption.EXEC_STOP: 'sh /etc/rc.shutdown',
     }
@@ -74,9 +73,11 @@ class JailFactory:
 
     def create_jail(self, jail_data: Jail, os_version: Version, architecture: Architecture):
         base_jail_dataset = f"{self._zfs_root_data_set}/{os_version}_{architecture.value}"
+        jail_mountpoint = self._jail_root_path.joinpath(jail_data.name)
+        clone_properties: Dict[str, str] = {"mountpoint": jail_mountpoint.as_posix()}
         self.ZFS_FACTORY.zfs_clone(snapshot=f"{base_jail_dataset}@{self.SNAPSHOT_NAME}",
                                    data_set=f"{self._zfs_root_data_set}/{jail_data.name}",
-                                   options={})
+                                   options=clone_properties)
 
         jail_options = self.get_jail_default_options(jail_data, os_version)
         final_jail = Jail(name=jail_data.name, options=jail_options)
