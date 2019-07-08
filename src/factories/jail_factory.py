@@ -79,7 +79,13 @@ class JailFactory:
         base_jail_dataset = f"{self._zfs_root_data_set}/{os_version}_{architecture.value}"
         distribution = Distribution(version=os_version, architecture=architecture, components=[])
         if not self.base_jail_exists(distribution=distribution):
-            raise JailError(f"The base jail for version {os_version}/{architecture.value} does not exist")
+            raise JailError(f"The base jail for version {os_version}/{architecture.value} does not exist.")
+
+        if self._jail_config_folder.joinpath(f"{jail_data.name}.conf").is_file():
+            raise JailError(f"The jail '{jail_data.name}' already exists.")
+
+        if len(self.ZFS_FACTORY.zfs_list(data_set=f"{self._zfs_root_data_set}/{jail_data.name}")) > 0:
+            raise JailError(f"The jail '{jail_data.name}' has some left overs, please remove them and try again.")
 
         jail_mountpoint = self._jail_root_path.joinpath(jail_data.name)
         clone_properties: Dict[str, str] = {"mountpoint": jail_mountpoint.as_posix()}

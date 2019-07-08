@@ -117,6 +117,7 @@ class TestJailFactory:
         finally:
             jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
             jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
+            TMP_PATH.joinpath(f"{jail_name}.conf").unlink()
 
     def test_create_jail_overriding_default_options(self):
         jail_name = "test_no_options"
@@ -138,6 +139,7 @@ class TestJailFactory:
         finally:
             jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
             jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
+            TMP_PATH.joinpath(f"{jail_name}.conf").unlink()
 
     def test_create_jail_with_additional_options(self):
         jail_name = "test_no_options"
@@ -159,12 +161,37 @@ class TestJailFactory:
         finally:
             jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
             jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
+            TMP_PATH.joinpath(f"{jail_name}.conf").unlink()
 
     def test_create_jail_without_base_jail(self):
         jail_factory = MockingJailFactory(jail_root_path=TMP_PATH, zfs_root_data_set=TEST_DATA_SET,
                                           jail_config_folder=TMP_PATH)
-        with pytest.raises(JailError):
+        with pytest.raises(JailError, match=r"The base jail for version 12.0-RELEASE/amd64 does not exist"):
             jail_factory.create_jail(Jail('test'), TEST_DISTRIBUTION.version, TEST_DISTRIBUTION.architecture)
+
+    def test_create_duplicated_jail(self):
+        jail_factory = MockingJailFactory(jail_root_path=TMP_PATH, zfs_root_data_set=TEST_DATA_SET,
+                                          jail_config_folder=TMP_PATH)
+        dataset_name = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
+        jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
+        jail_factory.ZFS_FACTORY.zfs_snapshot(data_set=dataset_name, snapshot_name=jail_factory.SNAPSHOT_NAME)
+        jail_factory.ZFS_FACTORY.zfs_create(data_set=f"{TEST_DATA_SET}/test", options={})
+
+        with open(TMP_PATH.joinpath('test.conf').as_posix(), "w") as fd:
+            fd.write("test\n")
+
+        try:
+            with pytest.raises(JailError, match=r"The jail 'test' already exists"):
+                jail_factory.create_jail(Jail('test'), TEST_DISTRIBUTION.version, TEST_DISTRIBUTION.architecture)
+
+            TMP_PATH.joinpath('test.conf').unlink()
+            with pytest.raises(JailError, match=r"The jail 'test' has some left overs, please remove them and try again."):
+                jail_factory.create_jail(Jail('test'), TEST_DISTRIBUTION.version, TEST_DISTRIBUTION.architecture)
+        finally:
+            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=dataset_name, arguments=['-R'])
+            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/test")
+            if TMP_PATH.joinpath('test.conf').is_file():
+                TMP_PATH.joinpath('test.conf').unlink()
 
     def test_destroy_jail(self):
         jail_name = "test_no_options"
