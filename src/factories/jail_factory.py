@@ -1,6 +1,8 @@
+import lzma
 import subprocess
 import tarfile
 from pathlib import PosixPath
+from tempfile import TemporaryDirectory
 from typing import Dict
 
 from models.distribution import Distribution, Version, Architecture
@@ -10,6 +12,16 @@ from src.utils.zfs import ZFS
 
 class JailError(BaseException):
     pass
+
+
+def extract_tarball_into(jail_path: PosixPath, path_to_tarball: PosixPath):
+    with TemporaryDirectory(prefix="jail_factory_") as temp_dir:
+        temp_file_path = f"{temp_dir}/{path_to_tarball.name}"
+        with lzma.open(path_to_tarball.as_posix(), 'r') as lz_file:
+            with open(temp_file_path, "wb") as temp_file:
+                temp_file.write(lz_file.read())
+        with tarfile.open(temp_file_path, mode='r') as tar_file:
+            tar_file.extractall(path=jail_path.as_posix())
 
 
 class JailFactory:
@@ -55,14 +67,9 @@ class JailFactory:
         )
 
         for component in set(distribution.components):
-            self.extract_tarball_into(jail_path, path_to_tarballs.joinpath(f"{component.value}.txz"))
+            extract_tarball_into(jail_path, path_to_tarballs.joinpath(f"{component.value}.txz"))
         self.ZFS_FACTORY.zfs_snapshot(f"{self._zfs_root_data_set}/{jail_data_set_path}",
                                       snapshot_name=self.SNAPSHOT_NAME)
-
-    def extract_tarball_into(self, jail_path: PosixPath, path_to_tarball: PosixPath):
-        print(f"Extracting {path_to_tarball.name} ...")
-        with tarfile.open(path_to_tarball.as_posix(), mode='r|xz') as tar_file:
-            tar_file.extractall(path=jail_path.as_posix())
 
     def destroy_base_jail(self, distribution: Distribution):
         base_jail_dataset = f"{self._zfs_root_data_set}/{distribution.version}_{distribution.architecture.value}"
