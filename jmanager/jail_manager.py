@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 
 from models.distribution import Distribution
 from models.jail import Jail
-from src.factories.jail_factory import JailFactory
+from src.factories.jail_factory import JailFactory, JailError
 from src.utils.fetch import HTTPFetcher
 
 
@@ -35,3 +35,8 @@ class JailManager:
 
         self._jail_factory.create_jail(jail_data=jail_data, os_version=distribution.version,
                                        architecture=distribution.architecture)
+
+    def destroy_jail(self, jail_name: str):
+        if self._jail_factory.jail_exists(jail_name):
+            self._jail_factory.destroy_jail(jail_name)
+        raise JailError(f"No jail named '{jail_name}'")
