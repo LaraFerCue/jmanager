@@ -210,8 +210,8 @@ class TestJailFactory:
                                match=r"The jail 'test' has some left overs, please remove them and try again."):
                 jail_factory.create_jail(Jail('test'), TEST_DISTRIBUTION.version, TEST_DISTRIBUTION.architecture)
         finally:
-            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=dataset_name, arguments=['-R'])
             jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/test")
+            jail_factory.destroy_base_jail(TEST_DISTRIBUTION)
             if TMP_PATH.joinpath('test.conf').is_file():
                 TMP_PATH.joinpath('test.conf').unlink()
 
