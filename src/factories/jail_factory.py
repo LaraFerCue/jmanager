@@ -8,6 +8,10 @@ from models.jail import Jail, JailOption
 from src.utils.zfs import ZFS
 
 
+class JailError(BaseException):
+    pass
+
+
 class JailFactory:
     ZFS_FACTORY = ZFS()
     SNAPSHOT_NAME = "jmanager_base_jail"
@@ -73,6 +77,10 @@ class JailFactory:
 
     def create_jail(self, jail_data: Jail, os_version: Version, architecture: Architecture):
         base_jail_dataset = f"{self._zfs_root_data_set}/{os_version}_{architecture.value}"
+        distribution = Distribution(version=os_version, architecture=architecture, components=[])
+        if not self.base_jail_exists(distribution=distribution):
+            raise JailError(f"The base jail for version {os_version}/{architecture.value} does not exist")
+
         jail_mountpoint = self._jail_root_path.joinpath(jail_data.name)
         clone_properties: Dict[str, str] = {"mountpoint": jail_mountpoint.as_posix()}
         self.ZFS_FACTORY.zfs_clone(snapshot=f"{base_jail_dataset}@{self.SNAPSHOT_NAME}",

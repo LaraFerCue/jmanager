@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from models.jail import Jail, JailOption
+from src.factories.jail_factory import JailError
 from src.test.globals import TEST_DATA_SET, TEST_DISTRIBUTION, MockingJailFactory, create_dummy_tarball_in_folder
 
 TMP_PATH = PosixPath('/tmp').joinpath('jmanager')
@@ -158,6 +159,12 @@ class TestJailFactory:
         finally:
             jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
             jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
+
+    def test_create_jail_without_base_jail(self):
+        jail_factory = MockingJailFactory(jail_root_path=TMP_PATH, zfs_root_data_set=TEST_DATA_SET,
+                                          jail_config_folder=TMP_PATH)
+        with pytest.raises(JailError):
+            jail_factory.create_jail(Jail('test'), TEST_DISTRIBUTION.version, TEST_DISTRIBUTION.architecture)
 
     def test_destroy_jail(self):
         jail_name = "test_no_options"
