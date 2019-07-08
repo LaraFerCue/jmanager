@@ -10,11 +10,12 @@ class HTTPFetcher:
     FTP_BASE_DIRECTORY = PosixPath('pub/FreeBSD')
     BLOCK_SIZE = 8192
 
-    def fetch_file(self, url: str, destination: PosixPath, callback: Callable[[int, int], None] = None):
+    def fetch_file(self, url: str, destination: PosixPath, callback: Callable[[str, int, int], None] = None):
         fetcher = urlopen(url)
         file_size = int(fetcher.headers["content-length"])
 
         received_bytes = 0
+        msg = f"{destination.name} "
         with open(destination.as_posix(), 'wb') as destination_file:
             while True:
                 buffer = fetcher.read(self.BLOCK_SIZE)
@@ -23,11 +24,11 @@ class HTTPFetcher:
 
                 received_bytes += len(buffer)
                 if callback is not None:
-                    callback(received_bytes=received_bytes, total_bytes=file_size)
+                    callback(msg, received_bytes, file_size)
                 destination_file.write(buffer)
 
     def fetch_tarballs_into(self, distribution: Distribution, temp_dir: PosixPath,
-                            callback: Callable[[int, int], None] = None):
+                            callback: Callable[[str, int, int], None] = None):
         directory = self.get_directory_path(distribution.architecture, distribution.version)
         base_url = f"{self.SERVER_URL}/{directory.as_posix()}"
 

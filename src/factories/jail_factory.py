@@ -1,6 +1,6 @@
 import subprocess
+import tarfile
 from pathlib import PosixPath
-from tarfile import TarFile
 from typing import Dict
 
 from models.distribution import Distribution, Version, Architecture
@@ -54,8 +54,8 @@ class JailFactory:
         )
 
         for component in distribution.components:
-            with TarFile(path_to_tarballs.joinpath(f"{component.value}.txz").as_posix(), mode='r') as tarfile:
-                tarfile.extractall(path=f"{self._jail_root_path}/{jail_path}")
+            with tarfile.open(path_to_tarballs.joinpath(f"{component.value}.txz").as_posix(), mode='r|xz') as tar_file:
+                tar_file.extractall(path=f"{self._jail_root_path}/{jail_path}")
         self.ZFS_FACTORY.zfs_snapshot(f"{self._zfs_root_data_set}/{jail_path}", snapshot_name=self.SNAPSHOT_NAME)
 
     def destroy_base_jail(self, distribution: Distribution):
