@@ -11,6 +11,12 @@ from src.test.globals import TEST_DATA_SET, TEST_DISTRIBUTION, MockingJailFactor
 TMP_PATH = PosixPath('/tmp').joinpath('jmanager')
 
 
+def create_dummy_base_jail(jail_factory):
+    dataset_name = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
+    jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
+    jail_factory.ZFS_FACTORY.zfs_snapshot(data_set=dataset_name, snapshot_name=jail_factory.SNAPSHOT_NAME)
+
+
 class TestJailFactory:
     def test_jail_factory_jail_path_do_not_exist(self):
         MockingJailFactory(jail_root_path=TMP_PATH, zfs_root_data_set=TEST_DATA_SET, jail_config_folder=TMP_PATH)
@@ -125,9 +131,7 @@ class TestJailFactory:
         jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
                                           zfs_root_data_set=TEST_DATA_SET,
                                           jail_config_folder=TMP_PATH)
-        dataset_name = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
-        jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
-        jail_factory.ZFS_FACTORY.zfs_snapshot(data_set=dataset_name, snapshot_name=jail_factory.SNAPSHOT_NAME)
+        create_dummy_base_jail(jail_factory)
 
         try:
             jail_factory.create_jail(jail_data=jail_info, os_version=TEST_DISTRIBUTION.version,
@@ -148,9 +152,7 @@ class TestJailFactory:
         jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
                                           zfs_root_data_set=TEST_DATA_SET,
                                           jail_config_folder=TMP_PATH)
-        dataset_name = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
-        jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
-        jail_factory.ZFS_FACTORY.zfs_snapshot(data_set=dataset_name, snapshot_name=jail_factory.SNAPSHOT_NAME)
+        create_dummy_base_jail(jail_factory)
 
         try:
             jail_factory.create_jail(jail_data=jail_info, os_version=TEST_DISTRIBUTION.version,
@@ -170,9 +172,7 @@ class TestJailFactory:
         jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
                                           zfs_root_data_set=TEST_DATA_SET,
                                           jail_config_folder=TMP_PATH)
-        dataset_name = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
-        jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
-        jail_factory.ZFS_FACTORY.zfs_snapshot(data_set=dataset_name, snapshot_name=jail_factory.SNAPSHOT_NAME)
+        create_dummy_base_jail(jail_factory)
 
         try:
             jail_factory.create_jail(jail_data=jail_info, os_version=TEST_DISTRIBUTION.version,
@@ -195,9 +195,7 @@ class TestJailFactory:
     def test_create_duplicated_jail(self):
         jail_factory = MockingJailFactory(jail_root_path=TMP_PATH, zfs_root_data_set=TEST_DATA_SET,
                                           jail_config_folder=TMP_PATH)
-        dataset_name = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
-        jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
-        jail_factory.ZFS_FACTORY.zfs_snapshot(data_set=dataset_name, snapshot_name=jail_factory.SNAPSHOT_NAME)
+        create_dummy_base_jail(jail_factory)
         jail_factory.ZFS_FACTORY.zfs_create(data_set=f"{TEST_DATA_SET}/test", options={})
 
         with open(TMP_PATH.joinpath('test.conf').as_posix(), "w") as fd:
@@ -234,9 +232,7 @@ class TestJailFactory:
         jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
                                           zfs_root_data_set=TEST_DATA_SET,
                                           jail_config_folder=TMP_PATH)
-        dataset_name = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
-        jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
-        jail_factory.ZFS_FACTORY.zfs_snapshot(data_set=dataset_name, snapshot_name=jail_factory.SNAPSHOT_NAME)
+        create_dummy_base_jail(jail_factory)
 
         try:
             jail_factory.create_jail(jail_data=Jail(jail_name), os_version=TEST_DISTRIBUTION.version,
