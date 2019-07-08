@@ -1,4 +1,4 @@
-- name: test
+- name: example
   version: 12.0-RELEASE
   architecture: amd64
   components:
