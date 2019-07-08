@@ -217,6 +217,14 @@ class TestJailFactory:
             if TMP_PATH.joinpath('test.conf').is_file():
                 TMP_PATH.joinpath('test.conf').unlink()
 
+    def test_jail_exists(self):
+        jail_factory = MockingJailFactory(jail_root_path=TMP_PATH, zfs_root_data_set=TEST_DATA_SET,
+                                          jail_config_folder=TMP_PATH)
+        jail_name = "test_jail_exists"
+        assert not jail_factory.jail_exists(jail_name)
+        open(TMP_PATH.joinpath(f'{jail_name}.conf').as_posix(), 'w').close()
+        assert jail_factory.jail_exists(jail_name)
+
     def test_destroy_jail(self):
         jail_name = "test_no_options"
         jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,

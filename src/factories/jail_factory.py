@@ -104,6 +104,9 @@ class JailFactory:
         final_jail = Jail(name=jail_data.name, options=jail_options)
         final_jail.write_config_file(self._jail_config_folder.joinpath(f"{jail_data.name}.conf"))
 
+    def jail_exists(self, jail_name: str) -> bool:
+        return self._jail_config_folder.joinpath(f"{jail_name}.conf").is_file()
+
     def destroy_jail(self, jail_name: str):
         self._jail_config_folder.joinpath(f"{jail_name}.conf").unlink()
         self.ZFS_FACTORY.zfs_destroy(f"{self._zfs_root_data_set}/{jail_name}")
