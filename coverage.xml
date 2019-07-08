@@ -39,7 +39,7 @@
 						<line hits="1" number="43"/>
 					</lines>
 				</class>
-				<class branch-rate="0" complexity="0" filename="src/create_jail.py" line-rate="0" name="create_jail.py">
+				<class branch-rate="0" complexity="0" filename="src/clone_base_jail_and_write_configuration.py" line-rate="0" name="clone_base_jail_and_write_configuration.py">
 					<methods/>
 					<lines>
 						<line hits="0" number="3"/>
