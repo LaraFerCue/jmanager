@@ -242,3 +242,19 @@ class TestJailFactory:
             assert not len(jail_factory.ZFS_FACTORY.zfs_list(f"{TEST_DATA_SET}/{jail_name}"))
         finally:
             jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
+
+    def test_list_jails(self):
+        jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
+                                          zfs_root_data_set=TEST_DATA_SET,
+                                          jail_config_folder=TMP_PATH)
+        create_dummy_base_jail(jail_factory)
+        jail_factory.create_jail(Jail('test'), os_version=TEST_DISTRIBUTION.version,
+                                 architecture=TEST_DISTRIBUTION.architecture)
+
+        try:
+            jail_list = jail_factory.list_jails()
+            assert len(jail_list) == 1
+            assert jail_list[0].name == 'test'
+        finally:
+            jail_factory.destroy_jail('test')
+            jail_factory.destroy_base_jail(TEST_DISTRIBUTION)

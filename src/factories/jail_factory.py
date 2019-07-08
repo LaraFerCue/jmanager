@@ -3,7 +3,7 @@ import subprocess
 import tarfile
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
-from typing import Dict
+from typing import Dict, List
 
 from models.distribution import Distribution, Version, Architecture
 from models.jail import Jail, JailOption
@@ -135,3 +135,10 @@ class JailFactory:
         cmd = f"{self.JAIL_CMD} -f {jail_config_file} -r {jail_name}"
         return subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, check=True,
                               universal_newlines=True).stdout
+
+    def list_jails(self) -> List[Jail]:
+        jail_list = []
+        for config_file in self._jail_config_folder.iterdir():
+            if config_file.suffix == '.conf':
+                jail_list.append(Jail.read_jail_config_file(config_file))
+        return jail_list
