@@ -14,7 +14,7 @@ CONFIGURATION_SCHEMA: Dict[str, type] = {
 }
 
 
-def read_configuration_file(path_to_file: PosixPath) -> List[Dict[str, str]]:
+def read_configuration_file(path_to_file: PosixPath) -> Union[List[Dict[str, str]], Dict[str, str]]:
     if not path_to_file.is_file():
         raise FileNotFoundError("error: The configuration file has not been found")
 
