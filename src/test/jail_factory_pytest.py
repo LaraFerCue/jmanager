@@ -223,7 +223,11 @@ class TestJailFactory:
         jail_name = "test_jail_exists"
         assert not jail_factory.jail_exists(jail_name)
         open(TMP_PATH.joinpath(f'{jail_name}.conf').as_posix(), 'w').close()
-        assert jail_factory.jail_exists(jail_name)
+
+        try:
+            assert jail_factory.jail_exists(jail_name)
+        finally:
+            TMP_PATH.joinpath(f'{jail_name}.conf').unlink()
 
     def test_destroy_jail(self):
         jail_name = "test_no_options"
