@@ -36,6 +36,13 @@ class JailFactory:
             jail_root_path.mkdir(parents=True)
 
     def create_base_jail(self, distribution: Distribution, path_to_tarballs: PosixPath):
+        if self.base_jail_exists(distribution=distribution):
+            raise JailError(f"The base jail for '{distribution.version}/{distribution.architecture.value}' exists")
+
+        if self.base_jail_incomplete(distribution=distribution):
+            raise JailError(f"The base jail '{distribution.version}/{distribution.architecture.value}' has left " + \
+                            "overs, delete them and try again.")
+
         for component in distribution.components:
             if not path_to_tarballs.joinpath(f"{component.value}.txz").is_file():
                 raise FileNotFoundError(f"Component '{component.value}' not found in {path_to_tarballs}")
@@ -47,7 +54,7 @@ class JailFactory:
         )
 
         for component in distribution.components:
-            with TarFile(path_to_tarballs.joinpath(f"{component.value}.txz").as_posix()) as tarfile:
+            with TarFile(path_to_tarballs.joinpath(f"{component.value}.txz").as_posix(), mode='r') as tarfile:
                 tarfile.extractall(path=f"{self._jail_root_path}/{jail_path}")
         self.ZFS_FACTORY.zfs_snapshot(f"{self._zfs_root_data_set}/{jail_path}", snapshot_name=self.SNAPSHOT_NAME)
 
