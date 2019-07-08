@@ -40,7 +40,7 @@ class TestJailFactory:
         jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}")
         assert jail_exists
 
-    def test_base_jail_imcomplete(self):
+    def test_base_jail_incomplete(self):
         jail_factory = MockingJailFactory(jail_root_path=TMP_PATH,
                                           zfs_root_data_set=TEST_DATA_SET,
                                           jail_config_folder=TMP_PATH)
