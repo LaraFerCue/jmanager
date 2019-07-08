@@ -21,5 +21,8 @@ destroy_parser = subparsers.add_parser('destroy')
 destroy_parser.set_defaults(command='destroy')
 destroy_parser.add_argument("jail_name", type=str, help="name of the jail to destroy")
 
+list_parser = subparsers.add_parser('list')
+list_parser.set_defaults(command="list")
+
 args = parser.parse_args()
 execute_commands(args)

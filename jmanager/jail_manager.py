@@ -1,5 +1,6 @@
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
+from typing import List
 
 from models.distribution import Distribution
 from models.jail import Jail
@@ -41,3 +42,6 @@ class JailManager:
             self._jail_factory.destroy_jail(jail_name)
         else:
             raise JailError(f"No jail named '{jail_name}'")
+
+    def list_jails(self) -> List[Jail]:
+        return self._jail_factory.list_jails()

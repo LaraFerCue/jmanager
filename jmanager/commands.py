@@ -32,3 +32,6 @@ def execute_commands(args: Namespace):
         create_command(jail_manager=jail_manager, jmanagerfile=args.jmanagerfile)
     elif args.command == 'destroy':
         jail_manager.destroy_jail(args.jail_name)
+    elif args.command == 'list':
+        for jail in jail_manager.list_jails():
+            print(jail)
