@@ -47,16 +47,22 @@ class JailFactory:
             if not path_to_tarballs.joinpath(f"{component.value}.txz").is_file():
                 raise FileNotFoundError(f"Component '{component.value}' not found in {path_to_tarballs}")
 
-        jail_path = f"{distribution.version}_{distribution.architecture.value}"
+        jail_data_set_path = f"{distribution.version}_{distribution.architecture.value}"
+        jail_path = self._jail_root_path.joinpath(jail_data_set_path)
         self.ZFS_FACTORY.zfs_create(
-            data_set=f"{self._zfs_root_data_set}/{jail_path}",
-            options={"mountpoint": f"{self._jail_root_path}/{jail_path}"}
+            data_set=f"{self._zfs_root_data_set}/{jail_data_set_path}",
+            options={"mountpoint": jail_path.as_posix()}
         )
 
-        for component in distribution.components:
-            with tarfile.open(path_to_tarballs.joinpath(f"{component.value}.txz").as_posix(), mode='r|xz') as tar_file:
-                tar_file.extractall(path=f"{self._jail_root_path}/{jail_path}")
-        self.ZFS_FACTORY.zfs_snapshot(f"{self._zfs_root_data_set}/{jail_path}", snapshot_name=self.SNAPSHOT_NAME)
+        for component in set(distribution.components):
+            self.extract_tarball_into(jail_path, path_to_tarballs.joinpath(f"{component.value}.txz"))
+        self.ZFS_FACTORY.zfs_snapshot(f"{self._zfs_root_data_set}/{jail_data_set_path}",
+                                      snapshot_name=self.SNAPSHOT_NAME)
+
+    def extract_tarball_into(self, jail_path: PosixPath, path_to_tarball: PosixPath):
+        print(f"Extracting {path_to_tarball.name} ...")
+        with tarfile.open(path_to_tarball.as_posix(), mode='r|xz') as tar_file:
+            tar_file.extractall(path=jail_path.as_posix())
 
     def destroy_base_jail(self, distribution: Distribution):
         base_jail_dataset = f"{self._zfs_root_data_set}/{distribution.version}_{distribution.architecture.value}"
