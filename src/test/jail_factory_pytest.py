@@ -182,7 +182,7 @@ class TestJailFactory:
             assert jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
             assert loaded_jail.options[JailOption.IP4] == "new"
         finally:
-            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}", arguments=['-R'])
             jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
             TMP_PATH.joinpath(f"{jail_name}.conf").unlink()
 
