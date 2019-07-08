@@ -39,4 +39,5 @@ class JailManager:
     def destroy_jail(self, jail_name: str):
         if self._jail_factory.jail_exists(jail_name):
             self._jail_factory.destroy_jail(jail_name)
-        raise JailError(f"No jail named '{jail_name}'")
+        else:
+            raise JailError(f"No jail named '{jail_name}'")
