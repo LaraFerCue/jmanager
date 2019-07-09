@@ -5,12 +5,9 @@ from typing import Dict, List
 from models.distribution import Distribution, Version, Architecture
 from models.jail import Jail, JailOption, JailError
 from src.factories.base_jail_factory import BaseJailFactory
-from src.utils.zfs import ZFS
 
 
 class JailFactory:
-    ZFS_FACTORY = ZFS()
-    SNAPSHOT_NAME = "jmanager_base_jail"
     JAIL_CMD = "jail"
 
     DEFAULT_JAIL_OPTIONS: Dict[JailOption, str] = {
@@ -46,15 +43,16 @@ class JailFactory:
             raise JailError(f"The jail '{jail_data.name}' already exists.")
 
         jail_data_set = self._base_jail_factory.get_jail_data_set(jail_data.name)
-        if len(self.ZFS_FACTORY.zfs_list(data_set=jail_data_set)) > 0:
+        if len(self._base_jail_factory.ZFS_FACTORY.zfs_list(data_set=jail_data_set)) > 0:
             raise JailError(f"The jail '{jail_data.name}' has some left overs, please remove them and try again.")
 
         base_jail_dataset = self._base_jail_factory.get_base_jail_data_set(distribution=distribution)
         jail_mountpoint = self._base_jail_factory.get_jail_mountpoint(jail_data_set)
         clone_properties: Dict[str, str] = {"mountpoint": jail_mountpoint.as_posix()}
-        self.ZFS_FACTORY.zfs_clone(snapshot=f"{base_jail_dataset}@{self.SNAPSHOT_NAME}",
-                                   data_set=jail_data_set,
-                                   options=clone_properties)
+        self._base_jail_factory.ZFS_FACTORY.zfs_clone(
+            snapshot=f"{base_jail_dataset}@{self._base_jail_factory.SNAPSHOT_NAME}",
+            data_set=jail_data_set,
+            options=clone_properties)
 
         jail_options = self.get_jail_default_options(jail_data, os_version)
         final_jail = Jail(name=jail_data.name, options=jail_options)
@@ -65,7 +63,7 @@ class JailFactory:
 
     def destroy_jail(self, jail_name: str):
         self._jail_config_folder.joinpath(f"{jail_name}.conf").unlink()
-        self.ZFS_FACTORY.zfs_destroy(self._base_jail_factory.get_jail_data_set(jail_name))
+        self._base_jail_factory.ZFS_FACTORY.zfs_destroy(self._base_jail_factory.get_jail_data_set(jail_name))
 
     def start_jail(self, jail_name: str) -> str:
         jail_config_file = self._jail_config_folder.joinpath(f"{jail_name}.conf")

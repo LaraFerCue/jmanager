@@ -17,12 +17,12 @@ class TestJailFactory:
                                      architecture=TEST_DISTRIBUTION.architecture)
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
             assert loaded_jail.name == jail_name
-            assert jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
             for option, value in jail_factory.get_jail_default_options(jail_info, TEST_DISTRIBUTION.version).items():
                 assert loaded_jail.options[option] == value
         finally:
             if jail_factory.jail_exists(jail_name):
-                jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
+                jail_factory.base_jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
             destroy_dummy_base_jail()
             TMP_PATH.joinpath(f"{jail_name}.conf").unlink()
 
@@ -37,11 +37,11 @@ class TestJailFactory:
                                      architecture=TEST_DISTRIBUTION.architecture)
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
             assert loaded_jail.name == jail_name
-            assert jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
             assert loaded_jail.options[JailOption.HOSTNAME] == "no host name"
         finally:
             if jail_factory.jail_exists(jail_name):
-                jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
+                jail_factory.base_jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
             destroy_dummy_base_jail()
             TMP_PATH.joinpath(f"{jail_name}.conf").unlink()
 
@@ -56,10 +56,11 @@ class TestJailFactory:
                                      architecture=TEST_DISTRIBUTION.architecture)
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
             assert loaded_jail.name == jail_name
-            assert jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
             assert loaded_jail.options[JailOption.IP4] == "new"
         finally:
-            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}", arguments=['-R'])
+            jail_factory.base_jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}",
+                                                                   arguments=['-R'])
             destroy_dummy_base_jail()
             TMP_PATH.joinpath(f"{jail_name}.conf").unlink()
 
@@ -71,7 +72,7 @@ class TestJailFactory:
     def test_create_duplicated_jail(self):
         jail_factory = get_mocking_jail_factory()
         create_dummy_base_jail()
-        jail_factory.ZFS_FACTORY.zfs_create(data_set=f"{TEST_DATA_SET}/test", options={})
+        jail_factory.base_jail_factory.ZFS_FACTORY.zfs_create(data_set=f"{TEST_DATA_SET}/test", options={})
 
         with open(TMP_PATH.joinpath('test.conf').as_posix(), "w") as fd:
             fd.write("test\n")
@@ -85,7 +86,7 @@ class TestJailFactory:
                                match=r"The jail 'test' has some left overs, please remove them and try again."):
                 jail_factory.create_jail(Jail('test'), TEST_DISTRIBUTION.version, TEST_DISTRIBUTION.architecture)
         finally:
-            jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/test")
+            jail_factory.base_jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/test")
             destroy_dummy_base_jail()
 
     def test_jail_exists(self):
@@ -109,7 +110,7 @@ class TestJailFactory:
                                      architecture=TEST_DISTRIBUTION.architecture)
             jail_factory.destroy_jail(jail_name=jail_name)
             assert not TMP_PATH.joinpath(f"{jail_name}.conf").is_file()
-            assert not len(jail_factory.ZFS_FACTORY.zfs_list(f"{TEST_DATA_SET}/{jail_name}"))
+            assert not len(jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(f"{TEST_DATA_SET}/{jail_name}"))
         finally:
             destroy_dummy_base_jail()
 

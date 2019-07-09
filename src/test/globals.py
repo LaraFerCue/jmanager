@@ -20,7 +20,6 @@ class MockingZFS(ZFS):
 
 
 class MockingJailFactory(JailFactory):
-    ZFS_FACTORY = MockingZFS()
     JAIL_CMD = "sh scripts/jail.sh"
 
 
