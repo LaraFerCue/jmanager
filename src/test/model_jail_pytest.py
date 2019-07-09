@@ -2,6 +2,8 @@ import filecmp
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
 
+import pytest
+
 from models.jail import Jail, JailOption
 from src.test.globals import RESOURCES_PATH
 
@@ -50,3 +52,12 @@ class TestJail:
             jail.write_config_file(config_file_path)
 
             assert filecmp.cmp(JAIL_CONFIGURATION_FILE, config_file_path, shallow=False)
+
+    def test_modify_origin_property(self):
+        jail = Jail('name')
+        assert jail.origin == ''
+        jail.origin = "12.0-RELEASE_amd64"
+        assert jail.origin == "12.0-RELEASE_amd64"
+
+        with pytest.raises(TypeError, match=r"Wrong type 'int' for attribute origin"):
+            jail.origin = 1

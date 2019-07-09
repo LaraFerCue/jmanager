@@ -30,6 +30,8 @@ class Jail:
         if options is not None:
             self._options.update(options)
 
+        self._origin: str = ""
+
     @property
     def name(self) -> str:
         return self._name
@@ -37,6 +39,16 @@ class Jail:
     @property
     def options(self) -> Dict[JailOption, str]:
         return self._options
+
+    @property
+    def origin(self) -> str:
+        return self._origin
+
+    @origin.setter
+    def origin(self, value: str):
+        if not isinstance(value, str):
+            raise TypeError(f"Wrong type '{type(value).__name__}' for attribute origin")
+        self._origin = value
 
     def write_config_file(self, file_path: PosixPath):
         with open(file_path.as_posix(), 'w') as config_file:
