@@ -109,7 +109,20 @@ class TestBaseJailFactory:
                 data_set=f"{TEST_DATA_SET}/test",
                 options={}
             )
-            assert base_jail_factory.get_origin_from_jail('test') == "12.0-RELEASE_amd64"
+            assert base_jail_factory.get_origin_from_jail('test') == "12.0-RELEASE_amd64 (base)"
+            base_jail_factory.ZFS_FACTORY.zfs_snapshot(
+                data_set=DUMMY_BASE_JAIL_DATA_SET,
+                snapshot_name=f"{base_jail_factory.SNAPSHOT_NAME}_src"
+            )
+            base_jail_factory.ZFS_FACTORY.zfs_clone(
+                snapshot=f"{DUMMY_BASE_JAIL_DATA_SET}@{base_jail_factory.SNAPSHOT_NAME}_src",
+                data_set=f"{TEST_DATA_SET}/test2",
+                options={}
+            )
+            assert base_jail_factory.get_origin_from_jail('test2') == "12.0-RELEASE_amd64 (base,src)"
         finally:
             base_jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/test")
+            base_jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/test2")
+            base_jail_factory.ZFS_FACTORY.zfs_destroy(
+                f"{DUMMY_BASE_JAIL_DATA_SET}@{base_jail_factory.SNAPSHOT_NAME}_src")
             destroy_dummy_base_jail()

@@ -3,7 +3,7 @@ import tarfile
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
 
-from models.distribution import Distribution
+from models.distribution import Distribution, Component
 from models.jail import JailError
 from src.utils.zfs import ZFS
 
@@ -33,8 +33,14 @@ class BaseJailFactory:
 
     def base_jail_exists(self, distribution: Distribution):
         base_jail_dataset = self.get_base_jail_data_set(distribution)
-        list_of_datasets = self.ZFS_FACTORY.zfs_list(f"{base_jail_dataset}@{self.SNAPSHOT_NAME}")
+        snapshot_data_set = f"{base_jail_dataset}@{self.get_snapshot_name(distribution=distribution)}"
+        list_of_datasets = self.ZFS_FACTORY.zfs_list(data_set=snapshot_data_set)
         return len(list_of_datasets) > 0
+
+    def get_snapshot_name(self, distribution: Distribution):
+        components = distribution.components.copy()
+        components.remove(Component.BASE)
+        return self.SNAPSHOT_NAME + '_'.join([dist.value for dist in components])
 
     def create_base_jail(self, distribution: Distribution, path_to_tarballs: PosixPath):
         if self.base_jail_exists(distribution=distribution):
@@ -58,7 +64,7 @@ class BaseJailFactory:
         for component in set(distribution.components):
             extract_tarball_into(jail_path, path_to_tarballs.joinpath(f"{component.value}.txz"))
         self.ZFS_FACTORY.zfs_snapshot(f"{self._zfs_root_data_set}/{jail_data_set_path}",
-                                      snapshot_name=self.SNAPSHOT_NAME)
+                                      snapshot_name=self.get_snapshot_name(distribution=distribution))
 
     def get_jail_mountpoint(self, jail_data_set_path: str) -> PosixPath:
         jail_path = self._jail_root_path.joinpath(jail_data_set_path)
@@ -67,7 +73,8 @@ class BaseJailFactory:
     def destroy_base_jail(self, distribution: Distribution):
         base_jail_dataset = self.get_base_jail_data_set(distribution)
         if self.base_jail_exists(distribution=distribution):
-            self.ZFS_FACTORY.zfs_destroy(data_set=f"{base_jail_dataset}@{self.SNAPSHOT_NAME}")
+            snapshot_name = self.get_snapshot_name(distribution=distribution)
+            self.ZFS_FACTORY.zfs_destroy(data_set=f"{base_jail_dataset}@{snapshot_name}")
         if self.base_jail_incomplete(distribution=distribution):
             self.ZFS_FACTORY.zfs_destroy(data_set=f"{base_jail_dataset}")
 
@@ -85,6 +92,11 @@ class BaseJailFactory:
         jail_data_set = self.get_jail_data_set(jail_name)
 
         origin_list = self.ZFS_FACTORY.zfs_get(jail_data_set, properties=['origin'])
-        origin = origin_list[jail_data_set]['origin'].replace(f"@{self.SNAPSHOT_NAME}", "")
-        origin = origin.replace(f"{self._zfs_root_data_set}/", "")
+        origin = origin_list[jail_data_set]['origin']
+        components = ['base']
+        for component in origin.split('@')[1].replace(self.SNAPSHOT_NAME, '').split('_'):
+            if component:
+                components.append(component)
+        origin = origin.split('@')[0]
+        origin = origin.replace(f"{self._zfs_root_data_set}/", "") + ' (' + ','.join(components) + ')'
         return origin
