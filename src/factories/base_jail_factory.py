@@ -80,3 +80,11 @@ class BaseJailFactory:
 
     def get_jail_data_set(self, jail_name: str) -> str:
         return f"{self._zfs_root_data_set}/{jail_name}"
+
+    def get_origin_from_jail(self, jail_name: str) -> str:
+        jail_data_set = self.get_jail_data_set(jail_name)
+
+        origin_list = self.ZFS_FACTORY.zfs_get(jail_data_set, properties=['origin'])
+        origin = origin_list[jail_data_set]['origin'].replace(f"@{self.SNAPSHOT_NAME}", "")
+        origin = origin.replace(f"{self._zfs_root_data_set}/", "")
+        return origin

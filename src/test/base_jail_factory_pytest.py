@@ -6,7 +6,7 @@ import pytest
 
 from models.jail import JailError
 from src.test.globals import TEST_DISTRIBUTION, TEST_DATA_SET, create_dummy_tarball_in_folder, \
-    get_mocking_base_jail_factory, TMP_PATH
+    get_mocking_base_jail_factory, TMP_PATH, create_dummy_base_jail, DUMMY_BASE_JAIL_DATA_SET, destroy_dummy_base_jail
 
 
 class TestBaseJailFactory:
@@ -106,3 +106,17 @@ class TestBaseJailFactory:
                                                        path_to_tarballs=PosixPath(temp_dir))
             finally:
                 base_jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
+
+    def test_get_origin_from_jail(self):
+        base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
+        create_dummy_base_jail()
+        try:
+            base_jail_factory.ZFS_FACTORY.zfs_clone(
+                snapshot=f"{DUMMY_BASE_JAIL_DATA_SET}@{base_jail_factory.SNAPSHOT_NAME}",
+                data_set=f"{TEST_DATA_SET}/test",
+                options={}
+            )
+            assert base_jail_factory.get_origin_from_jail('test') == "12.0-RELEASE_amd64"
+        finally:
+            base_jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/test")
+            destroy_dummy_base_jail()
