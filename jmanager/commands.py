@@ -43,4 +43,5 @@ def execute_commands(args: Namespace):
 def print_list_of_jails(jail_manager: JailManager):
     print(LIST_HEADER)
     for jail in jail_manager.list_jails():
-        print(f"{jail.name}\t{jail.origin}")
+        components = ','.join([component.value for component in jail.origin.components])
+        print(f"{jail.name}\t{jail.origin.version} / {jail.origin.architecture.value} ({components})")
