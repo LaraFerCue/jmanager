@@ -37,10 +37,10 @@ def execute_commands(args: Namespace):
     elif args.command == 'destroy':
         jail_manager.destroy_jail(args.jail_name)
     elif args.command == 'list':
-        print_list_of_jails(jail_manager)
+        print_list_of_jails(jail_manager=jail_manager)
 
 
-def print_list_of_jails(jail_manager):
+def print_list_of_jails(jail_manager: JailManager):
     print(LIST_HEADER)
     for jail in jail_manager.list_jails():
         print(f"{jail.name}\t{jail.origin}")
