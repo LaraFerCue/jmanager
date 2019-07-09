@@ -83,5 +83,8 @@ class JailFactory:
         jail_list = []
         for config_file in self._jail_config_folder.iterdir():
             if config_file.suffix == '.conf':
-                jail_list.append(Jail.read_jail_config_file(config_file))
+                jail = Jail.read_jail_config_file(config_file)
+
+                jail.origin = self._base_jail_factory.get_origin_from_jail(jail.name)
+                jail_list.append(jail)
         return jail_list
