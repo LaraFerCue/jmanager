@@ -29,13 +29,9 @@ class TestBaseJailFactory:
         base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
         assert not base_jail_factory.base_jail_exists(distribution=TEST_DISTRIBUTION)
 
-        jail_path = f"{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
-        base_jail_factory.ZFS_FACTORY.zfs_create(f"{TEST_DATA_SET}/{jail_path}", options={})
-        base_jail_factory.ZFS_FACTORY.zfs_create(f"{TEST_DATA_SET}/{jail_path}@{base_jail_factory.SNAPSHOT_NAME}",
-                                                 options={})
+        create_dummy_base_jail()
         jail_exists = base_jail_factory.base_jail_exists(TEST_DISTRIBUTION)
-        base_jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}@{base_jail_factory.SNAPSHOT_NAME}")
-        base_jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}")
+        destroy_dummy_base_jail()
         assert jail_exists
 
     def test_base_jail_incomplete(self):
@@ -56,11 +52,8 @@ class TestBaseJailFactory:
             base_jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/{jail_path}")
 
     def test_destroy_base_jail(self):
-        dataset_name = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
         base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
-        base_jail_factory.ZFS_FACTORY.zfs_create(data_set=dataset_name, options={})
-        base_jail_factory.ZFS_FACTORY.zfs_create(data_set=f"{dataset_name}@{base_jail_factory.SNAPSHOT_NAME}",
-                                                 options={})
+        create_dummy_base_jail()
 
         base_jail_factory.destroy_base_jail(TEST_DISTRIBUTION)
         assert not base_jail_factory.base_jail_incomplete(TEST_DISTRIBUTION)
