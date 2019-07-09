@@ -3,8 +3,8 @@ from tempfile import TemporaryDirectory
 from typing import List
 
 from models.distribution import Distribution
-from models.jail import Jail
-from src.factories.jail_factory import JailFactory, JailError
+from models.jail import Jail, JailError
+from src.factories.jail_factory import JailFactory
 from src.utils.fetch import HTTPFetcher
 
 
@@ -24,15 +24,16 @@ class JailManager:
             print()
 
     def create_jail(self, jail_data: Jail, distribution: Distribution):
-        if not self._jail_factory.base_jail_exists(distribution=distribution):
-            if self._jail_factory.base_jail_incomplete(distribution=distribution):
-                self._jail_factory.destroy_base_jail(distribution=distribution)
+        if not self._jail_factory.base_jail_factory.base_jail_exists(distribution=distribution):
+            if self._jail_factory.base_jail_factory.base_jail_incomplete(distribution=distribution):
+                self._jail_factory.base_jail_factory.destroy_base_jail(distribution=distribution)
 
             with TemporaryDirectory(prefix="jmanager_", suffix="_tarballs") as temp_dir:
                 path_to_temp_dir = PosixPath(temp_dir)
                 self._http_fetcher.fetch_tarballs_into(distribution=distribution, temp_dir=path_to_temp_dir,
                                                        callback=JailManager.print_progress_bar)
-                self._jail_factory.create_base_jail(distribution=distribution, path_to_tarballs=path_to_temp_dir)
+                self._jail_factory.base_jail_factory.create_base_jail(distribution=distribution,
+                                                                      path_to_tarballs=path_to_temp_dir)
 
         self._jail_factory.create_jail(jail_data=jail_data, os_version=distribution.version,
                                        architecture=distribution.architecture)

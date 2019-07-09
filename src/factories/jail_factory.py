@@ -25,6 +25,10 @@ class JailFactory:
         self._jail_config_folder = jail_config_folder
         self._base_jail_factory = base_jail_factory
 
+    @property
+    def base_jail_factory(self) -> BaseJailFactory:
+        return self._base_jail_factory
+
     def get_jail_default_options(self, jail_data: Jail, os_version: Version) -> Dict[JailOption, str]:
         jail_options = self.DEFAULT_JAIL_OPTIONS.copy()
         jail_options[JailOption.PATH] = self._base_jail_factory.get_jail_mountpoint(jail_data.name).as_posix()
