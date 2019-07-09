@@ -120,3 +120,19 @@ class TestZFS:
             if zfs.zfs_list(data_set=f"{TEST_DATA_SET}/clone"):
                 zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/clone")
             zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}@{snapshot_name}")
+
+    def test_zfs_get_no_types(self, zfs: ZFS):
+        data_set_name = f"{TEST_DATA_SET}/test_options"
+        options = {
+            "mountpoint": "/tmp/test",
+            "canmount": "off"
+        }
+        zfs.zfs_create(data_set=data_set_name, options=options)
+
+        try:
+            gathered_options = zfs.zfs_get(data_set=data_set_name)
+
+            for option, value in options.items():
+                assert gathered_options[data_set_name][option] == value
+        finally:
+            zfs.zfs_destroy(data_set=data_set_name)

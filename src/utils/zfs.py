@@ -99,3 +99,16 @@ class ZFS:
 
     def zfs_clone(self, snapshot: str, data_set: str, options: Dict[str, str]):
         self.zfs_cmd(cmd='clone', data_set=f"{snapshot} {data_set}", options=options, arguments=['-p'])
+
+    def zfs_get(self, data_set: str) -> Dict[str, Dict[str, str]]:
+        output = self.zfs_cmd(cmd='get', arguments=['-H', 'all'], options={}, data_set=data_set)
+
+        options_dictionary: Dict[str, Dict[str, str]] = {}
+        for line in output.split('\n'):
+            if not line:
+                break
+            data = line.split('\t')
+            if data[0] not in options_dictionary.keys():
+                options_dictionary[data[0]] = {}
+            options_dictionary[data[0]][data[1]] = data[2]
+        return options_dictionary
