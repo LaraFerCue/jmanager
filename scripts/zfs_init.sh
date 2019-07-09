@@ -1,7 +1,7 @@
 #!/bin/sh
 
 USER=${1:?A user is needed}
-PERMISSIONS="create,clone,destroy,hold,mount,release,rename,snapshot,canmount"
+PERMISSIONS="create,clone,destroy,hold,mount,release,rename,snapshot,canmount,mountpoint"
 
 if ! [ "$(uname -o)" = "FreeBSD" ] ; then
 	exit 0
