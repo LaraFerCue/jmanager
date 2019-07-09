@@ -4,12 +4,29 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
+from models.distribution import Distribution, Component
 from models.jail import JailError
 from src.test.globals import TEST_DISTRIBUTION, TEST_DATA_SET, create_dummy_tarball_in_folder, \
     get_mocking_base_jail_factory, TMP_PATH, create_dummy_base_jail, DUMMY_BASE_JAIL_DATA_SET, destroy_dummy_base_jail
 
 
 class TestBaseJailFactory:
+    def test_get_snapshot_name(self):
+        base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
+        assert base_jail_factory.get_snapshot_name(TEST_DISTRIBUTION) == base_jail_factory.SNAPSHOT_NAME
+        distribution = Distribution(
+            version=TEST_DISTRIBUTION.version,
+            architecture=TEST_DISTRIBUTION.architecture,
+            components=[Component.SRC]
+        )
+        assert base_jail_factory.get_snapshot_name(distribution) == f"{base_jail_factory.SNAPSHOT_NAME}_src"
+        distribution = Distribution(
+            version=TEST_DISTRIBUTION.version,
+            architecture=TEST_DISTRIBUTION.architecture,
+            components=[Component.SRC, Component.LIB32]
+        )
+        assert base_jail_factory.get_snapshot_name(distribution) == f"{base_jail_factory.SNAPSHOT_NAME}_src_lib32"
+
     def test_jail_factory_jail_path_do_not_exist(self):
         if TMP_PATH.exists():
             shutil.rmtree(TMP_PATH.as_posix())
@@ -77,6 +94,22 @@ class TestBaseJailFactory:
                     f"{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}").iterdir()
             finally:
                 base_jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
+
+    def test_create_base_data_set_with_multiple_components(self):
+        distribution = Distribution(version=TEST_DISTRIBUTION.version,
+                                    architecture=TEST_DISTRIBUTION.architecture,
+                                    components=[Component.SRC])
+        with TemporaryDirectory() as temp_dir:
+            base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
+            create_dummy_tarball_in_folder(PosixPath(temp_dir))
+            try:
+                base_jail_factory.create_base_jail(distribution=distribution,
+                                                   path_to_tarballs=PosixPath(temp_dir))
+                assert base_jail_factory.base_jail_exists(distribution=distribution)
+                assert PosixPath(temp_dir).joinpath(
+                    f"{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}").iterdir()
+            finally:
+                base_jail_factory.destroy_base_jail(distribution=distribution)
 
     def test_create_duplicated_base_jail(self):
         with TemporaryDirectory() as temp_dir:

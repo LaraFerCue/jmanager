@@ -40,7 +40,11 @@ class BaseJailFactory:
     def get_snapshot_name(self, distribution: Distribution):
         components = distribution.components.copy()
         components.remove(Component.BASE)
-        return self.SNAPSHOT_NAME + '_'.join([dist.value for dist in components])
+
+        if not components:
+            return self.SNAPSHOT_NAME
+        component_extension = '_'.join([dist.value for dist in components])
+        return f"{self.SNAPSHOT_NAME}_{component_extension}"
 
     def create_base_jail(self, distribution: Distribution, path_to_tarballs: PosixPath):
         if self.base_jail_exists(distribution=distribution):
