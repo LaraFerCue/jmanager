@@ -7,9 +7,9 @@ pre-test:
 test: pre-test
 	pipenv run pytest --cov-report html --cov=src --cov=models
 
-test-commands: check-test-commands test-help
+test_commands: test_help test_create test_destroy
 
-check-test-commands:
+check_test_commands:
 	if [ "$$(uname -o)" != "FreeBSD" ] ; then \
 		echo "FreeBSD only!" >&2; \
 		exit 1 ; \
@@ -19,17 +19,28 @@ check-test-commands:
 		exit 1 ; \
 	fi
 
-test-help:
+test_help:
 	python3.6 -m jmanager --help >> /dev/null
 	python3.6 -m jmanager create --help >> /dev/null
 	python3.6 -m jmanager destroy --help >> /dev/null
 	python3.6 -m jmanager list --help >> /dev/null
 
-test-create:
+test_create: check_test_commands
 	${JMANAGER_COMMAND} ${JMANAGER_OPTIONS} \
 		create --jmanagerfile examples/JManagerFile
-	touch test-create
 
-test-destroy: test-create
+test_destroy: check_test_commands test_create
 	${JMANAGER_COMMAND} ${JMANAGER_OPTIONS} \
 		destroy example
+
+test_list_empty:
+	make list_command
+
+test_list_one_jail:
+	make test_create list_command
+
+test_list: test_list_empty test_list_one_jail
+
+list_command:
+	${JMANAGER_COMMAND} ${JMANAGER_OPTIONS} \
+		list
