@@ -97,3 +97,7 @@ class Jail:
         jail_name: str = Jail.get_jail_name_from_lines(lines.split('\n'))
         options: Dict[JailOption, str] = Jail.parse_options(lines.split('\n'))
         return Jail(name=jail_name, options=options)
+
+
+class JailError(BaseException):
+    pass
