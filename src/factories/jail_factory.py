@@ -48,8 +48,9 @@ class JailFactory:
         base_jail_dataset = self._base_jail_factory.get_base_jail_data_set(distribution=distribution)
         jail_mountpoint = self._base_jail_factory.get_jail_mountpoint(jail_data_set)
         clone_properties: Dict[str, str] = {"mountpoint": jail_mountpoint.as_posix()}
+        snapshot_name = self._base_jail_factory.get_snapshot_name(distribution=distribution)
         self._base_jail_factory.ZFS_FACTORY.zfs_clone(
-            snapshot=f"{base_jail_dataset}@{self._base_jail_factory.SNAPSHOT_NAME}",
+            snapshot=f"{base_jail_dataset}@{snapshot_name}",
             data_set=jail_data_set,
             options=clone_properties)
 
