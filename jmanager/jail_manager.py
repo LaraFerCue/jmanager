@@ -19,7 +19,6 @@ class JailManager:
         filled_length = int(50 * iteration // total)
         bar = '=' * filled_length + ' ' * (50 - filled_length)
         print('\r%s |%s| %s%%' % (msg, bar, percent), end='\r')
-        # Print New Line on Complete
         if iteration == total:
             print()
 
@@ -35,8 +34,7 @@ class JailManager:
                 self._jail_factory.base_jail_factory.create_base_jail(distribution=distribution,
                                                                       path_to_tarballs=path_to_temp_dir)
 
-        self._jail_factory.create_jail(jail_data=jail_data, os_version=distribution.version,
-                                       architecture=distribution.architecture)
+        self._jail_factory.create_jail(jail_data=jail_data, distribution=distribution)
 
     def destroy_jail(self, jail_name: str):
         if self._jail_factory.jail_exists(jail_name):
