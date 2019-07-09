@@ -152,3 +152,18 @@ class TestZFS:
             assert len(gathered_options) == 2
         finally:
             zfs.zfs_destroy(data_set=data_set_name, arguments=['-R'])
+
+    def test_zfs_get_list_of_properties(self, zfs: ZFS):
+        data_set_name = f"{TEST_DATA_SET}/test_options"
+        options = {
+            "mountpoint": "/tmp/test",
+            "canmount": "off"
+        }
+        zfs.zfs_create(data_set=data_set_name, options=options)
+
+        try:
+            gathered_options = zfs.zfs_get(data_set=data_set_name, properties=['mountpoint'])
+
+            assert len(gathered_options[data_set_name]) == 1
+        finally:
+            zfs.zfs_destroy(data_set=data_set_name)

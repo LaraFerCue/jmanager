@@ -98,14 +98,18 @@ class ZFS:
     def zfs_clone(self, snapshot: str, data_set: str, options: Dict[str, str]):
         self.zfs_cmd(cmd='clone', data_set=f"{snapshot} {data_set}", options=options, arguments=['-p'])
 
-    def zfs_get(self, data_set: str, depth: int = 0) -> Dict[str, Dict[str, str]]:
+    def zfs_get(self, data_set: str, depth: int = 0,
+                properties: List[str] = ()) -> Dict[str, Dict[str, str]]:
         zfs_arguments = ['-H']
         if depth < 0:
             zfs_arguments.append('-r')
         else:
             zfs_arguments.extend(['-d', str(depth)])
 
-        zfs_arguments.append('all')
+        if not properties:
+            zfs_arguments.append('all')
+        else:
+            zfs_arguments.extend(properties)
         output = self.zfs_cmd(cmd='get', arguments=zfs_arguments, options={}, data_set=data_set)
 
         options_dictionary: Dict[str, Dict[str, str]] = {}

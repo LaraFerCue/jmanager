@@ -7,6 +7,24 @@
 # shellcheck source=zfslib/common.sh
 . "${ZFSLIB_PATH}/common.sh"
 
+option_in_list()
+{
+	local option=${1}
+	local options_list="${2:-all}"
+	local opt
+
+	if [ "${options}" = "all" ] ; then
+		return 0
+	fi
+
+	for opt in $(echo "${options_list}" | tr ',' ' ') ; do
+		if [ "${option}" = "${opt}" ] ;then
+			return 0
+		fi
+	done
+	return 1
+}
+
 show_options()
 {
 	local options="${1:-all}"
@@ -19,7 +37,10 @@ show_options()
 			if [ -z "${value}" ] || [ -z "${option}" ] ; then
 				continue
 			fi
-			printf "%s\t%s\t%s\n" "${dataset}" "${option}" "${value}"
+
+			if option_in_list "${option}" "${options}" ; then
+				printf "%s\t%s\t%s\n" "${dataset}" "${option}" "${value}"
+			fi
 		done
 	done
 }
