@@ -1,4 +1,5 @@
 from models.distribution import Distribution, Version, VersionType, Architecture, Component
+from src.test.globals import TEST_DISTRIBUTION
 
 
 class TestModelDistribution:
@@ -25,3 +26,6 @@ class TestModelDistribution:
         assert dist1 != dist6
         assert dist1 != dist7
         assert dist1 != dist8
+
+    def test_distribution_representation(self):
+        assert str(TEST_DISTRIBUTION) == "12.0-RELEASE/amd64/['base']"

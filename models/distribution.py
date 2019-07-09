@@ -86,7 +86,7 @@ class Distribution:
 
     def __repr__(self):
         components = [component.value for component in self.components]
-        return f"{self.version}/{self.architecture}/{components}"
+        return f"{self.version}/{self.architecture.value}/{components}"
 
     def __eq__(self, other: 'Distribution') -> bool:
         is_equal = self.version == other.version and self.architecture == other.architecture
