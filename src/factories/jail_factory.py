@@ -2,7 +2,7 @@ import subprocess
 from pathlib import PosixPath
 from typing import Dict, List
 
-from models.distribution import Distribution, Version, Architecture
+from models.distribution import Distribution, Version
 from models.jail import Jail, JailOption, JailError
 from src.factories.base_jail_factory import BaseJailFactory
 
@@ -34,10 +34,9 @@ class JailFactory:
         jail_options.update(jail_data.options)
         return jail_options
 
-    def create_jail(self, jail_data: Jail, os_version: Version, architecture: Architecture):
-        distribution = Distribution(version=os_version, architecture=architecture, components=[])
+    def create_jail(self, jail_data: Jail, distribution: Distribution):
         if not self._base_jail_factory.base_jail_exists(distribution=distribution):
-            raise JailError(f"The base jail for version {os_version}/{architecture.value} does not exist.")
+            raise JailError(f"The base jail for version {distribution} does not exist.")
 
         if self._jail_config_folder.joinpath(f"{jail_data.name}.conf").is_file():
             raise JailError(f"The jail '{jail_data.name}' already exists.")
@@ -54,7 +53,7 @@ class JailFactory:
             data_set=jail_data_set,
             options=clone_properties)
 
-        jail_options = self.get_jail_default_options(jail_data, os_version)
+        jail_options = self.get_jail_default_options(jail_data, distribution.version)
         final_jail = Jail(name=jail_data.name, options=jail_options)
         final_jail.write_config_file(self._jail_config_folder.joinpath(f"{jail_data.name}.conf"))
 

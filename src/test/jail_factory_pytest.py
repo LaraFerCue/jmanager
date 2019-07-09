@@ -13,8 +13,7 @@ class TestJailFactory:
         create_dummy_base_jail()
 
         try:
-            jail_factory.create_jail(jail_data=jail_info, os_version=TEST_DISTRIBUTION.version,
-                                     architecture=TEST_DISTRIBUTION.architecture)
+            jail_factory.create_jail(jail_data=jail_info, distribution=TEST_DISTRIBUTION)
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
             assert loaded_jail.name == jail_name
             assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
@@ -33,8 +32,7 @@ class TestJailFactory:
         create_dummy_base_jail()
 
         try:
-            jail_factory.create_jail(jail_data=jail_info, os_version=TEST_DISTRIBUTION.version,
-                                     architecture=TEST_DISTRIBUTION.architecture)
+            jail_factory.create_jail(jail_data=jail_info, distribution=TEST_DISTRIBUTION)
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
             assert loaded_jail.name == jail_name
             assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
@@ -52,8 +50,7 @@ class TestJailFactory:
         create_dummy_base_jail()
 
         try:
-            jail_factory.create_jail(jail_data=jail_info, os_version=TEST_DISTRIBUTION.version,
-                                     architecture=TEST_DISTRIBUTION.architecture)
+            jail_factory.create_jail(jail_data=jail_info, distribution=TEST_DISTRIBUTION)
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
             assert loaded_jail.name == jail_name
             assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
@@ -66,8 +63,8 @@ class TestJailFactory:
 
     def test_create_jail_without_base_jail(self):
         jail_factory = get_mocking_jail_factory()
-        with pytest.raises(JailError, match=r"The base jail for version 12.0-RELEASE/amd64 does not exist"):
-            jail_factory.create_jail(Jail('test'), TEST_DISTRIBUTION.version, TEST_DISTRIBUTION.architecture)
+        with pytest.raises(JailError, match=r"The base jail for version 12.0-RELEASE/amd64/\['base'\] does not exist"):
+            jail_factory.create_jail(jail_data=Jail('test'), distribution=TEST_DISTRIBUTION)
 
     def test_create_duplicated_jail(self):
         jail_factory = get_mocking_jail_factory()
@@ -79,12 +76,12 @@ class TestJailFactory:
 
         try:
             with pytest.raises(JailError, match=r"The jail 'test' already exists"):
-                jail_factory.create_jail(Jail('test'), TEST_DISTRIBUTION.version, TEST_DISTRIBUTION.architecture)
+                jail_factory.create_jail(jail_data=Jail('test'), distribution=TEST_DISTRIBUTION)
 
             TMP_PATH.joinpath('test.conf').unlink()
             with pytest.raises(JailError,
                                match=r"The jail 'test' has some left overs, please remove them and try again."):
-                jail_factory.create_jail(Jail('test'), TEST_DISTRIBUTION.version, TEST_DISTRIBUTION.architecture)
+                jail_factory.create_jail(jail_data=Jail('test'), distribution=TEST_DISTRIBUTION)
         finally:
             jail_factory.base_jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/test")
             destroy_dummy_base_jail()
@@ -106,8 +103,7 @@ class TestJailFactory:
         create_dummy_base_jail()
 
         try:
-            jail_factory.create_jail(jail_data=Jail(jail_name), os_version=TEST_DISTRIBUTION.version,
-                                     architecture=TEST_DISTRIBUTION.architecture)
+            jail_factory.create_jail(jail_data=Jail(jail_name), distribution=TEST_DISTRIBUTION)
             jail_factory.destroy_jail(jail_name=jail_name)
             assert not TMP_PATH.joinpath(f"{jail_name}.conf").is_file()
             assert not len(jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(f"{TEST_DATA_SET}/{jail_name}"))
@@ -117,8 +113,7 @@ class TestJailFactory:
     def test_list_jails(self):
         jail_factory = get_mocking_jail_factory()
         create_dummy_base_jail()
-        jail_factory.create_jail(Jail('test'), os_version=TEST_DISTRIBUTION.version,
-                                 architecture=TEST_DISTRIBUTION.architecture)
+        jail_factory.create_jail(jail_data=Jail('test'), distribution=TEST_DISTRIBUTION)
 
         try:
             jail_list = jail_factory.list_jails()
