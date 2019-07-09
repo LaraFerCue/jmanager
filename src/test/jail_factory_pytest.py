@@ -212,8 +212,6 @@ class TestJailFactory:
         finally:
             jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/test")
             jail_factory.destroy_base_jail(TEST_DISTRIBUTION)
-            if TMP_PATH.joinpath('test.conf').is_file():
-                TMP_PATH.joinpath('test.conf').unlink()
 
     def test_jail_exists(self):
         jail_factory = MockingJailFactory(jail_root_path=TMP_PATH, zfs_root_data_set=TEST_DATA_SET,
