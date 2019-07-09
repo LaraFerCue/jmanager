@@ -3,7 +3,7 @@ import tarfile
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
 
-from models.distribution import Distribution, Component
+from models.distribution import Distribution, Component, Version, Architecture
 from models.jail import JailError
 from src.utils.zfs import ZFS
 
@@ -92,15 +92,18 @@ class BaseJailFactory:
     def get_jail_data_set(self, jail_name: str) -> str:
         return f"{self._zfs_root_data_set}/{jail_name}"
 
-    def get_origin_from_jail(self, jail_name: str) -> str:
+    def get_origin_from_jail(self, jail_name: str) -> Distribution:
         jail_data_set = self.get_jail_data_set(jail_name)
 
         origin_list = self.ZFS_FACTORY.zfs_get(jail_data_set, properties=['origin'])
         origin = origin_list[jail_data_set]['origin']
-        components = ['base']
+        components = []
         for component in origin.split('@')[1].replace(self.SNAPSHOT_NAME, '').split('_'):
             if component:
-                components.append(component)
+                components.append(Component(component))
         origin = origin.split('@')[0]
-        origin = origin.replace(f"{self._zfs_root_data_set}/", "") + ' (' + ','.join(components) + ')'
-        return origin
+        origin = origin.replace(f"{self._zfs_root_data_set}/", "")
+
+        version = Version.from_string(origin.split('_')[0])
+        architecture = Architecture(origin.split('_')[1])
+        return Distribution(version=version, architecture=architecture, components=components)

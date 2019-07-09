@@ -124,7 +124,7 @@ class TestJailFactory:
             jail_list = jail_factory.list_jails()
             assert len(jail_list) == 1
             assert jail_list[0].name == 'test'
-            assert jail_list[0].origin == '12.0-RELEASE_amd64 (base)'
+            assert jail_list[0].origin == TEST_DISTRIBUTION
         finally:
             jail_factory.destroy_jail('test')
             destroy_dummy_base_jail()

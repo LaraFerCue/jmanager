@@ -2,6 +2,8 @@ from enum import Enum
 from pathlib import PosixPath
 from typing import Dict, List
 
+from models.distribution import Distribution
+
 
 class JailOption(Enum):
     PATH = 'path'
@@ -24,13 +26,13 @@ HEADER = '# This file has been writen with JManager. Please, do not modify it\n'
 
 
 class Jail:
-    def __init__(self, name: str, options: Dict[JailOption, str] = None):
+    def __init__(self, name: str, options: Dict[JailOption, str] = None, distribution: Distribution = None):
         self._name = name
         self._options = {}
         if options is not None:
             self._options.update(options)
 
-        self._origin: str = ""
+        self._origin: Distribution = distribution
 
     @property
     def name(self) -> str:
@@ -41,12 +43,12 @@ class Jail:
         return self._options
 
     @property
-    def origin(self) -> str:
+    def origin(self) -> Distribution:
         return self._origin
 
     @origin.setter
-    def origin(self, value: str):
-        if not isinstance(value, str):
+    def origin(self, value: Distribution):
+        if not isinstance(value, Distribution):
             raise TypeError(f"Wrong type '{type(value).__name__}' for attribute origin")
         self._origin = value
 

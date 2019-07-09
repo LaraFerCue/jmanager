@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from models.jail import Jail, JailOption
-from src.test.globals import RESOURCES_PATH
+from src.test.globals import RESOURCES_PATH, TEST_DISTRIBUTION
 
 JAIL_CONFIGURATION_DICT = {
     'name': 'jail_test_name',
@@ -55,9 +55,9 @@ class TestJail:
 
     def test_modify_origin_property(self):
         jail = Jail('name')
-        assert jail.origin == ''
-        jail.origin = "12.0-RELEASE_amd64"
-        assert jail.origin == "12.0-RELEASE_amd64"
+        assert jail.origin is None
+        jail.origin = TEST_DISTRIBUTION
+        assert jail.origin == TEST_DISTRIBUTION
 
         with pytest.raises(TypeError, match=r"Wrong type 'int' for attribute origin"):
             jail.origin = 1
