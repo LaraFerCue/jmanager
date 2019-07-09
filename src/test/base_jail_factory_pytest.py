@@ -47,9 +47,37 @@ class TestBaseJailFactory:
         assert not base_jail_factory.base_jail_exists(distribution=TEST_DISTRIBUTION)
 
         create_dummy_base_jail()
-        jail_exists = base_jail_factory.base_jail_exists(TEST_DISTRIBUTION)
-        destroy_dummy_base_jail()
-        assert jail_exists
+        try:
+            assert base_jail_factory.base_jail_exists(TEST_DISTRIBUTION)
+        finally:
+            destroy_dummy_base_jail()
+
+    def test_exists_base_jail_multiple_components(self):
+        base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
+        distribution = Distribution(version=TEST_DISTRIBUTION.version,
+                                    architecture=TEST_DISTRIBUTION.architecture,
+                                    components=[Component.SRC])
+        create_dummy_base_jail()
+        try:
+            assert not base_jail_factory.base_jail_exists(distribution)
+            assert base_jail_factory.base_jail_incomplete(distribution)
+        finally:
+            destroy_dummy_base_jail()
+
+        create_dummy_base_jail()
+        try:
+            snapshot_name = base_jail_factory.get_snapshot_name(distribution=distribution)
+            base_jail_factory.ZFS_FACTORY.zfs_snapshot(
+                data_set=DUMMY_BASE_JAIL_DATA_SET,
+                snapshot_name=snapshot_name
+            )
+            jail_exists = base_jail_factory.base_jail_exists(distribution)
+            base_jail_factory.ZFS_FACTORY.zfs_destroy(
+                data_set=f"{DUMMY_BASE_JAIL_DATA_SET}@{snapshot_name}"
+            )
+            assert jail_exists
+        finally:
+            destroy_dummy_base_jail()
 
     def test_base_jail_incomplete(self):
         base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)

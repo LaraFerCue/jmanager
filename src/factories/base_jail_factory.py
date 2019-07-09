@@ -33,7 +33,8 @@ class BaseJailFactory:
 
     def base_jail_exists(self, distribution: Distribution):
         base_jail_dataset = self.get_base_jail_data_set(distribution)
-        snapshot_data_set = f"{base_jail_dataset}@{self.get_snapshot_name(distribution=distribution)}"
+        snapshot_name = self.get_snapshot_name(distribution=distribution)
+        snapshot_data_set = f"{base_jail_dataset}@{snapshot_name}"
         list_of_datasets = self.ZFS_FACTORY.zfs_list(data_set=snapshot_data_set)
         return len(list_of_datasets) > 0
 
