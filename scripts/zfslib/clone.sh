@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 # shellcheck disable=SC2039
 # SC2039: local is defined in Bourne Shell and Bash
 
@@ -9,7 +9,7 @@
 
 set -x
 create_parents=false
-options="origin=%name%"
+options=""
 while getopts "po:" "args" ; do
 	case "${args}" in
 		p)
@@ -31,7 +31,8 @@ dataset_name="$(eval echo "\${${OPTIND}}")"
 snapshot_name=$(echo "${dataset_name}" | awk -F '@' '{ print $2 }')
 dataset_name=${dataset_name%%@${snapshot_name}}
 
-echo "${snapshot_name}" | grep -E '^[a-zA-Z0-9_-]+$' || exit 1
+options="origin=${dataset_name}@${snapshot_name}${options}"
+echo "${snapshot_name}" | grep -qE '^[a-zA-Z0-9_-]+$' || exit 1
 shift
 clone_name="$(eval echo "\${${OPTIND}}")"
 check_dataset_name "${dataset_name}" || exit 1
