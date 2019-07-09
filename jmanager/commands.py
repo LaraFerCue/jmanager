@@ -8,6 +8,8 @@ from src.factories.base_jail_factory import BaseJailFactory
 from src.factories.jail_factory import JailFactory
 from src.utils.fetch import HTTPFetcher
 
+LIST_HEADER = "JAIL\tBASE JAIL"
+
 
 def create_command(jmanagerfile: str, jail_manager: JailManager):
     jmanagerfile_path = PosixPath(jmanagerfile)
@@ -35,5 +37,10 @@ def execute_commands(args: Namespace):
     elif args.command == 'destroy':
         jail_manager.destroy_jail(args.jail_name)
     elif args.command == 'list':
-        for jail in jail_manager.list_jails():
-            print(f"{jail.name}")
+        print_list_of_jails(jail_manager)
+
+
+def print_list_of_jails(jail_manager):
+    print(LIST_HEADER)
+    for jail in jail_manager.list_jails():
+        print(f"{jail.name}\t{jail.origin}")
