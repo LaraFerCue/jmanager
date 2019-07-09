@@ -23,6 +23,8 @@ destroy_parser.add_argument("jail_name", type=str, help="name of the jail to des
 
 list_parser = subparsers.add_parser('list')
 list_parser.set_defaults(command="list")
+list_parser.add_argument('-t', '--type', type=str, default='jails', required=False,
+                         help="type of options to show")
 
 args = parser.parse_args()
 execute_commands(args)
