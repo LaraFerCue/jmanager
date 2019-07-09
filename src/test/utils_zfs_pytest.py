@@ -121,7 +121,7 @@ class TestZFS:
                 zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/clone")
             zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}@{snapshot_name}")
 
-    def test_zfs_get_no_types(self, zfs: ZFS):
+    def test_zfs_get_no_arguments(self, zfs: ZFS):
         data_set_name = f"{TEST_DATA_SET}/test_options"
         options = {
             "mountpoint": "/tmp/test",
@@ -136,3 +136,19 @@ class TestZFS:
                 assert gathered_options[data_set_name][option] == value
         finally:
             zfs.zfs_destroy(data_set=data_set_name)
+
+    def test_zfs_get_recursive_and_depth(self, zfs: ZFS):
+        data_set_name = f"{TEST_DATA_SET}/test_options"
+        options = {
+            "mountpoint": "/tmp/test",
+            "canmount": "off"
+        }
+        zfs.zfs_create(data_set=data_set_name, options=options)
+        zfs.zfs_create(data_set=f"{data_set_name}/child", options=options)
+        try:
+            gathered_options = zfs.zfs_get(data_set=data_set_name, depth=-1)
+            assert len(gathered_options) == 2
+            gathered_options = zfs.zfs_get(data_set=data_set_name, depth=1)
+            assert len(gathered_options) == 2
+        finally:
+            zfs.zfs_destroy(data_set=data_set_name, arguments=['-R'])
