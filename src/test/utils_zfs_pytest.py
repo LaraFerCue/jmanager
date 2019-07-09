@@ -20,23 +20,23 @@ def pytest_generate_tests(metafunc):
 
 class TestZFS:
 
-    def test_zfs_cmd(self, zfs):
+    def test_zfs_cmd(self, zfs: ZFS):
         zfs.zfs_cmd(cmd="list", arguments=[], options={}, data_set=TEST_DATA_SET)
         assert True
 
-    def test_zfs_error(self, zfs):
+    def test_zfs_error(self, zfs: ZFS):
         with pytest.raises(ZFSError):
             zfs.zfs_cmd(cmd='error', arguments=[], options={}, data_set='zroot')
 
-    def test_zfs_cmd_with_options(self, zfs):
+    def test_zfs_cmd_with_options(self, zfs: ZFS):
         zfs.zfs_create(options={'canmount': 'on'}, data_set=f"{TEST_DATA_SET}/test")
         zfs.zfs_destroy(arguments=[], data_set=f"{TEST_DATA_SET}/test")
 
-    def test_zfs_list_missing_data_set(self, zfs):
+    def test_zfs_list_missing_data_set(self, zfs: ZFS):
         data_sets = zfs.zfs_list(data_set=f"{TEST_DATA_SET}/missing_data_set")
         assert len(data_sets) == 0
 
-    def test_zfs_list_without_options(self, zfs):
+    def test_zfs_list_without_options(self, zfs: ZFS):
         output = zfs.zfs_list(data_set=TEST_DATA_SET)
 
         for data_set in output:
@@ -44,7 +44,7 @@ class TestZFS:
             assert ZFSProperty.USED in data_set and ZFSProperty.AVAIL in data_set and ZFSProperty.REFER in data_set
             assert ZFSProperty.MOUNTPOINT in data_set and data_set[ZFSProperty.MOUNTPOINT] == f"/{TEST_DATA_SET}"
 
-    def test_zfs_list_depth_option(self, zfs):
+    def test_zfs_list_depth_option(self, zfs: ZFS):
         zfs.zfs_create(options={}, data_set=f"{TEST_DATA_SET}/test/with/multiple/levels/more/than/one")
         try:
             output = zfs.zfs_list(data_set=TEST_DATA_SET, depth=1)
@@ -56,12 +56,12 @@ class TestZFS:
         finally:
             zfs.zfs_destroy(arguments=['-r'], data_set=f"{TEST_DATA_SET}/test")
 
-    def test_zfs_list_properties(self, zfs):
+    def test_zfs_list_properties(self, zfs: ZFS):
         data_sets = zfs.zfs_list(data_set=TEST_DATA_SET, properties=[ZFSProperty.NAME, ZFSProperty.MOUNTPOINT])
 
         assert len(data_sets[0].keys()) == 2
 
-    def test_zfs_list_types(self, zfs):
+    def test_zfs_list_types(self, zfs: ZFS):
         snapshot_name = f"{TEST_DATA_SET}@pytest_test"
         zfs.zfs_snapshot(data_set=TEST_DATA_SET, snapshot_name="pytest_test")
 
@@ -82,7 +82,7 @@ class TestZFS:
         finally:
             zfs.zfs_destroy(arguments=[], data_set=snapshot_name)
 
-    def test_zfs_snapshot_recursive(self, zfs):
+    def test_zfs_snapshot_recursive(self, zfs: ZFS):
         data_set_path = "a/lot/of/nested/datasets"
         zfs.zfs_create(data_set=f"{TEST_DATA_SET}/{data_set_path}", options={})
 
@@ -106,11 +106,11 @@ class TestZFS:
         finally:
             zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/a", arguments=['-R'])
 
-    def test_zfs_clone_from_dataset(self, zfs):
+    def test_zfs_clone_from_dataset(self, zfs: ZFS):
         with pytest.raises(ZFSError):
             zfs.zfs_clone(snapshot=f"{TEST_DATA_SET}", data_set=f"{TEST_DATA_SET}/clone", options={})
 
-    def test_zfs_clone_from_snapshot(self, zfs):
+    def test_zfs_clone_from_snapshot(self, zfs: ZFS):
         snapshot_name = "clone_snap"
         zfs.zfs_snapshot(data_set=TEST_DATA_SET, snapshot_name=snapshot_name)
 
