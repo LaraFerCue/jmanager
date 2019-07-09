@@ -59,6 +59,12 @@ class Version:
 
         return Version(int(major_minor[0]), int(major_minor[1]), VersionType(version_type))
 
+    def __eq__(self, other: 'Version') -> bool:
+        return self.major == other.major and self.minor == other.minor and self.version_type == other.version_type
+
+    def __ne__(self, other: 'Version') -> bool:
+        return not self.__eq__(other)
+
 
 class Distribution:
     def __init__(self, version: Version, architecture: Architecture, components: List[Component]):
@@ -77,3 +83,14 @@ class Distribution:
     @property
     def components(self) -> List[Component]:
         return self._components
+
+    def __repr__(self):
+        components = [component.value for component in self.components]
+        return f"{self.version}/{self.architecture}/{components}"
+
+    def __eq__(self, other: 'Distribution') -> bool:
+        is_equal = self.version == other.version and self.architecture == other.architecture
+        return is_equal and set(self.components) == set(other.components)
+
+    def __ne__(self, other: 'Distribution') -> bool:
+        return not self.__eq__(other)
