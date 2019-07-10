@@ -7,7 +7,10 @@ import pytest
 from models.distribution import Distribution, Component
 from models.jail import JailError
 from src.test.globals import TEST_DISTRIBUTION, TEST_DATA_SET, create_dummy_tarball_in_folder, \
-    get_mocking_base_jail_factory, TMP_PATH, create_dummy_base_jail, DUMMY_BASE_JAIL_DATA_SET, destroy_dummy_base_jail
+    get_mocking_base_jail_factory, TMP_PATH, create_dummy_base_jail, DUMMY_BASE_JAIL_DATA_SET, destroy_dummy_base_jail, \
+    destroy_dummy_jail, create_dummy_jail
+
+TEST_JAIL_NAME = "test"
 
 
 class TestBaseJailFactory:
@@ -64,20 +67,12 @@ class TestBaseJailFactory:
         finally:
             destroy_dummy_base_jail()
 
-        create_dummy_base_jail()
+        create_dummy_base_jail(distribution=distribution)
         try:
-            snapshot_name = base_jail_factory.get_snapshot_name(distribution=distribution)
-            base_jail_factory.ZFS_FACTORY.zfs_snapshot(
-                data_set=DUMMY_BASE_JAIL_DATA_SET,
-                snapshot_name=snapshot_name
-            )
             jail_exists = base_jail_factory.base_jail_exists(distribution)
-            base_jail_factory.ZFS_FACTORY.zfs_destroy(
-                data_set=f"{DUMMY_BASE_JAIL_DATA_SET}@{snapshot_name}"
-            )
             assert jail_exists
         finally:
-            destroy_dummy_base_jail()
+            destroy_dummy_base_jail(distribution=distribution)
 
     def test_base_jail_incomplete(self):
         base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
@@ -149,55 +144,46 @@ class TestBaseJailFactory:
                 with pytest.raises(JailError, match=r"The base jail for '12.0-RELEASE/amd64' exists"):
                     base_jail_factory.create_base_jail(distribution=TEST_DISTRIBUTION,
                                                        path_to_tarballs=PosixPath(temp_dir))
+            finally:
+                base_jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
 
-                dataset = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}" + \
-                          f"@{base_jail_factory.SNAPSHOT_NAME}"
-                base_jail_factory.ZFS_FACTORY.zfs_destroy(data_set=dataset)
+    def test_uncompleted_base_jail_on_creation(self):
+        with TemporaryDirectory() as temp_dir:
+            base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
+            try:
+                base_jail_factory.ZFS_FACTORY.zfs_create(data_set=DUMMY_BASE_JAIL_DATA_SET,
+                                                         options={})
                 incomplete_base_jail_msg = r"The base jail '12.0-RELEASE/amd64' has left overs, " + \
                                            "delete them and try again."
                 with pytest.raises(JailError, match=incomplete_base_jail_msg):
                     base_jail_factory.create_base_jail(distribution=TEST_DISTRIBUTION,
                                                        path_to_tarballs=PosixPath(temp_dir))
             finally:
-                base_jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
+                destroy_dummy_base_jail()
 
     def test_get_origin_from_jail(self):
         base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
         create_dummy_base_jail()
         try:
-            base_jail_factory.ZFS_FACTORY.zfs_clone(
-                snapshot=f"{DUMMY_BASE_JAIL_DATA_SET}@{base_jail_factory.SNAPSHOT_NAME}",
-                data_set=f"{TEST_DATA_SET}/test",
-                options={}
-            )
+            create_dummy_jail(jail_name=TEST_JAIL_NAME)
             gathered_distribution = base_jail_factory.get_origin_from_jail('test')
             assert gathered_distribution == TEST_DISTRIBUTION
         finally:
-            base_jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/test")
+            destroy_dummy_jail(jail_name=TEST_JAIL_NAME)
             destroy_dummy_base_jail()
 
     def test_get_origin_from_jail_with_several_components(self):
         base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
-        create_dummy_base_jail()
-        try:
-            base_jail_factory.ZFS_FACTORY.zfs_snapshot(
-                data_set=DUMMY_BASE_JAIL_DATA_SET,
-                snapshot_name=f"{base_jail_factory.SNAPSHOT_NAME}_src"
-            )
-            base_jail_factory.ZFS_FACTORY.zfs_clone(
-                snapshot=f"{DUMMY_BASE_JAIL_DATA_SET}@{base_jail_factory.SNAPSHOT_NAME}_src",
-                data_set=f"{TEST_DATA_SET}/test2",
-                options={}
-            )
-            distribution = Distribution(
-                version=TEST_DISTRIBUTION.version,
-                architecture=TEST_DISTRIBUTION.architecture,
-                components=[Component.SRC]
-            )
-            assert base_jail_factory.get_origin_from_jail('test2') == distribution
-        finally:
+        distribution = Distribution(
+            version=TEST_DISTRIBUTION.version,
+            architecture=TEST_DISTRIBUTION.architecture,
+            components=[Component.SRC]
+        )
 
-            base_jail_factory.ZFS_FACTORY.zfs_destroy(f"{TEST_DATA_SET}/test2")
-            base_jail_factory.ZFS_FACTORY.zfs_destroy(
-                f"{DUMMY_BASE_JAIL_DATA_SET}@{base_jail_factory.SNAPSHOT_NAME}_src")
-            destroy_dummy_base_jail()
+        create_dummy_base_jail(distribution=distribution)
+        try:
+            create_dummy_jail(TEST_JAIL_NAME, distribution=distribution)
+            assert base_jail_factory.get_origin_from_jail(TEST_JAIL_NAME) == distribution
+        finally:
+            destroy_dummy_jail(TEST_JAIL_NAME)
+            destroy_dummy_base_jail(distribution)

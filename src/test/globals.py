@@ -47,12 +47,41 @@ def get_mocking_jail_factory() -> MockingJailFactory:
     return jail_factory
 
 
-def create_dummy_base_jail():
+def create_dummy_base_jail(distribution: Distribution = TEST_DISTRIBUTION):
     zfs = MockingZFS()
-    zfs.zfs_create(data_set=DUMMY_BASE_JAIL_DATA_SET, options={})
-    zfs.zfs_snapshot(data_set=DUMMY_BASE_JAIL_DATA_SET, snapshot_name=MockingBaseJailFactory.SNAPSHOT_NAME)
+    data_set = f"{TEST_DATA_SET}/{distribution.version}_{distribution.architecture.value}"
+
+    zfs.zfs_create(data_set=data_set, options={})
+    zfs.zfs_snapshot(data_set=data_set, snapshot_name=get_dummy_snapshot_name(distribution))
 
 
-def destroy_dummy_base_jail():
-    jail_factory = get_mocking_base_jail_factory(TMP_PATH)
-    jail_factory.destroy_base_jail(TEST_DISTRIBUTION)
+def get_dummy_snapshot_name(distribution):
+    base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
+    snapshot_name = base_jail_factory.get_snapshot_name(distribution=distribution)
+    return snapshot_name
+
+
+def destroy_dummy_base_jail(distribution: Distribution = TEST_DISTRIBUTION):
+    zfs = MockingZFS()
+    data_set = get_dummy_data_set(distribution)
+    zfs.zfs_destroy(data_set=data_set, arguments=['-R'])
+
+
+def get_dummy_data_set(distribution):
+    return f"{TEST_DATA_SET}/{distribution.version}_{distribution.architecture.value}"
+
+
+def create_dummy_jail(jail_name: str, distribution: Distribution = TEST_DISTRIBUTION):
+    zfs = MockingZFS()
+    dummy_data_set = get_dummy_data_set(distribution=distribution)
+    snapshot_name = get_dummy_snapshot_name(distribution=distribution)
+    zfs.zfs_clone(
+        snapshot=f"{dummy_data_set}@{snapshot_name}",
+        data_set=f"{TEST_DATA_SET}/{jail_name}",
+        options={}
+    )
+
+
+def destroy_dummy_jail(jail_name: str):
+    zfs = MockingZFS()
+    zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
