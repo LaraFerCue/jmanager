@@ -65,9 +65,20 @@ class BaseJailFactory:
         jail_path = self.get_jail_mountpoint(self.get_base_jail_data_set(distribution=distribution))
         if set(components) == set(distribution.components):
             self.create_base_data_set(distribution, jail_path)
+        else:
+            self.rollback_base_dataset(components, distribution)
 
         self.extract_components_into_base_jail(components, jail_path, path_to_tarballs,
                                                self.get_base_jail_data_set(distribution=distribution))
+
+    def rollback_base_dataset(self, components: List[Component], distribution: Distribution):
+        common_components = []
+        for component in distribution.components.copy():
+            if component not in components:
+                common_components.append(component)
+        snapshot_name = self.get_snapshot_name(component_list=common_components)
+        data_set = self.get_base_jail_data_set(distribution=distribution)
+        self.ZFS_FACTORY.zfs_rollback(snapshot_name=f"{data_set}@{snapshot_name}")
 
     def get_remaining_components(self, distribution: Distribution):
         components = distribution.components.copy()
