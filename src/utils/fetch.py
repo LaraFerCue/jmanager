@@ -1,8 +1,8 @@
 from pathlib import PosixPath
-from typing import Callable
+from typing import Callable, List
 from urllib.request import urlopen
 
-from models.distribution import Distribution, Architecture, Version, VersionType
+from models.distribution import Architecture, Version, VersionType, Component
 
 
 class HTTPFetcher:
@@ -27,12 +27,13 @@ class HTTPFetcher:
                     callback(msg, received_bytes, file_size)
                 destination_file.write(buffer)
 
-    def fetch_tarballs_into(self, distribution: Distribution, temp_dir: PosixPath,
+    def fetch_tarballs_into(self, version: Version, architecture: Architecture,
+                            components: List[Component], temp_dir: PosixPath,
                             callback: Callable[[str, int, int], None] = None):
-        directory = self.get_directory_path(distribution.architecture, distribution.version)
+        directory = self.get_directory_path(architecture, version)
         base_url = f"{self.SERVER_URL}/{directory.as_posix()}"
 
-        for component in distribution.components.copy():
+        for component in components.copy():
             temp_file = temp_dir.joinpath(f"{component.value}.txz")
             self.fetch_file(url=f"{base_url}/{component.value}.txz", destination=temp_file, callback=callback)
 
