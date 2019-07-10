@@ -44,3 +44,6 @@ class JailManager:
 
     def list_jails(self) -> List[Jail]:
         return self._jail_factory.list_jails()
+
+    def list_base_jails(self) -> List[Distribution]:
+        return self._jail_factory.base_jail_factory.list_base_jails()
