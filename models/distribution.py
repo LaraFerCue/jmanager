@@ -24,6 +24,27 @@ class Component(Enum):
     SRC = "src"
     TESTS = "tests"
 
+    def __hash__(self):
+        return hash(self.value)
+
+    def __lt__(self, other: 'Component') -> bool:
+        return self.value < other.value
+
+    def __gt__(self, other: 'Component') -> bool:
+        return self.value > other.value
+
+    def __eq__(self, other: 'Component') -> bool:
+        return self.value == other.value
+
+    def __ne__(self, other: 'Component') -> bool:
+        return not self.__eq__(other)
+
+    def __le__(self, other: 'Component') -> bool:
+        return self.__lt__(other) or self.__eq__(other)
+
+    def __ge__(self, other: 'Component') -> bool:
+        return self.__gt__(other) or self.__eq__(other)
+
 
 class VersionType(Enum):
     RELEASE = "RELEASE"
@@ -70,6 +91,7 @@ class Distribution:
     def __init__(self, version: Version, architecture: Architecture, components: List[Component]):
         self._version = version
         self._components = [Component.BASE, *components]
+        self._components.sort()
         self._architecture = architecture
 
     @property

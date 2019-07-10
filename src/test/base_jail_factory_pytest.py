@@ -28,7 +28,7 @@ class TestBaseJailFactory:
             architecture=TEST_DISTRIBUTION.architecture,
             components=[Component.SRC, Component.LIB32]
         )
-        assert base_jail_factory.get_snapshot_name(distribution) == f"{base_jail_factory.SNAPSHOT_NAME}_src_lib32"
+        assert base_jail_factory.get_snapshot_name(distribution) == f"{base_jail_factory.SNAPSHOT_NAME}_lib32_src"
 
     def test_jail_factory_jail_path_do_not_exist(self):
         if TMP_PATH.exists():
