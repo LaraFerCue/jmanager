@@ -29,3 +29,14 @@ class TestModelDistribution:
 
     def test_distribution_representation(self):
         assert str(TEST_DISTRIBUTION) == "12.0-RELEASE/amd64/['base']"
+
+    def test_distribution_hash(self):
+        assert hash(TEST_DISTRIBUTION) == hash("12.0-RELEASE/amd64/['base']")
+
+    def test_components_inequality(self):
+        comp1 = Component.KERNEL
+
+        assert comp1 > Component.BASE
+        assert comp1 != Component.BASE
+        assert Component.BASE <= comp1 <= Component.KERNEL
+        assert Component.SRC >= comp1 >= Component.KERNEL

@@ -31,19 +31,19 @@ class Component(Enum):
         return self.value < other.value
 
     def __gt__(self, other: 'Component') -> bool:
-        return self.value > other.value
+        return not self <= other
 
     def __eq__(self, other: 'Component') -> bool:
         return self.value == other.value
 
     def __ne__(self, other: 'Component') -> bool:
-        return not self.__eq__(other)
+        return not self == other
 
     def __le__(self, other: 'Component') -> bool:
-        return self.__lt__(other) or self.__eq__(other)
+        return self < other or self == other
 
     def __ge__(self, other: 'Component') -> bool:
-        return self.__gt__(other) or self.__eq__(other)
+        return self > other or self == other
 
 
 class VersionType(Enum):
