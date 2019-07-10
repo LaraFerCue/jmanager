@@ -162,6 +162,24 @@ class TestBaseJailFactory:
             finally:
                 base_jail_factory.destroy_base_jail(distribution=TEST_DISTRIBUTION)
 
+    def test_create_accumulative_base_jails(self):
+        distribution = Distribution(
+            version=TEST_DISTRIBUTION.version, architecture=TEST_DISTRIBUTION.architecture,
+            components=[Component.LIB32]
+        )
+        with TemporaryDirectory() as temp_dir:
+            base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
+            create_dummy_tarball_in_folder(PosixPath(temp_dir))
+            try:
+                base_jail_factory.create_base_jail(distribution=TEST_DISTRIBUTION,
+                                                   path_to_tarballs=PosixPath(temp_dir))
+                base_jail_factory.create_base_jail(distribution=distribution,
+                                                   path_to_tarballs=PosixPath(temp_dir))
+                jails = base_jail_factory.list_base_jails()
+                assert len(jails) == 2
+            finally:
+                destroy_dummy_base_jail(TEST_DISTRIBUTION)
+
     def test_get_origin_from_jail(self):
         base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
         create_dummy_base_jail()

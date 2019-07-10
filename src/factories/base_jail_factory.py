@@ -53,20 +53,40 @@ class BaseJailFactory:
         if self.base_jail_exists(distribution=distribution):
             raise JailError(f"The base jail for '{distribution.version}/{distribution.architecture.value}' exists")
 
-        for component in distribution.components:
+        components = self.get_remaining_components(distribution)
+        if not components:
+            return
+
+        for component in components:
             if not path_to_tarballs.joinpath(f"{component.value}.txz").is_file():
                 raise FileNotFoundError(f"Component '{component.value}' not found in {path_to_tarballs}")
 
         jail_path = self.get_jail_mountpoint(self.get_base_jail_data_set(distribution=distribution))
-        self.create_base_data_set(distribution, jail_path)
+        if set(components) == set(distribution.components):
+            self.create_base_data_set(distribution, jail_path)
 
-        self.extract_components_into_base_jail(distribution, jail_path, path_to_tarballs,
+        self.extract_components_into_base_jail(components, jail_path, path_to_tarballs,
                                                self.get_base_jail_data_set(distribution=distribution))
 
-    def extract_components_into_base_jail(self, distribution: Distribution, jail_path: PosixPath,
+    def get_remaining_components(self, distribution: Distribution):
+        components = distribution.components.copy()
+
+        data_set = self.get_base_jail_data_set(distribution=distribution)
+        component_list = []
+        for component in components.copy():
+            component_list.append(component)
+            snapshot_name = self.get_snapshot_name(component_list)
+
+            if len(self.ZFS_FACTORY.zfs_list(data_set=f"{data_set}@{snapshot_name}")):
+                components.remove(component)
+            else:
+                return components
+        return []
+
+    def extract_components_into_base_jail(self, components: List[Component], jail_path: PosixPath,
                                           path_to_tarballs: PosixPath, data_set: str):
         processed_components = []
-        for component in set(distribution.components):
+        for component in set(components):
             extract_tarball_into(jail_path, path_to_tarballs.joinpath(f"{component.value}.txz"))
             processed_components.append(component)
             if component == Component.BASE:
