@@ -24,14 +24,14 @@ class ZFSProperty(Enum):
 
 
 class ZFS:
-    ZFS_CMD = "zfs"
+    ZFS_CLI = "zfs"
 
     def zfs_cmd(self, cmd: str, arguments: List[str], options: Dict[str, str], data_set: str):
         for option, value in options.items():
             arguments.append('-o')
             arguments.append(f"{option}={value}")
         try:
-            out = subprocess.run(' '.join([self.ZFS_CMD, cmd, *arguments, data_set]), shell=True, check=True,
+            out = subprocess.run(' '.join([self.ZFS_CLI, cmd, *arguments, data_set]), shell=True, check=True,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT, universal_newlines=True)
         except subprocess.CalledProcessError as error:

@@ -16,7 +16,7 @@ DUMMY_BASE_JAIL_DATA_SET = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_D
 
 
 class MockingZFS(ZFS):
-    ZFS_CMD = "sh scripts/zfs.sh"
+    ZFS_CLI = "sh scripts/zfs.sh"
 
 
 class MockingJailFactory(JailFactory):
