@@ -240,3 +240,5 @@ class TestBaseJailFactory:
 
         finally:
             destroy_dummy_base_jail()
+
+        assert not len(base_jail_factory.list_base_jails())
