@@ -34,14 +34,15 @@ class BaseJailFactory:
 
     def base_jail_exists(self, distribution: Distribution):
         base_jail_dataset = self.get_base_jail_data_set(distribution)
-        snapshot_name = self.get_snapshot_name(distribution=distribution)
+        snapshot_name = self.get_snapshot_name(component_list=distribution.components)
         snapshot_data_set = f"{base_jail_dataset}@{snapshot_name}"
         list_of_datasets = self.ZFS_FACTORY.zfs_list(data_set=snapshot_data_set)
         return len(list_of_datasets) > 0
 
-    def get_snapshot_name(self, distribution: Distribution):
-        components = distribution.components.copy()
-        components.remove(Component.BASE)
+    def get_snapshot_name(self, component_list: List[Component]):
+        components = component_list.copy()
+        if Component.BASE in components:
+            components.remove(Component.BASE)
 
         if not components:
             return self.SNAPSHOT_NAME
@@ -67,10 +68,16 @@ class BaseJailFactory:
             options={"mountpoint": jail_path.as_posix()}
         )
 
+        processed_components = []
         for component in set(distribution.components):
             extract_tarball_into(jail_path, path_to_tarballs.joinpath(f"{component.value}.txz"))
-        self.ZFS_FACTORY.zfs_snapshot(f"{self._zfs_root_data_set}/{jail_data_set_path}",
-                                      snapshot_name=self.get_snapshot_name(distribution=distribution))
+            processed_components.append(component)
+            if component == Component.BASE:
+                snapshot_name = self.SNAPSHOT_NAME
+            else:
+                snapshot_name = self.get_snapshot_name(component_list=processed_components)
+            self.ZFS_FACTORY.zfs_snapshot(f"{self._zfs_root_data_set}/{jail_data_set_path}",
+                                          snapshot_name=snapshot_name)
 
     def get_jail_mountpoint(self, jail_data_set_path: str) -> PosixPath:
         jail_path = self._jail_root_path.joinpath(jail_data_set_path)
@@ -79,7 +86,7 @@ class BaseJailFactory:
     def destroy_base_jail(self, distribution: Distribution):
         base_jail_dataset = self.get_base_jail_data_set(distribution)
         if self.base_jail_exists(distribution=distribution):
-            snapshot_name = self.get_snapshot_name(distribution=distribution)
+            snapshot_name = self.get_snapshot_name(component_list=distribution.components)
             self.ZFS_FACTORY.zfs_destroy(data_set=f"{base_jail_dataset}@{snapshot_name}")
         if self.base_jail_incomplete(distribution=distribution):
             self.ZFS_FACTORY.zfs_destroy(data_set=f"{base_jail_dataset}")

@@ -58,7 +58,7 @@ def create_dummy_base_jail(distribution: Distribution = TEST_DISTRIBUTION):
 
 def get_dummy_snapshot_name(distribution):
     base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
-    snapshot_name = base_jail_factory.get_snapshot_name(distribution=distribution)
+    snapshot_name = base_jail_factory.get_snapshot_name(component_list=distribution.components)
     return snapshot_name
 
 

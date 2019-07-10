@@ -16,19 +16,20 @@ TEST_JAIL_NAME = "test"
 class TestBaseJailFactory:
     def test_get_snapshot_name(self):
         base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
-        assert base_jail_factory.get_snapshot_name(TEST_DISTRIBUTION) == base_jail_factory.SNAPSHOT_NAME
+        assert base_jail_factory.get_snapshot_name(TEST_DISTRIBUTION.components) == base_jail_factory.SNAPSHOT_NAME
         distribution = Distribution(
             version=TEST_DISTRIBUTION.version,
             architecture=TEST_DISTRIBUTION.architecture,
             components=[Component.SRC]
         )
-        assert base_jail_factory.get_snapshot_name(distribution) == f"{base_jail_factory.SNAPSHOT_NAME}_src"
+        assert base_jail_factory.get_snapshot_name(distribution.components) == f"{base_jail_factory.SNAPSHOT_NAME}_src"
         distribution = Distribution(
             version=TEST_DISTRIBUTION.version,
             architecture=TEST_DISTRIBUTION.architecture,
             components=[Component.SRC, Component.LIB32]
         )
-        assert base_jail_factory.get_snapshot_name(distribution) == f"{base_jail_factory.SNAPSHOT_NAME}_lib32_src"
+        assert base_jail_factory.get_snapshot_name(
+            distribution.components) == f"{base_jail_factory.SNAPSHOT_NAME}_lib32_src"
 
     def test_jail_factory_jail_path_do_not_exist(self):
         if TMP_PATH.exists():
@@ -129,10 +130,11 @@ class TestBaseJailFactory:
                 base_jail_factory.create_base_jail(distribution=distribution,
                                                    path_to_tarballs=PosixPath(temp_dir))
                 assert base_jail_factory.base_jail_exists(distribution=distribution)
+                assert base_jail_factory.base_jail_exists(distribution=TEST_DISTRIBUTION)
                 assert PosixPath(temp_dir).joinpath(
                     f"{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}").iterdir()
             finally:
-                base_jail_factory.destroy_base_jail(distribution=distribution)
+                destroy_dummy_base_jail(distribution=TEST_DISTRIBUTION)
 
     def test_create_duplicated_base_jail(self):
         with TemporaryDirectory() as temp_dir:
