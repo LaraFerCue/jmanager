@@ -7,13 +7,6 @@
 # shellcheck source=zfslib/common.sh
 . "${ZFSLIB_PATH}/common.sh"
 
-check_snapshot_name()
-{
-	local snapshot_name=${1}
-
-	echo "${snapshot_name}" | grep -qE '^[a-zA-Z0-9_-]+$'
-}
-
 create_recursive_snapshots()
 {
 	local dataset=${1}

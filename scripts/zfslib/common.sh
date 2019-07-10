@@ -88,3 +88,11 @@ show_entries()
 		echo "${entry}" | tr ';' '\t'
 	done | cut -f "${columns}"
 }
+
+check_snapshot_name()
+{
+	local snapshot_name=${1}
+
+	echo "${snapshot_name}" | grep -qE '^[a-zA-Z0-9_-]+$'
+}
+
