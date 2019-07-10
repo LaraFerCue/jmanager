@@ -44,6 +44,7 @@ class BaseJailFactory:
         if Component.BASE in components:
             components.remove(Component.BASE)
 
+        components.sort()
         if not components:
             return self.SNAPSHOT_NAME
         component_extension = '_'.join([dist.value for dist in components])
