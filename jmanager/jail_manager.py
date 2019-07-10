@@ -26,8 +26,12 @@ class JailManager:
         if not self._jail_factory.base_jail_factory.base_jail_exists(distribution=distribution):
             with TemporaryDirectory(prefix="jmanager_", suffix="_tarballs") as temp_dir:
                 path_to_temp_dir = PosixPath(temp_dir)
-                self._http_fetcher.fetch_tarballs_into(distribution=distribution, temp_dir=path_to_temp_dir,
-                                                       callback=JailManager.print_progress_bar)
+                self._http_fetcher.fetch_tarballs_into(
+                    version=distribution.version,
+                    architecture=distribution.architecture,
+                    components=self._jail_factory.base_jail_factory.get_remaining_components(distribution),
+                    temp_dir=path_to_temp_dir,
+                    callback=JailManager.print_progress_bar)
                 self._jail_factory.base_jail_factory.create_base_jail(distribution=distribution,
                                                                       path_to_tarballs=path_to_temp_dir)
 
