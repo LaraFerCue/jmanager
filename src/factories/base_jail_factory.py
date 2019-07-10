@@ -2,10 +2,11 @@ import lzma
 import tarfile
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
+from typing import List
 
 from models.distribution import Distribution, Component, Version, Architecture
 from models.jail import JailError
-from src.utils.zfs import ZFS
+from src.utils.zfs import ZFS, ZFSType, ZFSProperty
 
 
 def extract_tarball_into(jail_path: PosixPath, path_to_tarball: PosixPath):
@@ -108,3 +109,22 @@ class BaseJailFactory:
         version = Version.from_string(origin.split('_')[0])
         architecture = Architecture(origin.split('_')[1])
         return Distribution(version=version, architecture=architecture, components=components)
+
+    def list_base_jails(self) -> List[Distribution]:
+        list_of_snapshots = self.ZFS_FACTORY.zfs_list(self._zfs_root_data_set, depth=-1,
+                                                      properties=[ZFSProperty.NAME],
+                                                      types=[ZFSType.SNAPSHOT])
+        distribution_list = []
+        for snapshot in list_of_snapshots:
+            snapshot_name = snapshot[ZFSProperty.NAME].split('@')[1].replace(f"{self.SNAPSHOT_NAME}", '')
+            data_set = snapshot[ZFSProperty.NAME].split('@')[0].replace(f"{self._zfs_root_data_set}/", '')
+
+            components = []
+            for component in snapshot_name.split('_'):
+                if component:
+                    components.append(Component(component))
+            version = Version.from_string(data_set.split('_')[0])
+            architecture = Architecture(data_set.split('_')[1])
+            distribution_list.append(Distribution(version=version, architecture=architecture,
+                                                  components=components))
+        return distribution_list

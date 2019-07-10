@@ -51,7 +51,8 @@ def create_dummy_base_jail(distribution: Distribution = TEST_DISTRIBUTION):
     zfs = MockingZFS()
     data_set = f"{TEST_DATA_SET}/{distribution.version}_{distribution.architecture.value}"
 
-    zfs.zfs_create(data_set=data_set, options={})
+    if len(zfs.zfs_list(data_set=data_set)) < 1:
+        zfs.zfs_create(data_set=data_set, options={})
     zfs.zfs_snapshot(data_set=data_set, snapshot_name=get_dummy_snapshot_name(distribution))
 
 

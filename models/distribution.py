@@ -84,6 +84,9 @@ class Distribution:
     def components(self) -> List[Component]:
         return self._components
 
+    def __hash__(self):
+        return hash(self.__repr__())
+
     def __repr__(self):
         components = [component.value for component in self.components]
         return f"{self.version}/{self.architecture.value}/{components}"
