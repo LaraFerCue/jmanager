@@ -45,18 +45,21 @@ class JailFactory:
         if len(self._base_jail_factory.ZFS_FACTORY.zfs_list(data_set=jail_data_set)) > 0:
             raise JailError(f"The jail '{jail_data.name}' has some left overs, please remove them and try again.")
 
-        base_jail_dataset = self._base_jail_factory.get_base_jail_data_set(distribution=distribution)
-        jail_mountpoint = self._base_jail_factory.get_jail_mountpoint(jail_data_set)
-        clone_properties: Dict[str, str] = {"mountpoint": jail_mountpoint.as_posix()}
-        snapshot_name = self._base_jail_factory.get_snapshot_name(distribution=distribution)
-        self._base_jail_factory.ZFS_FACTORY.zfs_clone(
-            snapshot=f"{base_jail_dataset}@{snapshot_name}",
-            data_set=jail_data_set,
-            options=clone_properties)
+        self.clone_base_jail(distribution, jail_data_set)
 
         jail_options = self.get_jail_default_options(jail_data, distribution.version)
         final_jail = Jail(name=jail_data.name, options=jail_options)
         final_jail.write_config_file(self._jail_config_folder.joinpath(f"{jail_data.name}.conf"))
+
+    def clone_base_jail(self, distribution, jail_data_set):
+        base_jail_dataset = self._base_jail_factory.get_base_jail_data_set(distribution=distribution)
+        jail_mountpoint = self._base_jail_factory.get_jail_mountpoint(jail_data_set)
+        clone_properties: Dict[str, str] = {"mountpoint": jail_mountpoint.as_posix()}
+        snapshot_name = self._base_jail_factory.get_snapshot_name(component_list=distribution.components)
+        self._base_jail_factory.ZFS_FACTORY.zfs_clone(
+            snapshot=f"{base_jail_dataset}@{snapshot_name}",
+            data_set=jail_data_set,
+            options=clone_properties)
 
     def jail_exists(self, jail_name: str) -> bool:
         return self._jail_config_folder.joinpath(f"{jail_name}.conf").is_file()
