@@ -61,13 +61,14 @@ class BaseJailFactory:
             if not path_to_tarballs.joinpath(f"{component.value}.txz").is_file():
                 raise FileNotFoundError(f"Component '{component.value}' not found in {path_to_tarballs}")
 
-        jail_data_set_path = f"{distribution.version}_{distribution.architecture.value}"
-        jail_path = self.get_jail_mountpoint(jail_data_set_path)
-        self.ZFS_FACTORY.zfs_create(
-            data_set=f"{self._zfs_root_data_set}/{jail_data_set_path}",
-            options={"mountpoint": jail_path.as_posix()}
-        )
+        jail_path = self.get_jail_mountpoint(self.get_base_jail_data_set(distribution=distribution))
+        self.create_base_data_set(distribution, jail_path)
 
+        self.extract_components_into_base_jail(distribution, jail_path, path_to_tarballs,
+                                               self.get_base_jail_data_set(distribution=distribution))
+
+    def extract_components_into_base_jail(self, distribution: Distribution, jail_path: PosixPath,
+                                          path_to_tarballs: PosixPath, data_set: str):
         processed_components = []
         for component in set(distribution.components):
             extract_tarball_into(jail_path, path_to_tarballs.joinpath(f"{component.value}.txz"))
@@ -76,8 +77,16 @@ class BaseJailFactory:
                 snapshot_name = self.SNAPSHOT_NAME
             else:
                 snapshot_name = self.get_snapshot_name(component_list=processed_components)
-            self.ZFS_FACTORY.zfs_snapshot(f"{self._zfs_root_data_set}/{jail_data_set_path}",
-                                          snapshot_name=snapshot_name)
+            self.ZFS_FACTORY.zfs_snapshot(
+                data_set=data_set,
+                snapshot_name=snapshot_name
+            )
+
+    def create_base_data_set(self, distribution, jail_path):
+        self.ZFS_FACTORY.zfs_create(
+            data_set=self.get_base_jail_data_set(distribution=distribution),
+            options={"mountpoint": jail_path.as_posix()}
+        )
 
     def get_jail_mountpoint(self, jail_data_set_path: str) -> PosixPath:
         jail_path = self._jail_root_path.joinpath(jail_data_set_path)
