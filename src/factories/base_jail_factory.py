@@ -53,10 +53,6 @@ class BaseJailFactory:
         if self.base_jail_exists(distribution=distribution):
             raise JailError(f"The base jail for '{distribution.version}/{distribution.architecture.value}' exists")
 
-        if self.base_jail_incomplete(distribution=distribution):
-            raise JailError(f"The base jail '{distribution.version}/{distribution.architecture.value}' has left " + \
-                            "overs, delete them and try again.")
-
         for component in distribution.components:
             if not path_to_tarballs.joinpath(f"{component.value}.txz").is_file():
                 raise FileNotFoundError(f"Component '{component.value}' not found in {path_to_tarballs}")
@@ -97,12 +93,8 @@ class BaseJailFactory:
         if self.base_jail_exists(distribution=distribution):
             snapshot_name = self.get_snapshot_name(component_list=distribution.components)
             self.ZFS_FACTORY.zfs_destroy(data_set=f"{base_jail_dataset}@{snapshot_name}")
-        if self.base_jail_incomplete(distribution=distribution):
+        if not len(self.list_base_jails()):
             self.ZFS_FACTORY.zfs_destroy(data_set=f"{base_jail_dataset}")
-
-    def base_jail_incomplete(self, distribution: Distribution):
-        base_jail_dataset = self.get_base_jail_data_set(distribution)
-        return not self.base_jail_exists(distribution) and len(self.ZFS_FACTORY.zfs_list(base_jail_dataset))
 
     def get_base_jail_data_set(self, distribution) -> str:
         return f"{self._zfs_root_data_set}/{distribution.version}_{distribution.architecture.value}"
