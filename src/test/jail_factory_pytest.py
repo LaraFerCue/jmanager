@@ -3,7 +3,7 @@ import pytest
 from models.distribution import Distribution, Component
 from models.jail import Jail, JailOption, JailError
 from src.test.globals import TEST_DATA_SET, TEST_DISTRIBUTION, create_dummy_base_jail, \
-    get_mocking_jail_factory, TMP_PATH, destroy_dummy_base_jail, DUMMY_BASE_JAIL_DATA_SET
+    get_mocking_jail_factory, TMP_PATH, destroy_dummy_base_jail, destroy_dummy_jail
 
 
 class TestJailFactory:
@@ -50,12 +50,7 @@ class TestJailFactory:
                                     architecture=TEST_DISTRIBUTION.architecture,
                                     components=[Component.SRC]
                                     )
-        snapshot_name = jail_factory.base_jail_factory.get_snapshot_name(distribution=distribution)
-        create_dummy_base_jail()
-        jail_factory.base_jail_factory.ZFS_FACTORY.zfs_snapshot(
-            data_set=DUMMY_BASE_JAIL_DATA_SET,
-            snapshot_name=snapshot_name
-        )
+        create_dummy_base_jail(distribution=distribution)
 
         try:
             jail_factory.create_jail(jail_data=jail_info, distribution=distribution)
@@ -67,10 +62,7 @@ class TestJailFactory:
                 assert loaded_jail.options[option] == value
         finally:
             if jail_factory.jail_exists(jail_name):
-                jail_factory.base_jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
-            jail_factory.base_jail_factory.ZFS_FACTORY.zfs_destroy(
-                data_set=f"{DUMMY_BASE_JAIL_DATA_SET}@{snapshot_name}"
-            )
+                destroy_dummy_jail(jail_name=jail_name)
             destroy_dummy_base_jail()
             TMP_PATH.joinpath(f"{jail_name}.conf").unlink()
 
