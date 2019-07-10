@@ -24,9 +24,6 @@ class JailManager:
 
     def create_jail(self, jail_data: Jail, distribution: Distribution):
         if not self._jail_factory.base_jail_factory.base_jail_exists(distribution=distribution):
-            if self._jail_factory.base_jail_factory.base_jail_incomplete(distribution=distribution):
-                self._jail_factory.base_jail_factory.destroy_base_jail(distribution=distribution)
-
             with TemporaryDirectory(prefix="jmanager_", suffix="_tarballs") as temp_dir:
                 path_to_temp_dir = PosixPath(temp_dir)
                 self._http_fetcher.fetch_tarballs_into(distribution=distribution, temp_dir=path_to_temp_dir,
