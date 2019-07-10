@@ -87,7 +87,7 @@ class BaseJailFactory:
     def extract_components_into_base_jail(self, components: List[Component], jail_path: PosixPath,
                                           path_to_tarballs: PosixPath, data_set: str):
         processed_components = []
-        for component in set(components):
+        for component in components:
             extract_tarball_into(jail_path, path_to_tarballs.joinpath(f"{component.value}.txz"))
             processed_components.append(component)
             if component == Component.BASE:
