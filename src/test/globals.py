@@ -34,6 +34,8 @@ def create_dummy_tarball_in_folder(path_to_folder: PosixPath):
         tar_file.add('models', recursive=True)
     with tarfile.open(name=path_to_folder.joinpath('src.txz').as_posix(), mode='w|xz') as tar_file:
         tar_file.add('src', recursive=True)
+    with tarfile.open(name=path_to_folder.joinpath('lib32.txz').as_posix(), mode='w|xz') as tar_file:
+        tar_file.add('examples', recursive=True)
 
 
 def get_mocking_base_jail_factory(temp_dir: PosixPath) -> MockingBaseJailFactory:

@@ -122,7 +122,10 @@ class TestBaseJailFactory:
     def test_create_base_data_set_with_multiple_components(self):
         distribution = Distribution(version=TEST_DISTRIBUTION.version,
                                     architecture=TEST_DISTRIBUTION.architecture,
-                                    components=[Component.SRC])
+                                    components=[Component.SRC, Component.LIB32])
+        lib32_distribution = Distribution(version=TEST_DISTRIBUTION.version,
+                                          architecture=TEST_DISTRIBUTION.architecture,
+                                          components=[Component.LIB32])
         with TemporaryDirectory() as temp_dir:
             base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
             create_dummy_tarball_in_folder(PosixPath(temp_dir))
@@ -130,6 +133,7 @@ class TestBaseJailFactory:
                 base_jail_factory.create_base_jail(distribution=distribution,
                                                    path_to_tarballs=PosixPath(temp_dir))
                 assert base_jail_factory.base_jail_exists(distribution=distribution)
+                assert base_jail_factory.base_jail_exists(distribution=lib32_distribution)
                 assert base_jail_factory.base_jail_exists(distribution=TEST_DISTRIBUTION)
                 assert PosixPath(temp_dir).joinpath(
                     f"{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}").iterdir()
