@@ -134,22 +134,6 @@ class BaseJailFactory:
     def get_jail_data_set(self, jail_name: str) -> str:
         return f"{self._zfs_root_data_set}/{jail_name}"
 
-    def get_origin_from_jail(self, jail_name: str) -> Distribution:
-        jail_data_set = self.get_jail_data_set(jail_name)
-
-        origin_list = self.ZFS_FACTORY.zfs_get(jail_data_set, properties=['origin'])
-        origin = origin_list[jail_data_set]['origin']
-        components = []
-        for component in origin.split('@')[1].replace(self.SNAPSHOT_NAME, '').split('_'):
-            if component:
-                components.append(Component(component))
-        origin = origin.split('@')[0]
-        origin = origin.replace(f"{self._zfs_root_data_set}/", "")
-
-        version = Version.from_string(origin.split('_')[0])
-        architecture = Architecture(origin.split('_')[1])
-        return Distribution(version=version, architecture=architecture, components=components)
-
     def list_base_jails(self) -> List[Distribution]:
         list_of_snapshots = self.ZFS_FACTORY.zfs_list(self._zfs_root_data_set, depth=-1,
                                                       properties=[ZFSProperty.NAME],
