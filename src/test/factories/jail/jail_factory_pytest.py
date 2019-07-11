@@ -1,8 +1,11 @@
+import os
+import shutil
+
 import pytest
 
 from models.jail import Jail, JailError
 from src.test.globals import TEST_DATA_SET, TEST_DISTRIBUTION, create_dummy_base_jail, \
-    get_mocking_jail_factory, TMP_PATH, destroy_dummy_base_jail
+    get_mocking_jail_factory, TMP_PATH, destroy_dummy_base_jail, destroy_dummy_jail
 
 
 class TestJailFactory:
@@ -14,16 +17,15 @@ class TestJailFactory:
 
         try:
             jail_factory.create_jail(jail_data=jail_info, distribution=TEST_DISTRIBUTION)
-            loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
+
+            loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(jail_name, "jail.conf"))
             assert loaded_jail.name == jail_name
             assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
             for option, value in jail_factory.get_jail_default_options(jail_info, TEST_DISTRIBUTION.version).items():
                 assert loaded_jail.options[option] == value
         finally:
-            if jail_factory.jail_exists(jail_name):
-                jail_factory.base_jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            destroy_dummy_jail(jail_name)
             destroy_dummy_base_jail()
-            TMP_PATH.joinpath(f"{jail_name}.conf").unlink()
 
     def test_create_jail_without_base_jail(self):
         jail_factory = get_mocking_jail_factory()
@@ -35,19 +37,18 @@ class TestJailFactory:
         create_dummy_base_jail()
         jail_factory.base_jail_factory.ZFS_FACTORY.zfs_create(data_set=f"{TEST_DATA_SET}/test", options={})
 
-        with open(TMP_PATH.joinpath('test.conf').as_posix(), "w") as fd:
-            fd.write("test\n")
+        os.makedirs(TMP_PATH.joinpath('test').as_posix(), exist_ok=True)
 
         try:
             with pytest.raises(JailError, match=r"The jail 'test' already exists"):
                 jail_factory.create_jail(jail_data=Jail('test'), distribution=TEST_DISTRIBUTION)
 
-            TMP_PATH.joinpath('test.conf').unlink()
+            shutil.rmtree(TMP_PATH.joinpath('test').as_posix(), ignore_errors=True)
             with pytest.raises(JailError,
                                match=r"The jail 'test' has some left overs, please remove them and try again."):
                 jail_factory.create_jail(jail_data=Jail('test'), distribution=TEST_DISTRIBUTION)
         finally:
-            jail_factory.base_jail_factory.ZFS_FACTORY.zfs_destroy(data_set=f"{TEST_DATA_SET}/test")
+            destroy_dummy_jail('test')
             destroy_dummy_base_jail()
 
     def test_destroy_jail(self):

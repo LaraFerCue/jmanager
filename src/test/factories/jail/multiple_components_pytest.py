@@ -35,14 +35,15 @@ class TestJailFactoryMultipleComponents:
 
         try:
             jail_factory.create_jail(jail_data=jail_info, distribution=distribution)
-            loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(f"{jail_name}.conf"))
-            assert jail_factory.base_jail_factory.get_origin_from_jail(jail_name) == distribution
+            loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(jail_name, "jail.conf"))
+            loaded_jail.origin = Distribution.read_config_file(
+                TMP_PATH.joinpath(jail_name, 'distribution.conf')
+            )
+            assert loaded_jail.origin == distribution
             assert loaded_jail.name == jail_name
             assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
             for option, value in jail_factory.get_jail_default_options(jail_info, TEST_DISTRIBUTION.version).items():
                 assert loaded_jail.options[option] == value
         finally:
-            if jail_factory.jail_exists(jail_name):
-                destroy_dummy_jail(jail_name=jail_name)
+            destroy_dummy_jail(jail_name=jail_name)
             destroy_dummy_base_jail()
-            TMP_PATH.joinpath(f"{jail_name}.conf").unlink()

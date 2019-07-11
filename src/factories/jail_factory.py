@@ -1,3 +1,5 @@
+import os
+import shutil
 import subprocess
 from pathlib import PosixPath
 from typing import Dict, List
@@ -38,7 +40,7 @@ class JailFactory:
         if not self._base_jail_factory.base_jail_exists(distribution=distribution):
             raise JailError(f"The base jail for version {distribution} does not exist.")
 
-        if self._jail_config_folder.joinpath(f"{jail_data.name}.conf").is_file():
+        if self._jail_config_folder.joinpath(jail_data.name).is_dir():
             raise JailError(f"The jail '{jail_data.name}' already exists.")
 
         jail_data_set = self._base_jail_factory.get_jail_data_set(jail_data.name)
@@ -46,10 +48,16 @@ class JailFactory:
             raise JailError(f"The jail '{jail_data.name}' has some left overs, please remove them and try again.")
 
         self.clone_base_jail(distribution, jail_data_set)
+        self.write_configuration_files(distribution, jail_data)
 
+    def write_configuration_files(self, distribution, jail_data):
+        jail_config_folder = self._jail_config_folder.joinpath(jail_data.name)
+        if not jail_config_folder.is_dir():
+            os.makedirs(jail_config_folder.as_posix())
         jail_options = self.get_jail_default_options(jail_data, distribution.version)
         final_jail = Jail(name=jail_data.name, options=jail_options)
-        final_jail.write_config_file(self._jail_config_folder.joinpath(f"{jail_data.name}.conf"))
+        final_jail.write_config_file(jail_config_folder.joinpath('jail.conf'))
+        distribution.write_config_file(jail_config_folder.joinpath('distribution.conf'))
 
     def clone_base_jail(self, distribution, jail_data_set):
         base_jail_dataset = self._base_jail_factory.get_base_jail_data_set(distribution=distribution)
@@ -65,8 +73,11 @@ class JailFactory:
         return self._jail_config_folder.joinpath(f"{jail_name}.conf").is_file()
 
     def destroy_jail(self, jail_name: str):
-        self._jail_config_folder.joinpath(f"{jail_name}.conf").unlink()
-        self._base_jail_factory.ZFS_FACTORY.zfs_destroy(self._base_jail_factory.get_jail_data_set(jail_name))
+        jail_config_dir = self._jail_config_folder.joinpath(jail_name)
+        shutil.rmtree(jail_config_dir.as_posix())
+
+        jail_data_set = self._base_jail_factory.get_jail_data_set(jail_name)
+        self._base_jail_factory.ZFS_FACTORY.zfs_destroy(jail_data_set)
 
     def start_jail(self, jail_name: str) -> str:
         jail_config_file = self._jail_config_folder.joinpath(f"{jail_name}.conf")
@@ -82,10 +93,11 @@ class JailFactory:
 
     def list_jails(self) -> List[Jail]:
         jail_list = []
-        for config_file in self._jail_config_folder.iterdir():
-            if config_file.suffix == '.conf':
-                jail = Jail.read_jail_config_file(config_file)
-
-                jail.origin = self._base_jail_factory.get_origin_from_jail(jail.name)
+        for config_folder in self._jail_config_folder.iterdir():
+            if not config_folder.is_dir():
+                continue
+            if config_folder.joinpath('jail.conf').is_file():
+                jail = Jail.read_jail_config_file(config_folder.joinpath('jail.conf'))
+                jail.origin = Distribution.read_config_file(config_folder.joinpath('distribution.conf'))
                 jail_list.append(jail)
         return jail_list
