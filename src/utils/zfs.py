@@ -121,6 +121,3 @@ class ZFS:
                 options_dictionary[data[0]] = {}
             options_dictionary[data[0]][data[1]] = data[2]
         return options_dictionary
-
-    def zfs_rollback(self, snapshot_name: str):
-        self.zfs_cmd(cmd="rollback", data_set=snapshot_name, options={}, arguments=[])
