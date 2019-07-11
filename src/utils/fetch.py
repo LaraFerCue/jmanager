@@ -15,18 +15,18 @@ class HTTPFetcher:
         fetcher = urlopen(url)
         file_size = int(fetcher.headers["content-length"])
 
-        start_time = time()
         received_bytes = 0
         msg = f"{destination.name} "
         with open(destination.as_posix(), 'wb') as destination_file:
             while True:
+                start_time = time()
                 buffer = fetcher.read(self.BLOCK_SIZE)
                 if not buffer:
                     break
 
                 received_bytes += len(buffer)
                 if callback is not None:
-                    callback(msg, received_bytes, file_size, time() - start_time)
+                    callback(msg, received_bytes, file_size, len(buffer) / (time() - start_time))
                 destination_file.write(buffer)
 
     def fetch_tarballs_into(self, version: Version, architecture: Architecture,
