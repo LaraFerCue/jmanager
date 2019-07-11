@@ -1,10 +1,4 @@
-import lzma
-import shutil
-import tarfile
-from os import chflags
 from pathlib import PosixPath
-from stat import SF_IMMUTABLE
-from tempfile import TemporaryDirectory
 from typing import List, Callable
 
 from models.distribution import Distribution, Component, Version, Architecture
@@ -14,27 +8,28 @@ from src.utils.file_utils import extract_tarball_into, remove_immutable_path
 
 
 class BaseJailFactory:
-    ZFS_FACTORY = ZFS()
     SNAPSHOT_NAME = "jmanager_base_jail"
 
-    def __init__(self, jail_root_path: PosixPath, zfs_root_data_set: str):
+    def __init__(self, jail_root_path: PosixPath, data_set_factory: DataSetFactory):
         self._jail_root_path = jail_root_path
-        self._zfs_root_data_set = zfs_root_data_set
+        self._data_set_factory = data_set_factory
 
         if jail_root_path.exists() and not jail_root_path.is_dir():
             raise PermissionError("The jail root path exists and it is not a directory")
         elif not jail_root_path.exists():
             jail_root_path.mkdir(parents=True)
 
+    @property
+    def data_set_factory(self) -> DataSetFactory:
+        return self._data_set_factory
+
     def get_jail_mountpoint(self, jail_data_set_path: str) -> PosixPath:
         jail_path = self._jail_root_path.joinpath(jail_data_set_path)
         return jail_path
 
-    def get_base_jail_data_set(self, distribution) -> str:
-        return f"{self._zfs_root_data_set}/{distribution.version}_{distribution.architecture.value}"
-
-    def get_jail_data_set(self, jail_name: str) -> str:
-        return f"{self._zfs_root_data_set}/{jail_name}"
+    @staticmethod
+    def get_data_set_name(distribution) -> str:
+        return f"{distribution.version}_{distribution.architecture.value}"
 
     def get_snapshot_name(self, component_list: List[Component]):
         components = component_list.copy()
@@ -47,17 +42,10 @@ class BaseJailFactory:
         component_extension = '_'.join([dist.value for dist in components])
         return f"{self.SNAPSHOT_NAME}_{component_extension}"
 
-    def base_data_set_exists(self, data_set: str, snapshot: str = ""):
-        if snapshot:
-            return len(self.ZFS_FACTORY.zfs_list(data_set=f"{data_set}@{snapshot}"))
-        return len(self.ZFS_FACTORY.zfs_list(data_set=data_set))
-
     def base_jail_exists(self, distribution: Distribution):
-        base_jail_dataset = self.get_base_jail_data_set(distribution)
+        base_jail_name = self.get_data_set_name(distribution)
         snapshot_name = self.get_snapshot_name(component_list=distribution.components)
-        snapshot_data_set = f"{base_jail_dataset}@{snapshot_name}"
-        list_of_datasets = self.ZFS_FACTORY.zfs_list(data_set=snapshot_data_set)
-        return len(list_of_datasets) > 0
+        return self._data_set_factory.snapshot_exists(base_jail_name, snapshot_name)
 
     def create_base_jail(self, distribution: Distribution, path_to_tarballs: PosixPath,
                          callback: Callable[[str, int, int], None] = None):
@@ -69,19 +57,19 @@ class BaseJailFactory:
                 raise FileNotFoundError(f"Component '{component.value}' not found in {path_to_tarballs}")
 
         jail_path = self.get_jail_mountpoint(f"{distribution.version}_{distribution.architecture.value}")
-        if not self.base_data_set_exists(data_set=self.get_base_jail_data_set(distribution)):
-            self.create_base_data_set(distribution, jail_path)
+        if not self._data_set_factory.base_data_set_exists(data_set_name=self.get_data_set_name(distribution)):
+            self._data_set_factory.create_base_data_set(self.get_data_set_name(distribution), jail_path)
         else:
             remove_immutable_path(jail_path)
 
         self.extract_components_into_base_jail(components=distribution.components,
                                                jail_path=jail_path,
                                                path_to_tarballs=path_to_tarballs,
-                                               data_set=self.get_base_jail_data_set(distribution=distribution),
+                                               data_set_name=self.get_data_set_name(distribution=distribution),
                                                callback=callback)
 
     def extract_components_into_base_jail(self, components: List[Component], jail_path: PosixPath,
-                                          path_to_tarballs: PosixPath, data_set: str,
+                                          path_to_tarballs: PosixPath, data_set_name: str,
                                           callback: Callable[[str, int, int], None]):
         processed_components = []
         for component in components:
@@ -91,41 +79,26 @@ class BaseJailFactory:
                 callback=callback
             )
             processed_components.append(component)
-            if component == Component.BASE:
-                snapshot_name = self.SNAPSHOT_NAME
-            else:
-                snapshot_name = self.get_snapshot_name(component_list=processed_components)
+            snapshot_name = self.get_snapshot_name(component_list=processed_components)
 
-            if not self.base_data_set_exists(data_set=data_set, snapshot=snapshot_name):
-                self.ZFS_FACTORY.zfs_snapshot(
-                    data_set=data_set,
-                    snapshot_name=snapshot_name
-                )
-
-    def create_base_data_set(self, distribution, jail_path):
-        self.ZFS_FACTORY.zfs_create(
-            data_set=self.get_base_jail_data_set(distribution=distribution),
-            options={"mountpoint": jail_path.as_posix(),
-                     "dedup": "sha512",
-                     "atime": "off"}
-        )
+            if not self._data_set_factory.snapshot_exists(data_set_name=data_set_name, snapshot=snapshot_name):
+                self._data_set_factory.create_snapshot(data_set_name=data_set_name, snapshot=snapshot_name)
 
     def destroy_base_jail(self, distribution: Distribution):
-        base_jail_dataset = self.get_base_jail_data_set(distribution)
+        base_jail_data_set_name = self.get_data_set_name(distribution)
         if self.base_jail_exists(distribution=distribution):
             snapshot_name = self.get_snapshot_name(component_list=distribution.components)
-            self.ZFS_FACTORY.zfs_destroy(data_set=f"{base_jail_dataset}@{snapshot_name}")
+            self._data_set_factory.delete_snapshot(data_set_name=base_jail_data_set_name,
+                                                   snapshot_name=snapshot_name)
+
         if not len(self.list_base_jails()):
-            self.ZFS_FACTORY.zfs_destroy(data_set=f"{base_jail_dataset}")
+            self._data_set_factory.delete_data_set(data_set_name=f"{base_jail_data_set_name}")
 
     def list_base_jails(self) -> List[Distribution]:
-        list_of_snapshots = self.ZFS_FACTORY.zfs_list(self._zfs_root_data_set, depth=-1,
-                                                      properties=[ZFSProperty.NAME],
-                                                      types=[ZFSType.SNAPSHOT])
         distribution_list = []
-        for snapshot in list_of_snapshots:
-            snapshot_name = snapshot[ZFSProperty.NAME].split('@')[1].replace(f"{self.SNAPSHOT_NAME}", '')
-            data_set = snapshot[ZFSProperty.NAME].split('@')[0].replace(f"{self._zfs_root_data_set}/", '')
+        for snapshot in self._data_set_factory.list_of_snapshots():
+            snapshot_name = snapshot.split('@')[1].replace(f"{self.SNAPSHOT_NAME}", '')
+            data_set = snapshot.split('@')[0].replace(f"{self._data_set_factory}/", '')
 
             components = []
             for component in snapshot_name.split('_'):

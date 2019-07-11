@@ -5,7 +5,7 @@ import pytest
 
 from models.jail import Jail, JailError
 from src.test.globals import TEST_DATA_SET, TEST_DISTRIBUTION, create_dummy_base_jail, \
-    get_mocking_jail_factory, TMP_PATH, destroy_dummy_base_jail, destroy_dummy_jail
+    get_mocking_jail_factory, TMP_PATH, destroy_dummy_base_jail, destroy_dummy_jail, MockingZFS
 
 
 class TestJailFactory:
@@ -20,7 +20,7 @@ class TestJailFactory:
 
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(jail_name, "jail.conf"))
             assert loaded_jail.name == jail_name
-            assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            assert MockingZFS().zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
             for option, value in jail_factory.get_jail_default_options(jail_info, TEST_DISTRIBUTION.version).items():
                 assert loaded_jail.options[option] == value
         finally:
@@ -35,7 +35,7 @@ class TestJailFactory:
     def test_create_duplicated_jail(self):
         jail_factory = get_mocking_jail_factory()
         create_dummy_base_jail()
-        jail_factory.base_jail_factory.ZFS_FACTORY.zfs_create(data_set=f"{TEST_DATA_SET}/test", options={})
+        MockingZFS().zfs_create(data_set=f"{TEST_DATA_SET}/test", options={})
 
         os.makedirs(TMP_PATH.joinpath('test').as_posix(), exist_ok=True)
 
@@ -60,7 +60,7 @@ class TestJailFactory:
             jail_factory.create_jail(jail_data=Jail(jail_name), distribution=TEST_DISTRIBUTION)
             jail_factory.destroy_jail(jail_name=jail_name)
             assert not TMP_PATH.joinpath(jail_name).is_dir()
-            assert not len(jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(f"{TEST_DATA_SET}/{jail_name}"))
+            assert not len(MockingZFS().zfs_list(f"{TEST_DATA_SET}/{jail_name}"))
         finally:
             destroy_dummy_base_jail()
 

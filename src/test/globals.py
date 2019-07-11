@@ -5,6 +5,7 @@ from pathlib import PosixPath
 
 from models.distribution import Distribution, Version, VersionType, Architecture
 from src.factories.base_jail_factory import BaseJailFactory
+from src.factories.data_set_factory import DataSetFactory
 from src.factories.jail_factory import JailFactory
 from src.utils.zfs import ZFS
 
@@ -24,8 +25,11 @@ class MockingJailFactory(JailFactory):
     JAIL_CMD = "sh scripts/jail.sh"
 
 
-class MockingBaseJailFactory(BaseJailFactory):
+class MockingDataSetFactory(DataSetFactory):
     ZFS_FACTORY = MockingZFS()
+
+
+class MockingBaseJailFactory(BaseJailFactory):
     JAIL_CMD = "sh scripts/jail.sh"
 
 
@@ -40,11 +44,12 @@ def create_dummy_tarball_in_folder(path_to_folder: PosixPath):
 
 
 def get_mocking_base_jail_factory(temp_dir: PosixPath) -> MockingBaseJailFactory:
-    return MockingBaseJailFactory(jail_root_path=temp_dir, zfs_root_data_set=TEST_DATA_SET)
+    data_set_factory = MockingDataSetFactory(zfs_root_data_set=TEST_DATA_SET)
+    return MockingBaseJailFactory(jail_root_path=temp_dir, data_set_factory=data_set_factory)
 
 
 def get_mocking_jail_factory() -> MockingJailFactory:
-    base_jail_factory = MockingBaseJailFactory(jail_root_path=TMP_PATH, zfs_root_data_set=TEST_DATA_SET)
+    base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
     jail_factory = MockingJailFactory(base_jail_factory=base_jail_factory,
                                       jail_config_folder=TMP_PATH)
     return jail_factory

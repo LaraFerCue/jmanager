@@ -1,6 +1,6 @@
 from models.jail import Jail, JailOption
 from src.test.globals import get_mocking_jail_factory, create_dummy_base_jail, TEST_DISTRIBUTION, TMP_PATH, \
-    TEST_DATA_SET, destroy_dummy_base_jail, destroy_dummy_jail
+    TEST_DATA_SET, destroy_dummy_base_jail, destroy_dummy_jail, MockingZFS
 
 
 class TestJailFactoryOption:
@@ -14,7 +14,7 @@ class TestJailFactoryOption:
             jail_factory.create_jail(jail_data=jail_info, distribution=TEST_DISTRIBUTION)
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(jail_name, "jail.conf"))
             assert loaded_jail.name == jail_name
-            assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            assert MockingZFS().zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
             assert loaded_jail.options[JailOption.HOSTNAME] == "no host name"
         finally:
             destroy_dummy_jail(jail_name)
@@ -30,7 +30,7 @@ class TestJailFactoryOption:
             jail_factory.create_jail(jail_data=jail_info, distribution=TEST_DISTRIBUTION)
             loaded_jail = Jail.read_jail_config_file(TMP_PATH.joinpath(jail_name, "jail.conf"))
             assert loaded_jail.name == jail_name
-            assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            assert MockingZFS().zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
             assert loaded_jail.options[JailOption.IP4] == "new"
         finally:
             destroy_dummy_jail(jail_name)

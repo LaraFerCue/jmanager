@@ -10,7 +10,10 @@ TEST_JAIL_NAME = "test"
 class TestBaseJailFactory:
     def test_jail_factory_jail_path_do_not_exist(self):
         if TMP_PATH.exists():
-            shutil.rmtree(TMP_PATH.as_posix())
+            if TMP_PATH.is_dir():
+                shutil.rmtree(TMP_PATH.as_posix())
+            else:
+                TMP_PATH.unlink()
         get_mocking_base_jail_factory(TMP_PATH)
         assert TMP_PATH.is_dir()
 

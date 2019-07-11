@@ -43,11 +43,10 @@ class JailFactory:
         if self._jail_config_folder.joinpath(jail_data.name).is_dir():
             raise JailError(f"The jail '{jail_data.name}' already exists.")
 
-        jail_data_set = self._base_jail_factory.get_jail_data_set(jail_data.name)
-        if len(self._base_jail_factory.ZFS_FACTORY.zfs_list(data_set=jail_data_set)) > 0:
+        if self._base_jail_factory.data_set_factory.base_data_set_exists(data_set_name=jail_data.name):
             raise JailError(f"The jail '{jail_data.name}' has some left overs, please remove them and try again.")
 
-        self.clone_base_jail(distribution, jail_data_set)
+        self.clone_base_jail(distribution, jail_data.name)
         self.write_configuration_files(distribution, jail_data)
 
     def write_configuration_files(self, distribution, jail_data):
@@ -60,13 +59,14 @@ class JailFactory:
         distribution.write_config_file(jail_config_folder.joinpath('distribution.conf'))
 
     def clone_base_jail(self, distribution, jail_data_set):
-        base_jail_dataset = self._base_jail_factory.get_base_jail_data_set(distribution=distribution)
         jail_mountpoint = self._base_jail_factory.get_jail_mountpoint(jail_data_set)
+
         clone_properties: Dict[str, str] = {"mountpoint": jail_mountpoint.as_posix()}
         snapshot_name = self._base_jail_factory.get_snapshot_name(component_list=distribution.components)
-        self._base_jail_factory.ZFS_FACTORY.zfs_clone(
-            snapshot=f"{base_jail_dataset}@{snapshot_name}",
-            data_set=jail_data_set,
+        self._base_jail_factory.data_set_factory.clone(
+            data_set_name=self._base_jail_factory.get_data_set_name(distribution),
+            snapshot_name=snapshot_name,
+            clone_data_set_name=jail_data_set,
             options=clone_properties)
 
     def jail_exists(self, jail_name: str) -> bool:
@@ -78,8 +78,7 @@ class JailFactory:
         jail_config_dir = self._jail_config_folder.joinpath(jail_name)
         shutil.rmtree(jail_config_dir.as_posix())
 
-        jail_data_set = self._base_jail_factory.get_jail_data_set(jail_name)
-        self._base_jail_factory.ZFS_FACTORY.zfs_destroy(jail_data_set)
+        self._base_jail_factory.data_set_factory.delete_data_set(jail_name)
 
     def start_jail(self, jail_name: str) -> str:
         jail_config_file = self._jail_config_folder.joinpath(f"{jail_name}.conf")

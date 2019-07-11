@@ -3,7 +3,7 @@ import pytest
 from models.distribution import Distribution, Component
 from models.jail import Jail, JailError
 from src.test.globals import get_mocking_jail_factory, create_dummy_base_jail, TEST_DISTRIBUTION, \
-    destroy_dummy_base_jail, TMP_PATH, TEST_DATA_SET, destroy_dummy_jail
+    destroy_dummy_base_jail, TMP_PATH, TEST_DATA_SET, destroy_dummy_jail, MockingZFS
 
 
 class TestJailFactoryMultipleComponents:
@@ -41,7 +41,7 @@ class TestJailFactoryMultipleComponents:
             )
             assert loaded_jail.origin == distribution
             assert loaded_jail.name == jail_name
-            assert jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
+            assert MockingZFS().zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
             for option, value in jail_factory.get_jail_default_options(jail_info, TEST_DISTRIBUTION.version).items():
                 assert loaded_jail.options[option] == value
         finally:
