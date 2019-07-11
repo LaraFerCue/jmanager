@@ -64,10 +64,14 @@ class TestModelDistribution:
             distribution.write_config_file(config_file_path)
 
             with open(config_file_path.as_posix(), 'r') as config_file:
-                configuration = yaml.load(config_file)
+                configuration = yaml.load(config_file, Loader=yaml.Loader)
 
         assert str(distribution.version) == configuration['version']
         assert distribution.architecture.value == configuration['architecture']
 
         for component in distribution.components:
             assert component.value in configuration['components']
+
+    def test_read_configuration_file(self):
+        distribution = Distribution.read_config_file(PosixPath('src/test/resources/dist.conf'))
+        assert distribution == TEST_DISTRIBUTION

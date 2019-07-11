@@ -131,3 +131,15 @@ class Distribution:
         }
         with open(path_to_file.as_posix(), 'w') as config_file:
             yaml.dump(configuration, stream=config_file)
+
+    @staticmethod
+    def read_config_file(path_to_config_file: PosixPath) -> 'Distribution':
+        with open(path_to_config_file.as_posix(), 'r') as config_file:
+            configuration = yaml.load(stream=config_file, Loader=yaml.Loader)
+
+        components = [Component(comp) for comp in configuration['components']]
+        return Distribution(
+            version=Version.from_string(configuration['version']),
+            architecture=Architecture(configuration['architecture']),
+            components=components
+        )
