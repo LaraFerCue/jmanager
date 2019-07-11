@@ -6,7 +6,7 @@ from pathlib import PosixPath
 from models.distribution import Distribution, Version, VersionType, Architecture
 from src.factories.base_jail_factory import BaseJailFactory
 from src.factories.jail_factory import JailFactory
-from src.utils.zfs import ZFS, ZFSError
+from src.utils.zfs import ZFS
 
 TMP_PATH = PosixPath('/tmp').joinpath('jmanager')
 TEST_DATA_SET = 'zroot/jmanager_test'
@@ -75,21 +75,7 @@ def get_dummy_data_set(distribution):
     return f"{TEST_DATA_SET}/{distribution.version}_{distribution.architecture.value}"
 
 
-def create_dummy_jail(jail_name: str, distribution: Distribution = TEST_DISTRIBUTION):
-    zfs = MockingZFS()
-    dummy_data_set = get_dummy_data_set(distribution=distribution)
-    snapshot_name = get_dummy_snapshot_name(distribution=distribution)
-    zfs.zfs_clone(
-        snapshot=f"{dummy_data_set}@{snapshot_name}",
-        data_set=f"{TEST_DATA_SET}/{jail_name}",
-        options={}
-    )
-
-
 def destroy_dummy_jail(jail_name: str):
     zfs = MockingZFS()
     shutil.rmtree(TMP_PATH.joinpath(jail_name), ignore_errors=True)
-    try:
-        zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
-    except ZFSError:
-        pass
+    zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
