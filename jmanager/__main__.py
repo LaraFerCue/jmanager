@@ -27,5 +27,13 @@ list_parser.add_argument('-t', '--type', type=str, default='jail', required=Fals
                          choices=['jail', 'base'],
                          help="type of options to show")
 
+start_parser = subparsers.add_parser('start')
+start_parser.set_defaults(command="start")
+start_parser.add_argument('jail_name', type=str, help="name of the jail to be started")
+
+stop_parser = subparsers.add_parser('stop')
+stop_parser.set_defaults(command="stop")
+stop_parser.add_argument('jail_name', type=str, help="name of the jail to be stopped")
+
 args = parser.parse_args()
 execute_commands(args)

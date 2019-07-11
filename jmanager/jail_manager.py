@@ -6,6 +6,7 @@ from models.distribution import Distribution
 from models.jail import Jail, JailError
 from src.factories.jail_factory import JailFactory
 from src.utils.fetch import HTTPFetcher
+from src.utils.provision import Provision
 
 
 def get_progress_text(msg: str, iteration: int, total: int) -> str:
@@ -30,6 +31,7 @@ class JailManager:
         self._jail_factory = jail_factory
         self._iteration = 0
         self._speed = 0
+        self._provision = Provision()
 
     def print_progress_bar_fetch(self, msg, iteration, total, speed):
         progress_text = get_progress_text(msg, iteration, total)
@@ -40,6 +42,7 @@ class JailManager:
 
         print('\r%s %2.2f Mbps  ' % (progress_text, self._speed / 1e6), end='\r')
         if iteration == total:
+            self._iteration = 0
             print()
 
     def create_jail(self, jail_data: Jail, distribution: Distribution):
@@ -69,3 +72,9 @@ class JailManager:
 
     def list_base_jails(self) -> List[Distribution]:
         return self._jail_factory.base_jail_factory.list_base_jails()
+
+    def start(self, jail_name: str):
+        self._jail_factory.start_jail(jail_name)
+
+    def stop(self, jail_name: str):
+        self._jail_factory.stop_jail(jail_name)

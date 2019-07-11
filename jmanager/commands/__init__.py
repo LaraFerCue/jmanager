@@ -9,6 +9,7 @@ from jmanager.commands.list import print_list_of_jails, list_command
 from jmanager.jail_manager import JailManager
 from src.configuration import read_configuration_file
 from src.factories.base_jail_factory import BaseJailFactory
+from src.factories.data_set_factory import DataSetFactory
 from src.factories.jail_factory import JailFactory
 from src.utils.fetch import HTTPFetcher
 
@@ -21,8 +22,9 @@ def execute_commands(args: Namespace):
 
     initialize_program(jail_config_folder, jail_root_path)
 
+    data_set_factory = DataSetFactory(zfs_root_data_set=configuration['zfs_root_dataset'])
     base_jail_factory = BaseJailFactory(jail_root_path=jail_root_path,
-                                        zfs_root_data_set=configuration['zfs_root_dataset'])
+                                        data_set_factory=data_set_factory)
     jail_factory = JailFactory(
         base_jail_factory=base_jail_factory,
         jail_config_folder=jail_config_folder
@@ -37,6 +39,10 @@ def execute_commands(args: Namespace):
         jail_manager.destroy_jail(args.jail_name)
     elif args.command == 'list':
         list_command(list_type=args.type, jail_manager=jail_manager)
+    elif args.command == 'start':
+        jail_manager.start(jail_name=args.jail_name)
+    elif args.command == 'stop':
+        jail_manager.stop(jail_name=args.jail_name)
 
 
 def initialize_program(jail_config_folder: PosixPath, jail_root_path: PosixPath):

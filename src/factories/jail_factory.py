@@ -89,15 +89,19 @@ class JailFactory:
         self._base_jail_factory.data_set_factory.delete_data_set(jail_name)
 
     def start_jail(self, jail_name: str) -> str:
-        jail_config_file = self._jail_config_folder.joinpath(f"{jail_name}.conf")
+        path_to_jail = self.base_jail_factory.get_jail_mountpoint(jail_data_set_name=jail_name)
+        if not path_to_jail.joinpath('etc', 'resolv.conf'):
+            copy_file('/etc/resolv.conf', path_to_jail.joinpath('etc').as_posix())
+
+        jail_config_file = self.get_config_file_path(jail_name)
         cmd = f"{self.JAIL_CMD} -f {jail_config_file} -c {jail_name}"
-        return subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, check=True,
+        return subprocess.run(cmd, shell=True, check=True,
                               universal_newlines=True).stdout
 
     def stop_jail(self, jail_name: str):
-        jail_config_file = self._jail_config_folder.joinpath(f"{jail_name}.conf")
+        jail_config_file = self.get_config_file_path(jail_name)
         cmd = f"{self.JAIL_CMD} -f {jail_config_file} -r {jail_name}"
-        return subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, check=True,
+        return subprocess.run(cmd, shell=True, check=True,
                               universal_newlines=True).stdout
 
     def list_jails(self) -> List[Jail]:
