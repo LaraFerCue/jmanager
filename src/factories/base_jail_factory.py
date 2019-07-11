@@ -23,8 +23,8 @@ class BaseJailFactory:
     def data_set_factory(self) -> DataSetFactory:
         return self._data_set_factory
 
-    def get_jail_mountpoint(self, jail_data_set_path: str) -> PosixPath:
-        jail_path = self._jail_root_path.joinpath(jail_data_set_path)
+    def get_jail_mountpoint(self, jail_data_set_name: str) -> PosixPath:
+        jail_path = self._jail_root_path.joinpath(jail_data_set_name)
         return jail_path
 
     @staticmethod
@@ -56,7 +56,8 @@ class BaseJailFactory:
             if not path_to_tarballs.joinpath(f"{component.value}.txz").is_file():
                 raise FileNotFoundError(f"Component '{component.value}' not found in {path_to_tarballs}")
 
-        jail_path = self.get_jail_mountpoint(f"{distribution.version}_{distribution.architecture.value}")
+        jail_data_set_name = f"{distribution.version}_{distribution.architecture.value}"
+        jail_path = self.get_jail_mountpoint(jail_data_set_name=jail_data_set_name)
         if not self._data_set_factory.base_data_set_exists(data_set_name=self.get_data_set_name(distribution)):
             self._data_set_factory.create_base_data_set(self.get_data_set_name(distribution), jail_path)
         else:

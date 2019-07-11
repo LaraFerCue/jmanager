@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+from distutils.file_util import copy_file
 from pathlib import PosixPath
 from typing import Dict, List
 
@@ -18,6 +19,7 @@ class JailFactory:
         JailOption.OS_RELEASE: '',
         JailOption.EXEC_START: 'sh /etc/rc',
         JailOption.EXEC_STOP: 'sh /etc/rc.shutdown',
+        JailOption.IP4: 'inherit'
     }
 
     def __init__(self, base_jail_factory: BaseJailFactory, jail_config_folder: PosixPath):
@@ -49,13 +51,19 @@ class JailFactory:
         self.clone_base_jail(distribution, jail_data.name)
         self.write_configuration_files(distribution, jail_data)
 
+    def get_config_file_path(self, jail_name: str):
+        jail_config_folder = self._jail_config_folder.joinpath(jail_name)
+        config_file = jail_config_folder.joinpath('jail.conf')
+        return config_file
+
     def write_configuration_files(self, distribution, jail_data):
         jail_config_folder = self._jail_config_folder.joinpath(jail_data.name)
         if not jail_config_folder.is_dir():
             os.makedirs(jail_config_folder.as_posix())
+
         jail_options = self.get_jail_default_options(jail_data, distribution.version)
         final_jail = Jail(name=jail_data.name, options=jail_options)
-        final_jail.write_config_file(jail_config_folder.joinpath('jail.conf'))
+        final_jail.write_config_file(self.get_config_file_path(jail_data.name))
         distribution.write_config_file(jail_config_folder.joinpath('distribution.conf'))
 
     def clone_base_jail(self, distribution, jail_data_set):
@@ -70,7 +78,7 @@ class JailFactory:
             options=clone_properties)
 
     def jail_exists(self, jail_name: str) -> bool:
-        configuration_file = self._jail_config_folder.joinpath(jail_name, 'jail.conf')
+        configuration_file = self.get_config_file_path(jail_name)
         distribution = self._jail_config_folder.joinpath(jail_name, 'distribution.conf')
         return configuration_file.is_file() and distribution.is_file()
 
