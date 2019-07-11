@@ -1,5 +1,8 @@
 from enum import Enum
+from pathlib import PosixPath
 from typing import List
+
+import yaml
 
 
 class Architecture(Enum):
@@ -119,3 +122,12 @@ class Distribution:
 
     def __ne__(self, other: 'Distribution') -> bool:
         return not self.__eq__(other)
+
+    def write_config_file(self, path_to_file: PosixPath):
+        configuration = {
+            'version': str(self.version),
+            'architecture': self.architecture.value,
+            'components': [comp.value for comp in self.components]
+        }
+        with open(path_to_file.as_posix(), 'w') as config_file:
+            yaml.dump(configuration, stream=config_file)

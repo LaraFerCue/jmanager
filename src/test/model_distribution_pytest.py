@@ -1,3 +1,7 @@
+import filecmp
+from pathlib import PosixPath
+from tempfile import TemporaryDirectory
+
 from models.distribution import Distribution, Version, VersionType, Architecture, Component
 from src.test.globals import TEST_DISTRIBUTION
 
@@ -40,3 +44,9 @@ class TestModelDistribution:
         assert comp1 != Component.BASE
         assert Component.BASE <= comp1 <= Component.KERNEL
         assert Component.SRC >= comp1 >= Component.KERNEL
+
+    def test_write_configuration(self):
+        with TemporaryDirectory() as temp_dir:
+            TEST_DISTRIBUTION.write_config_file(PosixPath(temp_dir).joinpath('test'))
+
+            assert filecmp.cmp(f"{temp_dir}/test", "src/test/resources/dist.conf", shallow=False)
