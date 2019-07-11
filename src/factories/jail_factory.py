@@ -90,7 +90,7 @@ class JailFactory:
 
     def start_jail(self, jail_name: str) -> str:
         path_to_jail = self.base_jail_factory.get_jail_mountpoint(jail_data_set_name=jail_name)
-        if not path_to_jail.joinpath('etc', 'resolv.conf'):
+        if not path_to_jail.joinpath('etc', 'resolv.conf').is_file():
             copy_file('/etc/resolv.conf', path_to_jail.joinpath('etc').as_posix())
 
         jail_config_file = self.get_config_file_path(jail_name)
