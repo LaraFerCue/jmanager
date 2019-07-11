@@ -8,7 +8,7 @@ from src.factories.base_jail_factory import BaseJailFactory
 from src.factories.jail_factory import JailFactory
 from src.utils.zfs import ZFS
 
-TMP_PATH = PosixPath('/tmp').joinpath('jmanager')
+TMP_PATH = PosixPath('/tmp').joinpath('jmanager_test')
 TEST_DATA_SET = 'zroot/jmanager_test'
 RESOURCES_PATH = PosixPath('src/test/resources')
 TEST_DISTRIBUTION = Distribution(version=Version(12, 0, VersionType.RELEASE), architecture=Architecture.AMD64,
