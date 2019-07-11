@@ -2,6 +2,8 @@ import filecmp
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
 
+import yaml
+
 from models.distribution import Distribution, Version, VersionType, Architecture, Component
 from src.test.globals import TEST_DISTRIBUTION
 
@@ -50,3 +52,22 @@ class TestModelDistribution:
             TEST_DISTRIBUTION.write_config_file(PosixPath(temp_dir).joinpath('test'))
 
             assert filecmp.cmp(f"{temp_dir}/test", "src/test/resources/dist.conf", shallow=False)
+
+    def test_write_configuration_with_multiple_components(self):
+        distribution = Distribution(
+            version=TEST_DISTRIBUTION.version,
+            architecture=TEST_DISTRIBUTION.architecture,
+            components=[Component.LIB32, Component.SRC]
+        )
+        with TemporaryDirectory() as temp_dir:
+            config_file_path = PosixPath(temp_dir).joinpath('test')
+            distribution.write_config_file(config_file_path)
+
+            with open(config_file_path.as_posix(), 'r') as config_file:
+                configuration = yaml.load(config_file)
+
+        assert str(distribution.version) == configuration['version']
+        assert distribution.architecture.value == configuration['architecture']
+
+        for component in distribution.components:
+            assert component.value in configuration['components']
