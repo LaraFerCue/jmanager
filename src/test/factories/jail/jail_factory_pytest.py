@@ -59,7 +59,7 @@ class TestJailFactory:
         try:
             jail_factory.create_jail(jail_data=Jail(jail_name), distribution=TEST_DISTRIBUTION)
             jail_factory.destroy_jail(jail_name=jail_name)
-            assert not TMP_PATH.joinpath(f"{jail_name}.conf").is_file()
+            assert not TMP_PATH.joinpath(jail_name).is_dir()
             assert not len(jail_factory.base_jail_factory.ZFS_FACTORY.zfs_list(f"{TEST_DATA_SET}/{jail_name}"))
         finally:
             destroy_dummy_base_jail()
@@ -68,12 +68,16 @@ class TestJailFactory:
         jail_factory = get_mocking_jail_factory()
         jail_name = "test_jail_exists"
         assert not jail_factory.jail_exists(jail_name)
-        open(TMP_PATH.joinpath(f'{jail_name}.conf').as_posix(), 'w').close()
+        config_folder_path = TMP_PATH.joinpath(jail_name)
+        os.makedirs(config_folder_path.as_posix(), exist_ok=True)
+
+        open(config_folder_path.joinpath('jail.conf').as_posix(), 'w').close()
+        open(config_folder_path.joinpath('distribution.conf').as_posix(), 'w').close()
 
         try:
             assert jail_factory.jail_exists(jail_name)
         finally:
-            TMP_PATH.joinpath(f'{jail_name}.conf').unlink()
+            shutil.rmtree(config_folder_path.as_posix(), ignore_errors=True)
 
     def test_list_jails(self):
         jail_factory = get_mocking_jail_factory()
