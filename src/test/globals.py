@@ -1,11 +1,12 @@
 import os
+import shutil
 import tarfile
 from pathlib import PosixPath
 
 from models.distribution import Distribution, Version, VersionType, Architecture
 from src.factories.base_jail_factory import BaseJailFactory
 from src.factories.jail_factory import JailFactory
-from src.utils.zfs import ZFS
+from src.utils.zfs import ZFS, ZFSError
 
 TMP_PATH = PosixPath('/tmp').joinpath('jmanager')
 TEST_DATA_SET = 'zroot/jmanager_test'
@@ -87,4 +88,8 @@ def create_dummy_jail(jail_name: str, distribution: Distribution = TEST_DISTRIBU
 
 def destroy_dummy_jail(jail_name: str):
     zfs = MockingZFS()
-    zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
+    shutil.rmtree(TMP_PATH.joinpath(jail_name), ignore_errors=True)
+    try:
+        zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
+    except ZFSError:
+        pass
