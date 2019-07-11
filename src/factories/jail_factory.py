@@ -94,8 +94,6 @@ class JailFactory:
     def list_jails(self) -> List[Jail]:
         jail_list = []
         for config_folder in self._jail_config_folder.iterdir():
-            if not config_folder.is_dir():
-                continue
             if config_folder.joinpath('jail.conf').is_file():
                 jail = Jail.read_jail_config_file(config_folder.joinpath('jail.conf'))
                 jail.origin = Distribution.read_config_file(config_folder.joinpath('distribution.conf'))
