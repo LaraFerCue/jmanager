@@ -2,21 +2,28 @@ import lzma
 import tarfile
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
-from typing import List
+from typing import List, Callable
 
 from models.distribution import Distribution, Component, Version, Architecture
 from models.jail import JailError
 from src.utils.zfs import ZFS, ZFSType, ZFSProperty
 
 
-def extract_tarball_into(jail_path: PosixPath, path_to_tarball: PosixPath):
+def extract_tarball_into(jail_path: PosixPath, path_to_tarball: PosixPath,
+                         callback: Callable[[str, int, int], None]):
     with TemporaryDirectory(prefix="jail_factory_") as temp_dir:
         temp_file_path = f"{temp_dir}/{path_to_tarball.name}"
         with lzma.open(path_to_tarball.as_posix(), 'r') as lz_file:
             with open(temp_file_path, "wb") as temp_file:
                 temp_file.write(lz_file.read())
+
         with tarfile.open(temp_file_path, mode='r') as tar_file:
-            tar_file.extractall(path=jail_path.as_posix())
+            members = tar_file.getmembers()
+            iteration = 0
+            for member in members:
+                if callback is not None:
+                    callback(f"Extracting {path_to_tarball.name}", iteration, len(members))
+                tar_file.extract(member, path=jail_path.as_posix())
 
 
 class BaseJailFactory:
@@ -50,7 +57,8 @@ class BaseJailFactory:
         component_extension = '_'.join([dist.value for dist in components])
         return f"{self.SNAPSHOT_NAME}_{component_extension}"
 
-    def create_base_jail(self, distribution: Distribution, path_to_tarballs: PosixPath):
+    def create_base_jail(self, distribution: Distribution, path_to_tarballs: PosixPath,
+                         callback: Callable[[str, int, int], None] = None):
         components = self.get_remaining_components(distribution)
         if not components:
             raise JailError(f"The base jail for '{distribution.version}/{distribution.architecture.value}' exists")
@@ -65,8 +73,11 @@ class BaseJailFactory:
         else:
             self.rollback_base_dataset(components, distribution)
 
-        self.extract_components_into_base_jail(components, jail_path, path_to_tarballs,
-                                               self.get_base_jail_data_set(distribution=distribution))
+        self.extract_components_into_base_jail(components=components,
+                                               jail_path=jail_path,
+                                               path_to_tarballs=path_to_tarballs,
+                                               data_set=self.get_base_jail_data_set(distribution=distribution),
+                                               callback=callback)
 
     def rollback_base_dataset(self, components: List[Component], distribution: Distribution):
         common_components = []
@@ -93,10 +104,15 @@ class BaseJailFactory:
         return []
 
     def extract_components_into_base_jail(self, components: List[Component], jail_path: PosixPath,
-                                          path_to_tarballs: PosixPath, data_set: str):
+                                          path_to_tarballs: PosixPath, data_set: str,
+                                          callback: Callable[[str, int, int], None]):
         processed_components = []
         for component in components:
-            extract_tarball_into(jail_path, path_to_tarballs.joinpath(f"{component.value}.txz"))
+            extract_tarball_into(
+                jail_path=jail_path,
+                path_to_tarball=path_to_tarballs.joinpath(f"{component.value}.txz"),
+                callback=callback
+            )
             processed_components.append(component)
             if component == Component.BASE:
                 snapshot_name = self.SNAPSHOT_NAME

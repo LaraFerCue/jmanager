@@ -80,3 +80,20 @@ class TestBaseJailFactoryCreate:
                 assert len(jails) == 2
             finally:
                 destroy_dummy_base_jail(TEST_DISTRIBUTION)
+
+    def test_create_callback(self):
+        def _callback(msg, iteration, total):
+            assert msg == "Extracting base.txz"
+            assert isinstance(iteration, int)
+            assert isinstance(total, int)
+            assert iteration < total
+
+        with TemporaryDirectory() as temp_dir:
+            base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)
+            create_dummy_tarball_in_folder(PosixPath(temp_dir))
+            try:
+                base_jail_factory.create_base_jail(distribution=TEST_DISTRIBUTION,
+                                                   path_to_tarballs=PosixPath(temp_dir),
+                                                   callback=_callback)
+            finally:
+                destroy_dummy_base_jail(TEST_DISTRIBUTION)
