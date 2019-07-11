@@ -51,12 +51,9 @@ class BaseJailFactory:
         return f"{self.SNAPSHOT_NAME}_{component_extension}"
 
     def create_base_jail(self, distribution: Distribution, path_to_tarballs: PosixPath):
-        if self.base_jail_exists(distribution=distribution):
-            raise JailError(f"The base jail for '{distribution.version}/{distribution.architecture.value}' exists")
-
         components = self.get_remaining_components(distribution)
         if not components:
-            return
+            raise JailError(f"The base jail for '{distribution.version}/{distribution.architecture.value}' exists")
 
         for component in components:
             if not path_to_tarballs.joinpath(f"{component.value}.txz").is_file():

@@ -93,7 +93,9 @@ class Version:
 class Distribution:
     def __init__(self, version: Version, architecture: Architecture, components: List[Component]):
         self._version = version
-        self._components = [Component.BASE, *components]
+        self._components = components.copy()
+        if Component.BASE not in self._components:
+            self._components.append(Component.BASE)
         self._components.sort()
         self._architecture = architecture
 
