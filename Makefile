@@ -2,6 +2,8 @@ SET_USER?=		${USER}
 JMANAGER_COMMAND=	python3.6 -m jmanager
 JMANAGER_OPTIONS=	--jmanager-config src/test/resources/jmanager.conf
 
+LIST_TYPE=jail
+
 pre-test:
 	scripts/zfs_init.sh ${SET_USER}
 test: pre-test
@@ -33,14 +35,6 @@ test_destroy: check_test_commands test_create
 	${JMANAGER_COMMAND} ${JMANAGER_OPTIONS} \
 		destroy example
 
-test_list_empty:
-	make list_command
-
-test_list_one_jail:
-	make test_create list_command
-
-test_list: test_list_empty test_list_one_jail
-
-list_command:
+test_list:
 	${JMANAGER_COMMAND} ${JMANAGER_OPTIONS} \
-		list
+		list --type ${LIST_TYPE}
