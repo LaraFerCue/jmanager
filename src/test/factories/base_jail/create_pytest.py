@@ -86,7 +86,7 @@ class TestBaseJailFactoryCreate:
             assert msg == "Extracting base.txz"
             assert isinstance(iteration, int)
             assert isinstance(total, int)
-            assert iteration < total
+            assert iteration <= total
 
         with TemporaryDirectory() as temp_dir:
             base_jail_factory = get_mocking_base_jail_factory(TMP_PATH)

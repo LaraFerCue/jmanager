@@ -8,17 +8,37 @@ from src.factories.jail_factory import JailFactory
 from src.utils.fetch import HTTPFetcher
 
 
+def get_progress_text(msg: str, iteration: int, total: int) -> str:
+    percent = "{0:.1f}".format(100 * (iteration / float(total)))
+    filled_length = int(50 * iteration // total)
+    bar = '=' * filled_length + ' ' * (50 - filled_length)
+
+    return "%s |%s| %s%%" % (msg, bar, percent)
+
+
+def print_progress_bar_extract(msg: str, iteration: int, total: int):
+    progress_text = get_progress_text(msg, iteration, total)
+
+    print('\r%s ' % progress_text, end='\r')
+    if iteration == total:
+        print()
+
+
 class JailManager:
     def __init__(self, http_fetcher: HTTPFetcher, jail_factory: JailFactory):
         self._http_fetcher = http_fetcher
         self._jail_factory = jail_factory
+        self._iteration = 0
+        self._speed = 0
 
-    @staticmethod
-    def print_progress_bar(msg, iteration, total):
-        percent = "{0:.1f}".format(100 * (iteration / float(total)))
-        filled_length = int(50 * iteration // total)
-        bar = '=' * filled_length + ' ' * (50 - filled_length)
-        print('\r%s |%s| %s%%' % (msg, bar, percent), end='\r')
+    def print_progress_bar_fetch(self, msg, iteration, total, speed):
+        progress_text = get_progress_text(msg, iteration, total)
+
+        if (self._iteration % 250) == 0:
+            self._speed = speed
+        self._iteration += 1
+
+        print('\r%s %2.2f Mbps  ' % (progress_text, self._speed / 1e6), end='\r')
         if iteration == total:
             print()
 
@@ -31,9 +51,10 @@ class JailManager:
                     architecture=distribution.architecture,
                     components=self._jail_factory.base_jail_factory.get_remaining_components(distribution),
                     temp_dir=path_to_temp_dir,
-                    callback=JailManager.print_progress_bar)
+                    callback=self.print_progress_bar_fetch)
                 self._jail_factory.base_jail_factory.create_base_jail(distribution=distribution,
-                                                                      path_to_tarballs=path_to_temp_dir)
+                                                                      path_to_tarballs=path_to_temp_dir,
+                                                                      callback=print_progress_bar_extract)
 
         self._jail_factory.create_jail(jail_data=jail_data, distribution=distribution)
 

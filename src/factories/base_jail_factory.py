@@ -17,13 +17,17 @@ def extract_tarball_into(jail_path: PosixPath, path_to_tarball: PosixPath,
             with open(temp_file_path, "wb") as temp_file:
                 temp_file.write(lz_file.read())
 
+        msg = f"Extracting {path_to_tarball.name}"
         with tarfile.open(temp_file_path, mode='r') as tar_file:
             members = tar_file.getmembers()
             iteration = 0
             for member in members:
                 if callback is not None:
-                    callback(f"Extracting {path_to_tarball.name}", iteration, len(members))
+                    callback(msg, iteration, len(members))
                 tar_file.extract(member, path=jail_path.as_posix())
+                iteration += 1
+            if callback is not None:
+                callback(msg, len(members), len(members))
 
 
 class BaseJailFactory:
