@@ -74,10 +74,11 @@ class TestFetchUtils:
                 assert temp_dir_path.joinpath('base.txz').is_file()
 
     def test_fetch_with_callback_function(self):
-        def callback_function(text_to_show: str, received_bytes: int, total_bytes: int):
+        def callback_function(text_to_show: str, received_bytes: int, total_bytes: int, time_elapsed: float):
             assert isinstance(text_to_show, str)
             assert isinstance(received_bytes, int)
             assert isinstance(total_bytes, int)
+            assert isinstance(time_elapsed, float)
             raise TestFetchUtils.ErrorToBeRaised(f"test message")
 
         distribution_version = Version(major=12, minor=0, version_type=VersionType.STABLE)
