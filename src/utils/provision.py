@@ -8,7 +8,8 @@ from models.jail import Jail
 
 
 class Provision:
-    ANSIBLE_CMD = 'ansible-playbook-3.6'
+    ANSIBLE_PLAYBOOK_CMD = 'ansible-playbook-3.6'
+    ANSIBLE_CMD = 'ansible-3.6'
     ANSIBLE_INVENTORY_NAME = 'ansible_inventory'
     ANSIBLE_CONFIG_FILE = 'ansible.cfg'
 
@@ -19,7 +20,7 @@ class Provision:
 
     def run_provision(self, path_to_playbook_file: PosixPath, wrap_output: bool = True):
         cmd = [
-            self.ANSIBLE_CMD,
+            self.ANSIBLE_PLAYBOOK_CMD,
             path_to_playbook_file.as_posix()
         ]
 
@@ -40,11 +41,14 @@ class Provision:
                 }
             }
         }
+        port = 2201
         for jail in list_of_jails:
             inventory['all']['hosts'][jail.name] = {
-                'hostname': 'localhost',
-                'user': 'root'
+                'ansible_host': 'localhost',
+                'ansible_user': 'root',
+                'ansible_port': port
             }
+            port += 1
         with open(config_folder.joinpath(self.ANSIBLE_INVENTORY_NAME).as_posix(), 'w') as inventory_file:
             yaml.dump(inventory, stream=inventory_file)
 
