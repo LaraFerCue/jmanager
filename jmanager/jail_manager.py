@@ -1,3 +1,4 @@
+import os
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
 from typing import List, Dict
@@ -33,6 +34,11 @@ class JailManager:
         self._speed = 0
         self._provision = Provision()
 
+        if not self._jail_factory.jail_config_folder.is_dir():
+            os.makedirs(self._jail_factory.jail_config_folder.as_posix())
+        if not self._jail_factory.jail_config_folder.joinpath(self._provision.ANSIBLE_CONFIG_FILE).is_file():
+            self._provision.write_ansible_configuration(self._jail_factory.jail_config_folder)
+
     def print_progress_bar_fetch(self, msg, iteration, total, speed):
         progress_text = get_progress_text(msg, iteration, total)
 
@@ -62,6 +68,9 @@ class JailManager:
                                                                       callback=print_progress_bar_extract)
 
         self._jail_factory.create_jail(jail_data=jail_data, distribution=distribution)
+        list_of_jails = self._jail_factory.list_jails()
+        self._provision.write_inventory(list_of_jails=list_of_jails,
+                                        config_folder=self._jail_factory.jail_config_folder)
 
     def destroy_jail(self, jail_name: str):
         if self._jail_factory.jail_exists(jail_name):
@@ -80,3 +89,7 @@ class JailManager:
 
     def stop(self, jail_name: str):
         self._jail_factory.stop_jail(jail_name)
+
+    def provision_jail(self, jail_name: str, provision_dict: Dict):
+        self._provision.run_provision_cmd(cmd='pkg install -y python3.6', jail_name=jail_name,
+                                          config_folder=self._jail_factory.jail_config_folder)

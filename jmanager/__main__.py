@@ -35,5 +35,11 @@ stop_parser = subparsers.add_parser('stop')
 stop_parser.set_defaults(command="stop")
 stop_parser.add_argument('jail_name', type=str, help="name of the jail to be stopped")
 
+provision_parser = subparsers.add_parser('provision')
+provision_parser.set_defaults(command='provision')
+provision_parser.add_argument('jail_name', type=str, help='name of the jail to be provisioned')
+provision_parser.add_argument('--provision-file', type=str, default='provision.yml',
+                              help="path to the ansible playbook to provision the jail")
+
 args = parser.parse_args()
 execute_commands(args)
