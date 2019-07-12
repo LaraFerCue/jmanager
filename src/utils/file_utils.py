@@ -1,7 +1,7 @@
 import lzma
+import os
 import shutil
 import tarfile
-from os import chflags
 from pathlib import PosixPath
 from stat import SF_IMMUTABLE
 from tempfile import TemporaryDirectory
@@ -31,7 +31,7 @@ def extract_tarball_into(jail_path: PosixPath, path_to_tarball: PosixPath,
 
 def set_flags_to_folder_recursively(path: PosixPath, flags: int):
     if not path.is_dir() and not path.is_symlink():
-        chflags(path.as_posix(), flags)
+        os.chflags(path.as_posix(), flags)
         return
 
     if path.is_symlink():
