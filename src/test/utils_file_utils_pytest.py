@@ -23,7 +23,7 @@ def assert_folder_mutable(temp_dir: str):
     assert not stat(f"{temp_dir}/file1").st_flags & UF_HIDDEN
 
 
-@pytest.mark.skipif(sys.platform != 'FreeBSD', reason="chflags is not supported in this platform")
+@pytest.mark.skipif(not sys.platform.startswith('freebsd'), reason="chflags is not supported in this platform")
 class TestFileUtils:
 
     def test_make_folder_mutable_only_files(self):
