@@ -19,7 +19,8 @@ class JailFactory:
         JailParameter.OS_RELEASE: '',
         JailParameter.EXEC_START: 'sh /etc/rc',
         JailParameter.EXEC_STOP: 'sh /etc/rc.shutdown',
-        JailParameter.IP4: 'inherit'
+        JailParameter.IP4: 'inherit',
+        JailParameter.MOUNT_DEVFS: 'true'
     }
 
     def __init__(self, base_jail_factory: BaseJailFactory, jail_config_folder: PosixPath):

@@ -18,6 +18,7 @@ class JailParameter(Enum):
     IP6 = 'ip6'
     IP6_ADDR = 'ip6.addr'
     IP6_SADDR_SEL = 'ip6.saddrsel'
+    MOUNT_DEVFS = 'mount.devfs'
 
 
 HEADER = '# This file has been writen with JManager. Please, do not modify it\n' \
