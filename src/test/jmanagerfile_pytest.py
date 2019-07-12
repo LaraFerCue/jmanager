@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict
 
 import pytest
 
@@ -6,7 +6,7 @@ from src.configuration import parse_jmanagerfile
 from src.test.globals import RESOURCES_PATH
 
 SAMPLE_JMANAGER_FILE = RESOURCES_PATH.joinpath('test_jmanagerfile.yaml')
-JAIL_CONFIGURATION_EXAMPLE: List[Dict[str, Union[List[str], str]]] = [
+JAIL_CONFIGURATION_EXAMPLE: List[Dict] = [
     {
         "name": "test",
         "version": "12.0-RELEASE",
@@ -18,6 +18,11 @@ JAIL_CONFIGURATION_EXAMPLE: List[Dict[str, Union[List[str], str]]] = [
     }
 ]
 
+JAIL_PARAMETERS = {
+    "exec.start": "true",
+    "exec.stop": "false"
+}
+
 
 class TestJManagerFile:
     def test_parsing_correct_configuration(self):
@@ -28,6 +33,15 @@ class TestJManagerFile:
         assert jmanager_file[0].distribution.architecture.value == JAIL_CONFIGURATION_EXAMPLE[0]['architecture']
         for component in jmanager_file[0].distribution.components:
             assert component.value in ['base', *JAIL_CONFIGURATION_EXAMPLE[0]['components']]
+
+    def test_parsing_with_parameters(self):
+        configuration = JAIL_CONFIGURATION_EXAMPLE.copy()
+        configuration[0]['jail_parameters'] = JAIL_PARAMETERS.copy()
+
+        for jail in parse_jmanagerfile(jail_dictionary_list=configuration):
+            for parameter, value in jail.jail.parameters.items():
+                assert parameter.value in JAIL_PARAMETERS.keys()
+                assert value == JAIL_PARAMETERS[parameter.value]
 
     def test_parsing_wrong_type_name(self):
         configuration = [JAIL_CONFIGURATION_EXAMPLE[0].copy()]
