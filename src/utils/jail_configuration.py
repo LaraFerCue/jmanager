@@ -6,6 +6,7 @@ from paramiko import rsakey
 def configure_ssh_service_configuration_file(path_to_config_file: PosixPath, jail_port: int):
     with open(path_to_config_file.as_posix(), 'a') as config_file:
         config_file.write(f'ListenAddress localhost:{jail_port}\n')
+        config_file.write('PermitRootLogin yes\n')
 
 
 def configure_services(service_configure_file_path: PosixPath):

@@ -12,7 +12,7 @@ class TestJailConfiguration:
             configure_ssh_service_configuration_file(temp_dir_path.joinpath('sshd_config'), jail_port=2201)
 
             with open(temp_dir_path.joinpath('sshd_config').as_posix(), 'r') as sshd_config:
-                assert sshd_config.read() == "ListenAddress localhost:2201\n"
+                assert sshd_config.read() == "ListenAddress localhost:2201\nPermitRootLogin yes\n"
 
     def test_editing_services(self):
         with TemporaryDirectory() as temp_dir:
