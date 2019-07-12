@@ -29,7 +29,7 @@ test_help:
 
 test_create: check_test_commands
 	${JMANAGER_COMMAND} ${JMANAGER_OPTIONS} \
-		create --jmanagerfile examples/JManagerFile
+		create examples/JManagerFile
 
 test_destroy: check_test_commands test_create
 	${JMANAGER_COMMAND} ${JMANAGER_OPTIONS} \

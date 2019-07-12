@@ -12,7 +12,7 @@ parser.add_argument("--jmanager-config", type=str,
 subparsers = parser.add_subparsers(help="sub-command help")
 create_parser = subparsers.add_parser('create')
 create_parser.set_defaults(command='create')
-create_parser.add_argument("--jmanagerfile",
+create_parser.add_argument("jmanagerfile",
                            type=str,
                            help="path to the configuration file for the jail to create",
                            default="./Jmanagerfile")
