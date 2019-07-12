@@ -83,11 +83,7 @@ class BaseJailFactory:
             snapshot_name = self.get_snapshot_name(component_list=processed_components)
 
             if not self._data_set_factory.snapshot_exists(data_set_name=data_set_name, snapshot=snapshot_name):
-                if callback is not None:
-                    callback(f"Creating snapshot {snapshot_name}", 0, 100)
                 self._data_set_factory.create_snapshot(data_set_name=data_set_name, snapshot=snapshot_name)
-                if callback is not None:
-                    callback(f"Creating snapshot {snapshot_name}", 100, 100)
 
     def destroy_base_jail(self, distribution: Distribution):
         base_jail_data_set_name = self.get_data_set_name(distribution)
