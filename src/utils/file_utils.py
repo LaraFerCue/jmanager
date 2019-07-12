@@ -29,18 +29,18 @@ def extract_tarball_into(jail_path: PosixPath, path_to_tarball: PosixPath,
                 callback(msg, len(members), len(members))
 
 
-def make_folder_content_mutable(path: PosixPath, recursive: bool = False):
+def set_flags_to_folder_recursively(path: PosixPath, flags: int):
     if not path.is_dir() and not path.is_symlink():
-        chflags(path.as_posix(), not SF_IMMUTABLE)
+        chflags(path.as_posix(), flags)
         return
 
-    if not recursive or path.is_symlink():
+    if path.is_symlink():
         return
 
     for node in path.iterdir():
-        make_folder_content_mutable(path=node, recursive=recursive)
+        set_flags_to_folder_recursively(path=node, flags=flags)
 
 
 def remove_immutable_path(jail_path: PosixPath):
-    make_folder_content_mutable(jail_path, True)
+    set_flags_to_folder_recursively(jail_path, not SF_IMMUTABLE)
     shutil.rmtree(jail_path, ignore_errors=True)
