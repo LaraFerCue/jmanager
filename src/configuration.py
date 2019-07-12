@@ -1,9 +1,10 @@
 from pathlib import PosixPath
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Any
 
 from yaml import load, Loader
 
 from models.distribution import Architecture, Component, Version
+from models.jail import JailParameter
 from models.jmanagerfile import JManagerFile
 
 CONFIGURATION_SCHEMA: Dict[str, type] = {
@@ -14,7 +15,7 @@ CONFIGURATION_SCHEMA: Dict[str, type] = {
 }
 
 
-def read_configuration_file(path_to_file: PosixPath) -> Union[List[Dict[str, str]], Dict[str, str]]:
+def read_configuration_file(path_to_file: PosixPath) -> Union[List[Dict], Dict]:
     if not path_to_file.is_file():
         raise FileNotFoundError("error: The configuration file has not been found")
 
@@ -23,7 +24,7 @@ def read_configuration_file(path_to_file: PosixPath) -> Union[List[Dict[str, str
     return data
 
 
-def parse_jmanagerfile(jail_dictionary_list: List[Dict[str, Union[List, str]]]) -> List[JManagerFile]:
+def parse_jmanagerfile(jail_dictionary_list: List[Dict[str, Any]]) -> List[JManagerFile]:
     jail_list: List[JManagerFile] = []
 
     for jail_dictionary in jail_dictionary_list:
@@ -33,10 +34,16 @@ def parse_jmanagerfile(jail_dictionary_list: List[Dict[str, Union[List, str]]]) 
         for component in jail_dictionary['components']:
             components.append(Component(component))
 
-        jail_list.append(JManagerFile(name=jail_dictionary['name'],
+        jail_parameters: Dict[JailParameter, str] = {}
+        if 'jail_parameters' in jail_dictionary:
+            for parameter, value in jail_dictionary['jail_parameters'].items():
+                jail_parameters[JailParameter(parameter)] = value
+
+        jail_list.append(JManagerFile(jail_name=jail_dictionary['name'],
                                       version=Version.from_string(jail_dictionary['version']),
                                       components=components,
-                                      architecture=Architecture(jail_dictionary['architecture'])
+                                      architecture=Architecture(jail_dictionary['architecture']),
+                                      jail_parameters=jail_parameters
                                       ))
     return jail_list
 

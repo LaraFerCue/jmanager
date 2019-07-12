@@ -5,7 +5,7 @@ from typing import Dict, List
 from models.distribution import Distribution
 
 
-class JailOption(Enum):
+class JailParameter(Enum):
     PATH = 'path'
     HOSTNAME = 'host.hostname'
     OS_RELEASE = 'osrelease'
@@ -26,11 +26,11 @@ HEADER = '# This file has been writen with JManager. Please, do not modify it\n'
 
 
 class Jail:
-    def __init__(self, name: str, options: Dict[JailOption, str] = None, distribution: Distribution = None):
+    def __init__(self, name: str, parameters: Dict[JailParameter, str] = None, distribution: Distribution = None):
         self._name = name
         self._options = {}
-        if options is not None:
-            self._options.update(options)
+        if parameters is not None:
+            self._options.update(parameters)
 
         self._origin: Distribution = distribution
 
@@ -39,7 +39,7 @@ class Jail:
         return self._name
 
     @property
-    def options(self) -> Dict[JailOption, str]:
+    def parameters(self) -> Dict[JailParameter, str]:
         return self._options
 
     @property
@@ -56,7 +56,7 @@ class Jail:
         with open(file_path.as_posix(), 'w') as config_file:
             config_file.write(HEADER)
             config_file.write(f"{self.name} " + "{\n")
-            for option, value in self.options.items():
+            for option, value in self.parameters.items():
                 config_file.write(f"\t{option.value} = \"{value}\";\n")
             config_file.write("}\n")
 
@@ -84,13 +84,13 @@ class Jail:
         return string
 
     @staticmethod
-    def parse_options(lines_of_file: List[str]) -> Dict[JailOption, str]:
+    def parse_options(lines_of_file: List[str]) -> Dict[JailParameter, str]:
         """
         Parses the options on the configuration file
         :param lines_of_file:
         :return:
         """
-        options: Dict[JailOption, str] = {}
+        options: Dict[JailParameter, str] = {}
 
         for line in lines_of_file:
             position_of_assignation = line.find('=')
@@ -100,7 +100,7 @@ class Jail:
                 semicolon_position = value.find(';')
                 value = value[:semicolon_position].strip('"')
 
-                options[JailOption(option)] = value
+                options[JailParameter(option)] = value
         return options
 
     @staticmethod
@@ -109,8 +109,8 @@ class Jail:
         with open(config_file.as_posix(), 'r') as jail_config_file:
             lines = Jail.remove_comments(jail_config_file.read())
         jail_name: str = Jail.get_jail_name_from_lines(lines.split('\n'))
-        options: Dict[JailOption, str] = Jail.parse_options(lines.split('\n'))
-        return Jail(name=jail_name, options=options)
+        options: Dict[JailParameter, str] = Jail.parse_options(lines.split('\n'))
+        return Jail(name=jail_name, parameters=options)
 
 
 class JailError(BaseException):

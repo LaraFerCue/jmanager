@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from models.jail import Jail, JailOption
+from models.jail import Jail, JailParameter
 from src.test.globals import RESOURCES_PATH, TEST_DISTRIBUTION
 
 JAIL_CONFIGURATION_DICT = {
@@ -37,14 +37,14 @@ class TestJail:
             if key == 'name':
                 assert jail.name == JAIL_CONFIGURATION_DICT[key]
             else:
-                assert jail.options[JailOption(key)] == JAIL_CONFIGURATION_DICT[key]
+                assert jail.parameters[JailParameter(key)] == JAIL_CONFIGURATION_DICT[key]
 
     def test_write_configuration_file_with_default_options(self):
         jail_options = {}
         for key, value in JAIL_CONFIGURATION_DICT.items():
             if key == "name":
                 continue
-            jail_options[JailOption(key)] = value
+            jail_options[JailParameter(key)] = value
         jail = Jail(JAIL_CONFIGURATION_DICT['name'], jail_options)
 
         with TemporaryDirectory() as temp_dir:

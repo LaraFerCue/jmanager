@@ -10,3 +10,4 @@ def create_command(jmanagerfile: str, jail_manager: JailManager):
 
     for jmanagerfile in jmanagerfile_list:
         jail_manager.create_jail(jail_data=jmanagerfile.jail, distribution=jmanagerfile.distribution)
+        jail_manager.start(jail_name=jail_manager.jail.name)

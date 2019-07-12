@@ -43,7 +43,7 @@ class TestJailFactoryMultipleComponents:
             assert loaded_jail.name == jail_name
             assert MockingZFS().zfs_list(data_set=f"{TEST_DATA_SET}/{jail_name}")
             for option, value in jail_factory.get_jail_default_options(jail_info, TEST_DISTRIBUTION.version).items():
-                assert loaded_jail.options[option] == value
+                assert loaded_jail.parameters[option] == value
         finally:
             destroy_dummy_jail(jail_name=jail_name)
             destroy_dummy_base_jail()

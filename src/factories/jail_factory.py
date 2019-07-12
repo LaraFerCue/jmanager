@@ -6,20 +6,20 @@ from pathlib import PosixPath
 from typing import Dict, List
 
 from models.distribution import Distribution, Version
-from models.jail import Jail, JailOption, JailError
+from models.jail import Jail, JailParameter, JailError
 from src.factories.base_jail_factory import BaseJailFactory
 
 
 class JailFactory:
     JAIL_CMD = "jail"
 
-    DEFAULT_JAIL_OPTIONS: Dict[JailOption, str] = {
-        JailOption.PATH: '',
-        JailOption.HOSTNAME: '',
-        JailOption.OS_RELEASE: '',
-        JailOption.EXEC_START: 'sh /etc/rc',
-        JailOption.EXEC_STOP: 'sh /etc/rc.shutdown',
-        JailOption.IP4: 'inherit'
+    DEFAULT_JAIL_OPTIONS: Dict[JailParameter, str] = {
+        JailParameter.PATH: '',
+        JailParameter.HOSTNAME: '',
+        JailParameter.OS_RELEASE: '',
+        JailParameter.EXEC_START: 'sh /etc/rc',
+        JailParameter.EXEC_STOP: 'sh /etc/rc.shutdown',
+        JailParameter.IP4: 'inherit'
     }
 
     def __init__(self, base_jail_factory: BaseJailFactory, jail_config_folder: PosixPath):
@@ -30,12 +30,12 @@ class JailFactory:
     def base_jail_factory(self) -> BaseJailFactory:
         return self._base_jail_factory
 
-    def get_jail_default_options(self, jail_data: Jail, os_version: Version) -> Dict[JailOption, str]:
+    def get_jail_default_options(self, jail_data: Jail, os_version: Version) -> Dict[JailParameter, str]:
         jail_options = self.DEFAULT_JAIL_OPTIONS.copy()
-        jail_options[JailOption.PATH] = self._base_jail_factory.get_jail_mountpoint(jail_data.name).as_posix()
-        jail_options[JailOption.HOSTNAME] = jail_data.name
-        jail_options[JailOption.OS_RELEASE] = str(os_version)
-        jail_options.update(jail_data.options)
+        jail_options[JailParameter.PATH] = self._base_jail_factory.get_jail_mountpoint(jail_data.name).as_posix()
+        jail_options[JailParameter.HOSTNAME] = jail_data.name
+        jail_options[JailParameter.OS_RELEASE] = str(os_version)
+        jail_options.update(jail_data.parameters)
         return jail_options
 
     def create_jail(self, jail_data: Jail, distribution: Distribution):
@@ -62,7 +62,7 @@ class JailFactory:
             os.makedirs(jail_config_folder.as_posix())
 
         jail_options = self.get_jail_default_options(jail_data, distribution.version)
-        final_jail = Jail(name=jail_data.name, options=jail_options)
+        final_jail = Jail(name=jail_data.name, parameters=jail_options)
         final_jail.write_config_file(self.get_config_file_path(jail_data.name))
         distribution.write_config_file(jail_config_folder.joinpath('distribution.conf'))
 
