@@ -18,19 +18,25 @@ class Provision:
         with open(path_to_file.as_posix(), 'w') as playbook:
             yaml.dump(ansible_playbook, stream=playbook)
 
-    def run_provision(self, path_to_playbook_file: PosixPath, wrap_output: bool = True):
+    def run_provision_cmd(self, cmd: str, jail_name: str, config_folder: PosixPath):
+        cmd.replace("'", "\\'")
+        cmd = [
+            f'env ANSIBLE_CONFIG={config_folder.as_posix()}/{self.ANSIBLE_CONFIG_FILE}',
+            self.ANSIBLE_CMD,
+            f"--inventory={config_folder.joinpath(self.ANSIBLE_INVENTORY_NAME).as_posix()}",
+            f"--module-name=raw",
+            f"--args='{cmd}'",
+            jail_name
+        ]
+        subprocess.run(" ".join(cmd), shell=True, check=True, universal_newlines=True)
+
+    def run_provision(self, path_to_playbook_file: PosixPath):
         cmd = [
             self.ANSIBLE_PLAYBOOK_CMD,
             path_to_playbook_file.as_posix()
         ]
 
-        subprocess_options = {
-            'shell': True, 'check': True, 'universal_newlines': True
-        }
-        if wrap_output:
-            subprocess_options['stdout'] = subprocess.PIPE
-            subprocess_options['stderr'] = subprocess.STDOUT
-        subprocess.run(" ".join(cmd), **subprocess_options)
+        subprocess.run(" ".join(cmd), shell=True, check=True, universal_newlines=True)
 
     def write_inventory(self, list_of_jails: List[Jail], config_folder: PosixPath):
         inventory: Dict = {

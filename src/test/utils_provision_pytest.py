@@ -13,7 +13,8 @@ TEST_RESOURCES_PLAYBOOK = PosixPath('src/test/resources/playbook')
 
 
 class MockingProvision(Provision):
-    ANSIBLE_CMD = "sh scripts/ansible.sh"
+    ANSIBLE_PLAYBOOK_CMD = "sh scripts/ansible-playbook.sh"
+    ANSIBLE_CMD = 'sh scripts/ansible.sh'
 
 
 def configure_ansible_template(temp_folder_path: str, filename: str):
@@ -36,13 +37,11 @@ class TestProvision:
     def test_run_playbook(self):
         MockingProvision().run_provision(
             path_to_playbook_file=TEST_RESOURCES_PLAYBOOK,
-            wrap_output=False
         )
 
         with pytest.raises(CalledProcessError):
             MockingProvision().run_provision(
-                path_to_playbook_file=TEST_RESOURCES_PLAYBOOK.joinpath('none'),
-                wrap_output=True)
+                path_to_playbook_file=TEST_RESOURCES_PLAYBOOK.joinpath('none'))
 
     def test_create_ansible_configuration(self):
         with TemporaryDirectory() as temp_dir:
@@ -53,3 +52,8 @@ class TestProvision:
     def test_write_inventory_file(self):
         MockingProvision().write_inventory([Jail('test1'), Jail('test2')], TMP_PATH)
         assert filecmp.cmp(TMP_PATH.joinpath('ansible_inventory').as_posix(), 'src/test/resources/ansible_inventory')
+
+    def test_run_provision_cmd(self):
+        cmd = 'echo true'
+
+        MockingProvision().run_provision_cmd(cmd, 'test', config_folder=TMP_PATH)
