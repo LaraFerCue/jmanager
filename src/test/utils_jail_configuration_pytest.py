@@ -1,7 +1,8 @@
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
 
-from src.utils.jail_configuration import configure_ssh_service_configuration_file, configure_services
+from src.utils.jail_configuration import configure_ssh_service_configuration_file, configure_services, \
+    create_private_key, write_public_key
 
 
 class TestJailConfiguration:
@@ -54,3 +55,17 @@ class TestJailConfiguration:
 
             with open(temp_dir_path.joinpath('rc.conf').as_posix(), 'r') as rc_conf:
                 assert rc_conf.read() == "other_service_enable=\"YES\"\nsshd_enable=\"YES\"\n"
+
+    def test_write_private_key(self):
+        with TemporaryDirectory() as temp_dir:
+            create_private_key(PosixPath(temp_dir).joinpath('priv.key'))
+            assert PosixPath(temp_dir).joinpath('priv.key').is_file()
+
+    def test_write_public_key(self):
+        with TemporaryDirectory() as temp_dir:
+            priv_key_path = PosixPath(temp_dir).joinpath('priv.key')
+            pub_key_path = PosixPath(temp_dir).joinpath('pub.key')
+            create_private_key(priv_key_path)
+
+            write_public_key(priv_key_path, pub_key_path)
+            assert pub_key_path.is_file()
