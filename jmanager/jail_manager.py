@@ -1,6 +1,6 @@
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
-from typing import List
+from typing import List, Dict
 
 from models.distribution import Distribution
 from models.jail import Jail, JailError
@@ -48,6 +48,7 @@ class JailManager:
     def create_jail(self, jail_data: Jail, distribution: Distribution):
         if not self._jail_factory.base_jail_factory.base_jail_exists(distribution=distribution):
             with TemporaryDirectory(prefix="jmanager_", suffix="_tarballs") as temp_dir:
+                print("Fetching tarballs ...")
                 path_to_temp_dir = PosixPath(temp_dir)
                 self._http_fetcher.fetch_tarballs_into(
                     version=distribution.version,
@@ -55,6 +56,7 @@ class JailManager:
                     components=distribution.components,
                     temp_dir=path_to_temp_dir,
                     callback=self.print_progress_bar_fetch)
+                print("Creating the base jail ...")
                 self._jail_factory.base_jail_factory.create_base_jail(distribution=distribution,
                                                                       path_to_tarballs=path_to_temp_dir,
                                                                       callback=print_progress_bar_extract)
