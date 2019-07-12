@@ -1,11 +1,8 @@
 import os
-import sys
 from os import stat
 from pathlib import PosixPath
 from stat import UF_HIDDEN
 from tempfile import TemporaryDirectory
-
-import pytest
 
 from src.utils.file_utils import set_flags_to_folder_recursively
 
@@ -23,7 +20,6 @@ def assert_folder_mutable(temp_dir: str):
     assert not stat(f"{temp_dir}/file1").st_flags & UF_HIDDEN
 
 
-@pytest.mark.skipif(not sys.platform.startswith('freebsd'), reason="chflags is not supported in this platform")
 class TestFileUtils:
 
     def test_make_folder_mutable_only_files(self):
