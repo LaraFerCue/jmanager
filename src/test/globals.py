@@ -84,3 +84,11 @@ def destroy_dummy_jail(jail_name: str):
     zfs = MockingZFS()
     shutil.rmtree(TMP_PATH.joinpath(jail_name), ignore_errors=True)
     zfs.zfs_destroy(data_set=f"{TEST_DATA_SET}/{jail_name}")
+
+
+def remove_path(temp_dir: PosixPath = TMP_PATH):
+    if temp_dir.exists():
+        if temp_dir.is_dir():
+            shutil.rmtree(temp_dir.as_posix())
+        else:
+            temp_dir.unlink()
