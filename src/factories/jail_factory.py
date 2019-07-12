@@ -28,6 +28,10 @@ class JailFactory:
         self._base_jail_factory = base_jail_factory
 
     @property
+    def jail_config_folder(self) -> PosixPath:
+        return self._jail_config_folder
+
+    @property
     def base_jail_factory(self) -> BaseJailFactory:
         return self._base_jail_factory
 
@@ -67,15 +71,15 @@ class JailFactory:
         final_jail.write_config_file(self.get_config_file_path(jail_data.name))
         distribution.write_config_file(jail_config_folder.joinpath('distribution.conf'))
 
-    def clone_base_jail(self, distribution, jail_data_set):
-        jail_mountpoint = self._base_jail_factory.get_jail_mountpoint(jail_data_set)
+    def clone_base_jail(self, distribution: Distribution, jail_data_set_name: str):
+        jail_mountpoint = self._base_jail_factory.get_jail_mountpoint(jail_data_set_name)
 
         clone_properties: Dict[str, str] = {"mountpoint": jail_mountpoint.as_posix()}
         snapshot_name = self._base_jail_factory.get_snapshot_name(component_list=distribution.components)
         self._base_jail_factory.data_set_factory.clone(
             data_set_name=self._base_jail_factory.get_data_set_name(distribution),
             snapshot_name=snapshot_name,
-            clone_data_set_name=jail_data_set,
+            clone_data_set_name=jail_data_set_name,
             options=clone_properties)
 
     def jail_exists(self, jail_name: str) -> bool:
