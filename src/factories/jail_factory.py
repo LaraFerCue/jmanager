@@ -1,7 +1,5 @@
 import os
 import shutil
-import subprocess
-from distutils.file_util import copy_file
 from pathlib import PosixPath
 from typing import Dict, List
 
@@ -93,22 +91,6 @@ class JailFactory:
 
         self._base_jail_factory.data_set_factory.delete_data_set(jail_name)
 
-    def start_jail(self, jail_name: str) -> str:
-        path_to_jail = self.base_jail_factory.get_jail_mountpoint(jail_data_set_name=jail_name)
-        if not path_to_jail.joinpath('etc', 'resolv.conf').is_file():
-            copy_file('/etc/resolv.conf', path_to_jail.joinpath('etc').as_posix())
-
-        jail_config_file = self.get_config_file_path(jail_name)
-        cmd = f"{self.JAIL_CMD} -f {jail_config_file} -c {jail_name}"
-        return subprocess.run(cmd, shell=True, check=True,
-                              universal_newlines=True).stdout
-
-    def stop_jail(self, jail_name: str):
-        jail_config_file = self.get_config_file_path(jail_name)
-        cmd = f"{self.JAIL_CMD} -f {jail_config_file} -r {jail_name}"
-        return subprocess.run(cmd, shell=True, check=True,
-                              universal_newlines=True).stdout
-
     def list_jails(self) -> List[Jail]:
         jail_list = []
         for config_folder in self._jail_config_folder.iterdir():
@@ -117,3 +99,6 @@ class JailFactory:
                 jail.origin = Distribution.read_config_file(config_folder.joinpath('distribution.conf'))
                 jail_list.append(jail)
         return jail_list
+
+    def __eq__(self, other: 'JailFactory') -> bool:
+        return self.base_jail_factory == other.base_jail_factory and self.jail_config_folder == other.jail_config_folder
