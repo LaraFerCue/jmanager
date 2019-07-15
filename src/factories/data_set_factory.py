@@ -58,3 +58,6 @@ class DataSetFactory:
             data_set=self.get_data_set_path(clone_data_set_name),
             options=options
         )
+
+    def __eq__(self, other: 'DataSetFactory') -> bool:
+        return self._zfs_root_data_set == other._zfs_root_data_set
