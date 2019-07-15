@@ -12,7 +12,8 @@ CONFIGURATION_SCHEMA: Dict[str, type] = {
     'version': str,
     'architecture': str,
     'components': list,
-    'jail_parameters': dict
+    'jail_parameters': dict,
+    'provision': dict
 }
 
 
