@@ -12,4 +12,4 @@ def create_command(jmanagerfile: str, jail_manager: JailManager):
         jail_manager.create_jail(jail_data=jmanagerfile.jail, distribution=jmanagerfile.distribution)
         jail_manager.configure_jail(jail_name=jmanagerfile.jail.name)
         jail_manager.start(jail_name=jmanagerfile.jail.name)
-        jail_manager.provision_jail(jail_name=jmanagerfile.jail.name, provision_dict={})
+        jail_manager.provision_jail(jail_name=jmanagerfile.jail.name, provision_file=None)

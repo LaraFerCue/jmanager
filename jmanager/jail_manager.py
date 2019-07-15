@@ -3,7 +3,7 @@ import subprocess
 from distutils.file_util import copy_file
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
-from typing import List, Dict
+from typing import List
 
 from jmanager.utils.console_utils import print_progress_bar_extract, print_progress_bar_fetch
 from models.distribution import Distribution
@@ -108,6 +108,8 @@ class JailManager:
         write_public_key(priv_key_path=self._private_key_path,
                          pub_key_path=ssh_config_folder.joinpath('authorized_keys'))
 
-    def provision_jail(self, jail_name: str, provision_dict: Dict):
-        self._provision.run_provision_cmd(cmd='pkg install -y python3.6', jail_name=jail_name,
+    def provision_jail(self, jail_name: str, provision_file: PosixPath = None):
+        self._provision.run_provision_cmd(cmd='pkg install -y python36', jail_name=jail_name,
                                           config_folder=self._jail_factory.jail_config_folder)
+        if provision_file is not None:
+            self._provision.run_provision(path_to_playbook_file=provision_file)
