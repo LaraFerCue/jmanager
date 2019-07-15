@@ -7,7 +7,7 @@ from models.distribution import Architecture, Version, VersionType, Component
 
 
 class HTTPFetcher:
-    SERVER_URL = "http://ftp.FreeBSD.org"
+    SERVER_URL = "https://ftp.FreeBSD.org"
     FTP_BASE_DIRECTORY = PosixPath('pub/FreeBSD')
     BLOCK_SIZE = 8192
 
