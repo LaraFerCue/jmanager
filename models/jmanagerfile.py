@@ -18,8 +18,9 @@ class JManagerFile:
         if provision is not None:
             if provision['type'] == 'inline':
                 _, temp_file_path = mkstemp()
+                final_provision = [{'tasks': provision['provision'], 'hosts': jail_name}]
                 with open(temp_file_path, 'w') as temp_file:
-                    yaml.dump(provision['provision'], stream=temp_file)
+                    yaml.dump(final_provision, stream=temp_file)
 
                 self._provision_file_path = PosixPath(temp_file_path)
             elif provision['type'] == 'file':
@@ -31,6 +32,8 @@ class JManagerFile:
                     raise FileNotFoundError(f"Provision file {self._provision_file_path.as_posix()} is missing")
             else:
                 raise ValueError(f"Wrong value '{provision['type']}' for provision type")
+        else:
+            self._provision_file_path = None
 
     @property
     def distribution(self) -> Distribution:

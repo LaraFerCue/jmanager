@@ -6,6 +6,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from models.jail import Jail
+from src.test.globals import TMP_PATH
 from src.utils.ansible import Ansible
 
 TEST_RESOURCES_PLAYBOOK = PosixPath('src/test/resources/playbook')
@@ -34,13 +35,17 @@ class TestProvision:
             assert filecmp.cmp(playbook_path.as_posix(), TEST_RESOURCES_PLAYBOOK.as_posix())
 
     def test_run_playbook(self):
+        open(TMP_PATH.joinpath(MockingAnsible.ANSIBLE_INVENTORY_NAME), 'w').close()
         MockingAnsible().run_provision(
             path_to_playbook_file=TEST_RESOURCES_PLAYBOOK,
+            config_folder=TMP_PATH
         )
 
         with pytest.raises(CalledProcessError):
             MockingAnsible().run_provision(
-                path_to_playbook_file=TEST_RESOURCES_PLAYBOOK.joinpath('none'))
+                path_to_playbook_file=TEST_RESOURCES_PLAYBOOK.joinpath('none'),
+                config_folder=TMP_PATH
+            )
 
     def test_create_ansible_configuration(self):
         with TemporaryDirectory() as temp_dir:

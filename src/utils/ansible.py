@@ -35,9 +35,10 @@ class Ansible:
         ]
         subprocess.run(" ".join(cmd), shell=True, check=True, universal_newlines=True)
 
-    def run_provision(self, path_to_playbook_file: PosixPath):
+    def run_provision(self, path_to_playbook_file: PosixPath, config_folder: PosixPath):
         cmd = [
             self.ANSIBLE_PLAYBOOK_CMD,
+            f"--inventory={config_folder.joinpath(self.ANSIBLE_INVENTORY_NAME).as_posix()}",
             path_to_playbook_file.as_posix()
         ]
 

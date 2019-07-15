@@ -134,5 +134,9 @@ class TestJManagerFile:
 
             assert len(provision['provision']) == len(read_provision_file)
             for index in range(0, len(provision['provision'])):
+                assert 'hosts' in read_provision_file[index]
+                assert 'tasks' in read_provision_file[index]
+
+                read_tasks = read_provision_file[index]['tasks']
                 for key, value in provision['provision'][index].items():
-                    assert key in read_provision_file[index] and read_provision_file[index][key] == value
+                    assert key in read_tasks[index] and read_tasks[index][key] == value
