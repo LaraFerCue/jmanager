@@ -1,4 +1,6 @@
 import os
+import subprocess
+from distutils.file_util import copy_file
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
 from typing import List, Dict
@@ -84,11 +86,24 @@ class JailManager:
     def list_base_jails(self) -> List[Distribution]:
         return self._jail_factory.base_jail_factory.list_base_jails()
 
+    def get_jail_mountpoint(self, jail_name: str) -> PosixPath:
+        return self._jail_factory.base_jail_factory.get_jail_mountpoint(jail_data_set_name=jail_name)
+
     def start(self, jail_name: str):
-        self._jail_factory.start_jail(jail_name)
+        path_to_jail = self.get_jail_mountpoint(jail_name=jail_name)
+        if not path_to_jail.joinpath('etc', 'resolv.conf').is_file():
+            copy_file('/etc/resolv.conf', path_to_jail.joinpath('etc').as_posix())
+
+        jail_config_file = self._jail_factory.get_config_file_path(jail_name)
+        cmd = f"{self._jail_factory.JAIL_CMD} -f {jail_config_file} -c {jail_name}"
+        return subprocess.run(cmd, shell=True, check=True,
+                              universal_newlines=True).stdout
 
     def stop(self, jail_name: str):
-        self._jail_factory.stop_jail(jail_name)
+        jail_config_file = self._jail_factory.get_config_file_path(jail_name)
+        cmd = f"{self._jail_factory.JAIL_CMD} -f {jail_config_file} -r {jail_name}"
+        return subprocess.run(cmd, shell=True, check=True,
+                              universal_newlines=True).stdout
 
     def provision_jail(self, jail_name: str, provision_dict: Dict):
         self._provision.run_provision_cmd(cmd='pkg install -y python3.6', jail_name=jail_name,
