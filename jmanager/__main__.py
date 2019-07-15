@@ -4,7 +4,7 @@ import argparse
 
 from jmanager.commands import execute_commands
 
-parser = argparse.ArgumentParser(description="FreeBSD Jail Manager")
+parser = argparse.ArgumentParser(prog="jmanager", description="FreeBSD Jail Manager")
 parser.add_argument("--jmanager-config", type=str,
                     help="path to the configuration file for the program",
                     default='/usr/local/etc/jmanager.conf')
