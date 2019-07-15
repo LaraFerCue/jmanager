@@ -12,6 +12,11 @@ class Provision:
     ANSIBLE_CMD = 'ansible-3.6'
     ANSIBLE_INVENTORY_NAME = 'ansible_inventory'
     ANSIBLE_CONFIG_FILE = 'ansible.cfg'
+    SSH_OPTIONS = {
+        'ControlMaster': 'auto',
+        'ControlPersist': '60s',
+        'NoHostAuthenticationForLocalhost': 'yes'
+    }
 
     @staticmethod
     def write_ansible_playbook(path_to_file: PosixPath, ansible_playbook):
@@ -59,11 +64,16 @@ class Provision:
             yaml.dump(inventory, stream=inventory_file)
 
     def write_ansible_configuration(self, config_folder: PosixPath):
+        ssh_args = ['-C']
+        for option, value in self.SSH_OPTIONS.items():
+            ssh_args.append(f"-o {option}='{value}'")
+
         with open(config_folder.joinpath(self.ANSIBLE_CONFIG_FILE).as_posix(), 'w') as ansible_config_file:
             ansible_config_file.write("[defaults]\n")
             ansible_config_file.write(f"inventory = {config_folder.joinpath(self.ANSIBLE_INVENTORY_NAME)}\n\n")
 
             ansible_config_file.write('[ssh_connection]\n')
             priv_key_path = config_folder.joinpath("priv.key")
-            ansible_config_file.write(
-                f'ssh_args = -C -o ControlMaster=auto -o ControlPersist=60s -i {priv_key_path.as_posix()}\n')
+
+            ssh_args.append(f"-i {priv_key_path.as_posix()}")
+            ansible_config_file.write(f'ssh_args = {" ".join(ssh_args)}\n')
