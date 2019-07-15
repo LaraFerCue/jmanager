@@ -75,6 +75,13 @@ class TestJManagerFile:
         with pytest.raises(ValueError, match=r"Property components must be of type 'list' not 'str'"):
             parse_jmanagerfile(configuration)
 
+    def test_parsing_with_provision(self):
+        configuration = [JAIL_CONFIGURATION_EXAMPLE[0].copy()]
+        configuration[0]['provision'] = {'type': 'inline', 'provision': {}}
+
+        jmanager_file = parse_jmanagerfile(configuration)
+        assert jmanager_file[0].provision_file_path is not None
+
     def test_jmanagerfile_with_provision_file(self):
         with TemporaryDirectory() as temp_dir:
             provision_file_path = PosixPath(temp_dir).joinpath('provision')
