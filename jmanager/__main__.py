@@ -35,6 +35,10 @@ stop_parser = subparsers.add_parser('stop')
 stop_parser.set_defaults(command="stop")
 stop_parser.add_argument('jail_name', type=str, help="name of the jail to be stopped")
 
+configure_parser = subparsers.add_parser('configure')
+configure_parser.set_defaults(command='configure')
+configure_parser.add_argument('jail_name', type=str, help='name of the jail to be configured')
+
 provision_parser = subparsers.add_parser('provision')
 provision_parser.set_defaults(command='provision')
 provision_parser.add_argument('jail_name', type=str, help='name of the jail to be provisioned')

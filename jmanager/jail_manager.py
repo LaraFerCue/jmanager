@@ -82,6 +82,32 @@ class JailManager:
         return subprocess.run(cmd, shell=True, check=True,
                               universal_newlines=True).stdout
 
+    def get_jail_port(self, jail_name: str) -> int:
+        port = -1
+        jail_path = self.get_jail_mountpoint(jail_name=jail_name)
+        if jail_path.joinpath('etc', 'ssh', 'sshd_config').is_file():
+            port = read_port_from_config_file(
+                config_file_path=jail_path.joinpath('etc', 'ssh', 'sshd_config')
+            )
+
+        if port < 0:
+            port = 2200 + len(self.list_jails())
+        return port
+
+    def configure_jail(self, jail_name: str):
+        jail_path = self.get_jail_mountpoint(jail_name=jail_name)
+        configure_ssh_service_configuration_file(
+            path_to_config_file=jail_path.joinpath('etc', 'ssh', 'sshd_config'),
+            jail_port=self.get_jail_port(jail_name=jail_name)
+        )
+        configure_services(service_configure_file_path=jail_path.joinpath('etc', 'rc.conf'))
+        ssh_config_folder = jail_path.joinpath('root', '.ssh')
+        if not ssh_config_folder.is_dir():
+            os.makedirs(ssh_config_folder.as_posix())
+
+        write_public_key(priv_key_path=self._private_key_path,
+                         pub_key_path=ssh_config_folder.joinpath('authorized_keys'))
+
     def provision_jail(self, jail_name: str, provision_dict: Dict):
         self._provision.run_provision_cmd(cmd='pkg install -y python3.6', jail_name=jail_name,
                                           config_folder=self._jail_factory.jail_config_folder)

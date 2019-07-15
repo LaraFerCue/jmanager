@@ -43,6 +43,8 @@ def execute_commands(args: Namespace):
         jail_manager.start(jail_name=args.jail_name)
     elif args.command == 'stop':
         jail_manager.stop(jail_name=args.jail_name)
+    elif args.command == 'configure':
+        jail_manager.configure_jail(jail_name=args.jail_name)
 
 
 def initialize_program(jail_config_folder: PosixPath, jail_root_path: PosixPath):
