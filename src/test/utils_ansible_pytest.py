@@ -1,4 +1,5 @@
 import filecmp
+import os
 from pathlib import PosixPath
 from subprocess import CalledProcessError
 from tempfile import TemporaryDirectory
@@ -35,6 +36,7 @@ class TestProvision:
             assert filecmp.cmp(playbook_path.as_posix(), TEST_RESOURCES_PLAYBOOK.as_posix())
 
     def test_run_playbook(self):
+        os.makedirs(TMP_PATH.as_posix(), exist_ok=True)
         open(TMP_PATH.joinpath(MockingAnsible.ANSIBLE_INVENTORY_NAME), 'w').close()
         MockingAnsible().run_provision(
             path_to_playbook_file=TEST_RESOURCES_PLAYBOOK,
