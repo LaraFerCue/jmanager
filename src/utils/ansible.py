@@ -7,7 +7,7 @@ import yaml
 from models.jail import Jail
 
 
-class Provision:
+class Ansible:
     ANSIBLE_PLAYBOOK_CMD = 'ansible-playbook-3.6'
     ANSIBLE_CMD = 'ansible-3.6'
     ANSIBLE_INVENTORY_NAME = 'ansible_inventory'
