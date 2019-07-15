@@ -9,10 +9,10 @@ from jmanager.utils.console_utils import print_progress_bar_extract, print_progr
 from models.distribution import Distribution
 from models.jail import Jail, JailError
 from src.factories.jail_factory import JailFactory
+from src.utils.ansible import Ansible
 from src.utils.fetch import HTTPFetcher
 from src.utils.jail_configuration import create_private_key, configure_services, \
     configure_ssh_service_configuration_file, read_port_from_config_file, write_public_key
-from src.utils.ansible import Ansible
 
 
 class JailManager:
@@ -112,4 +112,5 @@ class JailManager:
         self._ansible.run_provision_cmd(cmd='pkg install -y python36', jail_name=jail_name,
                                         config_folder=self._jail_factory.jail_config_folder)
         if provision_file is not None:
-            self._ansible.run_provision(path_to_playbook_file=provision_file)
+            self._ansible.run_provision(path_to_playbook_file=provision_file,
+                                        config_folder=self._jail_factory.jail_config_folder)
