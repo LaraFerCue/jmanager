@@ -10,6 +10,8 @@ from models.distribution import Distribution
 from models.jail import Jail, JailError
 from src.factories.jail_factory import JailFactory
 from src.utils.fetch import HTTPFetcher
+from src.utils.jail_configuration import create_private_key, configure_services, \
+    configure_ssh_service_configuration_file, read_port_from_config_file, write_public_key
 from src.utils.provision import Provision
 
 
@@ -23,6 +25,10 @@ class JailManager:
             os.makedirs(self._jail_factory.jail_config_folder.as_posix())
         if not self._jail_factory.jail_config_folder.joinpath(self._provision.ANSIBLE_CONFIG_FILE).is_file():
             self._provision.write_ansible_configuration(self._jail_factory.jail_config_folder)
+
+        self._private_key_path = self._jail_factory.jail_config_folder.joinpath('priv.key')
+        if not self._private_key_path.is_file():
+            create_private_key(priv_key_file_path=self._private_key_path)
 
     def create_jail(self, jail_data: Jail, distribution: Distribution):
         if not self._jail_factory.base_jail_factory.base_jail_exists(distribution=distribution):
