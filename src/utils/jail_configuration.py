@@ -43,3 +43,11 @@ def write_public_key(priv_key_path: PosixPath, pub_key_path: PosixPath):
                 'hostname': 'localhost',
             }
         )
+
+
+def read_port_from_config_file(config_file_path: PosixPath) -> int:
+    with open(config_file_path.as_posix(), 'r') as config_file:
+        for line in config_file.readlines():
+            if line.startswith('ListenAddress'):
+                return int(line.split()[1].split(':')[1])
+    return -1

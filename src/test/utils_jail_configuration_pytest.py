@@ -2,7 +2,7 @@ from pathlib import PosixPath
 from tempfile import TemporaryDirectory
 
 from src.utils.jail_configuration import configure_ssh_service_configuration_file, configure_services, \
-    create_private_key, write_public_key
+    create_private_key, write_public_key, read_port_from_config_file
 
 
 class TestJailConfiguration:
@@ -69,3 +69,15 @@ class TestJailConfiguration:
 
             write_public_key(priv_key_path, pub_key_path)
             assert pub_key_path.is_file()
+
+    def test_read_port_from_configuration_file(self):
+        with TemporaryDirectory() as temp_dir:
+            temp_dir_path = PosixPath(temp_dir)
+            open(temp_dir_path.joinpath('config_file').as_posix(), 'w').close()
+
+            assert read_port_from_config_file(temp_dir_path.joinpath('config_file')) == -1
+
+            with open(temp_dir_path.joinpath('config_file').as_posix(), 'w') as config_file:
+                config_file.write('ListenAddress\tlocalhost:2201\n')
+
+            assert read_port_from_config_file(temp_dir_path.joinpath('config_file')) == 2201
