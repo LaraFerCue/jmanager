@@ -110,3 +110,6 @@ class BaseJailFactory:
             distribution_list.append(Distribution(version=version, architecture=architecture,
                                                   components=components))
         return distribution_list
+
+    def __eq__(self, other: 'BaseJailFactory') -> bool:
+        return self._data_set_factory == other._data_set_factory and self._jail_root_path == other._jail_root_path
