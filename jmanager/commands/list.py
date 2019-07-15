@@ -14,7 +14,7 @@ class ListType(Enum):
 def print_list_of_base_jails(jail_manager: JailManager):
     print(BASE_JAIL_HEADER)
     for distribution in jail_manager.list_base_jails():
-        components = ', '.join([component.value for component in distribution.components])
+        components = ','.join([component.value for component in distribution.components])
         print(f"{distribution.version}\t{distribution.architecture.value}\t{components}")
 
 
