@@ -40,12 +40,16 @@ def parse_jmanagerfile(jail_dictionary_list: List[Dict[str, Any]]) -> List[JMana
         if 'jail_parameters' in jail_dictionary:
             for parameter, value in jail_dictionary['jail_parameters'].items():
                 jail_parameters[JailParameter(parameter)] = value
+        provision = None
+        if 'provision' in jail_dictionary:
+            provision = jail_dictionary['provision']
 
         jail_list.append(JManagerFile(jail_name=jail_dictionary['name'],
                                       version=Version.from_string(jail_dictionary['version']),
                                       components=components,
                                       architecture=Architecture(jail_dictionary['architecture']),
-                                      jail_parameters=jail_parameters
+                                      jail_parameters=jail_parameters,
+                                      provision=provision
                                       ))
     return jail_list
 
