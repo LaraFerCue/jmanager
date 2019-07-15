@@ -6,7 +6,6 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from models.jail import Jail
-from src.test.globals import TMP_PATH
 from src.utils.provision import Provision
 
 TEST_RESOURCES_PLAYBOOK = PosixPath('src/test/resources/playbook')
@@ -50,10 +49,17 @@ class TestProvision:
             assert filecmp.cmp(f"{temp_dir}/ansible.cfg", f"{temp_dir}/config", shallow=False)
 
     def test_write_inventory_file(self):
-        MockingProvision().write_inventory([Jail('test1'), Jail('test2')], TMP_PATH)
-        assert filecmp.cmp(TMP_PATH.joinpath('ansible_inventory').as_posix(), 'src/test/resources/ansible_inventory')
+        with TemporaryDirectory() as config_dir:
+            config_dir_path = PosixPath(config_dir)
+            MockingProvision().write_inventory([Jail('test1'), Jail('test2')], config_dir_path)
+            assert filecmp.cmp(config_dir_path.joinpath('ansible_inventory').as_posix(),
+                               'src/test/resources/ansible_inventory')
 
     def test_run_provision_cmd(self):
         cmd = 'echo true'
 
-        MockingProvision().run_provision_cmd(cmd, 'test', config_folder=TMP_PATH)
+        with TemporaryDirectory() as ansible_dir:
+            ansible_dir_path = PosixPath(ansible_dir)
+            open(ansible_dir_path.joinpath('ansible_inventory').as_posix(), 'w').close()
+            open(ansible_dir_path.joinpath('ansible.cfg').as_posix(), 'w').close()
+            MockingProvision().run_provision_cmd(cmd, 'test', config_folder=ansible_dir_path)
