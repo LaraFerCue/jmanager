@@ -1,0 +1,19 @@
+- name: provisioned_example
+  version: 12.0-RELEASE
+  architecture: amd64
+  components:
+    - src
+    - lib32
+  provision:
+    type: inline
+    provision:
+        - name: Installing sl
+          package:
+            name: sl
+            state: latest
+        - name: Append line in /root/test
+          lineinfile:
+            create: yes
+            path: /root/test
+            regex: '^line='
+            line: 'line=myline'
