@@ -17,6 +17,8 @@ class HTTPFetcher:
 
         received_bytes = 0
         msg = f"{destination.name} "
+        total_time_elapsed = 0.0
+        speed = 0.0
         with open(destination.as_posix(), 'wb') as destination_file:
             while True:
                 start_time = time()
@@ -24,9 +26,15 @@ class HTTPFetcher:
                 if not buffer:
                     break
 
+                if total_time_elapsed <= 5.0:
+                    speed = len(buffer) / (time() - start_time)
+                    total_time_elapsed += (time() - start_time)
+                else:
+                    total_time_elapsed = 0.0
+
                 received_bytes += len(buffer)
                 if callback is not None:
-                    callback(msg, received_bytes, file_size, len(buffer) / (time() - start_time))
+                    callback(msg, received_bytes, file_size, speed)
                 destination_file.write(buffer)
 
     def fetch_tarballs_into(self, version: Version, architecture: Architecture,
