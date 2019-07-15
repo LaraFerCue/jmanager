@@ -1,9 +1,13 @@
+from pathlib import PosixPath
+from tempfile import TemporaryDirectory
 from typing import List, Dict
 
 import pytest
+import yaml
 
+from models.jmanagerfile import JManagerFile
 from src.configuration import parse_jmanagerfile
-from src.test.globals import RESOURCES_PATH
+from src.test.globals import RESOURCES_PATH, TEST_DISTRIBUTION
 
 SAMPLE_JMANAGER_FILE = RESOURCES_PATH.joinpath('test_jmanagerfile.yaml')
 JAIL_CONFIGURATION_EXAMPLE: List[Dict] = [
@@ -70,3 +74,65 @@ class TestJManagerFile:
 
         with pytest.raises(ValueError, match=r"Property components must be of type 'list' not 'str'"):
             parse_jmanagerfile(configuration)
+
+    def test_jmanagerfile_with_provision_file(self):
+        with TemporaryDirectory() as temp_dir:
+            provision_file_path = PosixPath(temp_dir).joinpath('provision')
+            provision = {'type': 'file', 'path': provision_file_path.as_posix()}
+            open(provision_file_path.as_posix(), 'w').close()
+            jmamagerfile = JManagerFile(jail_name='test', version=TEST_DISTRIBUTION.version,
+                                        architecture=TEST_DISTRIBUTION.architecture,
+                                        components=[],
+                                        provision=provision)
+
+            assert jmamagerfile.provision_file_path == provision_file_path
+
+    def test_jmanagerfile_with_wrong_provision_type(self):
+        provision = {'type': 'none'}
+        with pytest.raises(ValueError, match=r"Wrong value 'none' for provision type"):
+            JManagerFile(jail_name='test', version=TEST_DISTRIBUTION.version,
+                         architecture=TEST_DISTRIBUTION.architecture,
+                         components=[],
+                         provision=provision)
+
+    def test_jmanagerfile_with_missing_path_line(self):
+        provision = {'type': 'file'}
+
+        with pytest.raises(AttributeError, match=r"Path is a mandatory option for the provision type 'file'"):
+            JManagerFile(jail_name='test', version=TEST_DISTRIBUTION.version,
+                         architecture=TEST_DISTRIBUTION.architecture,
+                         components=[],
+                         provision=provision)
+
+    def test_jmanagerfile_with_missing_provision_file(self):
+        with TemporaryDirectory() as temp_dir:
+            provision_file_path = PosixPath(temp_dir).joinpath('provision')
+            provision = {'type': 'file', 'path': provision_file_path.as_posix()}
+
+            with pytest.raises(FileNotFoundError, match=r'^Provision file'):
+                JManagerFile(jail_name='test', version=TEST_DISTRIBUTION.version,
+                             architecture=TEST_DISTRIBUTION.architecture,
+                             components=[],
+                             provision=provision)
+
+    def test_jmanagerfile_with_inline_provision(self):
+        provision = {
+            'type': 'inline',
+            'provision': [
+                {
+                    'name': 'name',
+                    'value': 'value'
+                }
+            ]
+        }
+        jmamagerfile = JManagerFile(jail_name='test', version=TEST_DISTRIBUTION.version,
+                                    architecture=TEST_DISTRIBUTION.architecture,
+                                    components=[],
+                                    provision=provision)
+        with open(jmamagerfile.provision_file_path.as_posix(), 'r') as provision_file:
+            read_provision_file = yaml.load(stream=provision_file, Loader=yaml.Loader)
+
+            assert len(provision['provision']) == len(read_provision_file)
+            for index in range(0, len(provision['provision'])):
+                for key, value in provision['provision'][index].items():
+                    assert key in read_provision_file[index] and read_provision_file[index][key] == value
