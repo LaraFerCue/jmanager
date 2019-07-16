@@ -11,7 +11,7 @@ from jmanager.factories.data_set_factory import DataSetFactory
 from jmanager.factories.jail_factory import JailFactory
 from jmanager.jail_manager import JailManager
 from jmanager.utils.fetch import HTTPFetcher
-from src.configuration import read_configuration_file
+from jmanager.utils.configuration import read_configuration_file
 
 
 def execute_commands(args: Namespace):

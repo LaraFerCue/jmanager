@@ -1,7 +1,7 @@
 from pathlib import PosixPath
 
 from jmanager.jail_manager import JailManager
-from src.configuration import parse_jmanagerfile, read_configuration_file
+from jmanager.utils.configuration import parse_jmanagerfile, read_configuration_file
 
 
 def create_command(jmanagerfile: str, jail_manager: JailManager):
