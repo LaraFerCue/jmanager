@@ -5,7 +5,7 @@ from typing import Dict, List
 
 from jmanager.models.distribution import Distribution, Version
 from jmanager.models.jail import Jail, JailParameter, JailError
-from src.factories.base_jail_factory import BaseJailFactory
+from jmanager.factories.base_jail_factory import BaseJailFactory
 
 
 class JailFactory:

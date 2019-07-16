@@ -3,11 +3,11 @@ import shutil
 import tarfile
 from pathlib import PosixPath
 
+from jmanager.factories.base_jail_factory import BaseJailFactory
+from jmanager.factories.data_set_factory import DataSetFactory
+from jmanager.factories.jail_factory import JailFactory
 from jmanager.models.distribution import Distribution, Version, VersionType, Architecture
 from jmanager.utils.zfs import ZFS
-from src.factories.base_jail_factory import BaseJailFactory
-from src.factories.data_set_factory import DataSetFactory
-from src.factories.jail_factory import JailFactory
 
 TMP_PATH = PosixPath('/tmp').joinpath('jmanager_test')
 TEST_DATA_SET = 'zroot/jmanager_test'

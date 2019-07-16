@@ -12,7 +12,7 @@ from jmanager.utils.ansible import Ansible
 from jmanager.utils.fetch import HTTPFetcher
 from jmanager.utils.jail_configuration import create_private_key, configure_services, \
     configure_ssh_service_configuration_file, read_port_from_config_file, write_public_key
-from src.factories.jail_factory import JailFactory
+from jmanager.factories.jail_factory import JailFactory
 
 
 class JailManager:

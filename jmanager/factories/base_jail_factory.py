@@ -1,10 +1,10 @@
 from pathlib import PosixPath
 from typing import List, Callable
 
+from jmanager.factories.data_set_factory import DataSetFactory
 from jmanager.models.distribution import Distribution, Component, Version, Architecture
 from jmanager.models.jail import JailError
 from jmanager.utils.file_utils import remove_immutable_path, extract_tarball_into
-from src.factories.data_set_factory import DataSetFactory
 
 
 class BaseJailFactory:
