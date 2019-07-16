@@ -2,7 +2,7 @@ import shutil
 
 import pytest
 
-from src.test.globals import get_mocking_base_jail_factory, TMP_PATH, remove_path
+from test.globals import get_mocking_base_jail_factory, TMP_PATH, remove_path
 
 TEST_JAIL_NAME = "test"
 

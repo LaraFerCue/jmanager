@@ -2,7 +2,7 @@ import pytest
 
 from jmanager.models.distribution import Distribution, Component
 from jmanager.models.jail import Jail, JailError
-from src.test.globals import get_mocking_jail_factory, create_dummy_base_jail, TEST_DISTRIBUTION, \
+from test.globals import get_mocking_jail_factory, create_dummy_base_jail, TEST_DISTRIBUTION, \
     destroy_dummy_base_jail, TMP_PATH, TEST_DATA_SET, destroy_dummy_jail, MockingZFS
 
 

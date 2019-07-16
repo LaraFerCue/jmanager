@@ -2,7 +2,7 @@ import os
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory, mkdtemp
 
-from src.test.globals import remove_path
+from test.globals import remove_path
 
 
 class TestGlobals:

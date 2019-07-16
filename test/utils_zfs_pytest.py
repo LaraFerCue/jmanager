@@ -2,7 +2,7 @@ import platform
 
 import pytest
 
-from src.test.globals import TEST_DATA_SET, MockingZFS
+from test.globals import TEST_DATA_SET, MockingZFS
 from jmanager.utils.zfs import ZFSError, ZFSProperty, ZFS, ZFSType
 
 

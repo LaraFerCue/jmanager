@@ -11,7 +11,7 @@ from jmanager.utils.zfs import ZFS
 
 TMP_PATH = PosixPath('/tmp').joinpath('jmanager_test')
 TEST_DATA_SET = 'zroot/jmanager_test'
-RESOURCES_PATH = PosixPath('src/test/resources')
+RESOURCES_PATH = PosixPath('test/resources')
 TEST_DISTRIBUTION = Distribution(version=Version(12, 0, VersionType.RELEASE), architecture=Architecture.AMD64,
                                  components=[])
 DUMMY_BASE_JAIL_DATA_SET = f"{TEST_DATA_SET}/{TEST_DISTRIBUTION.version}_{TEST_DISTRIBUTION.architecture.value}"
@@ -38,7 +38,7 @@ def create_dummy_tarball_in_folder(path_to_folder: PosixPath):
     with tarfile.open(name=path_to_folder.joinpath('base.txz').as_posix(), mode='w|xz') as tar_file:
         tar_file.add('jmanager/models', recursive=True)
     with tarfile.open(name=path_to_folder.joinpath('src.txz').as_posix(), mode='w|xz') as tar_file:
-        tar_file.add('src', recursive=True)
+        tar_file.add('jmanager', recursive=True)
     with tarfile.open(name=path_to_folder.joinpath('lib32.txz').as_posix(), mode='w|xz') as tar_file:
         tar_file.add('examples', recursive=True)
 

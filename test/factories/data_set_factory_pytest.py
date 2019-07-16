@@ -1,5 +1,5 @@
 from jmanager.factories.data_set_factory import DataSetFactory
-from src.test.globals import TEST_DATA_SET
+from test.globals import TEST_DATA_SET
 
 
 class TestDataSetFactory:

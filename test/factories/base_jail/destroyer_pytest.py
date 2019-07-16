@@ -1,5 +1,5 @@
 from jmanager.models.distribution import Distribution, Component
-from src.test.globals import get_mocking_base_jail_factory, TMP_PATH, create_dummy_base_jail, TEST_DISTRIBUTION
+from test.globals import get_mocking_base_jail_factory, TMP_PATH, create_dummy_base_jail, TEST_DISTRIBUTION
 
 
 class TestBaseJailFactoryDestroyer:

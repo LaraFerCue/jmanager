@@ -2,8 +2,8 @@ from pathlib import PosixPath
 
 import pytest
 
-from src.configuration import read_configuration_file
-from src.test.jmanagerfile_pytest import SAMPLE_JMANAGER_FILE, JAIL_CONFIGURATION_EXAMPLE
+from jmanager.utils.configuration import read_configuration_file
+from test.jmanagerfile_pytest import SAMPLE_JMANAGER_FILE, JAIL_CONFIGURATION_EXAMPLE
 
 
 class TestConfigurationFile:

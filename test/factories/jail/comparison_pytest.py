@@ -1,7 +1,7 @@
 from jmanager.factories.base_jail_factory import BaseJailFactory
 from jmanager.factories.data_set_factory import DataSetFactory
 from jmanager.factories.jail_factory import JailFactory
-from src.test.globals import TEST_DATA_SET, TMP_PATH
+from test.globals import TEST_DATA_SET, TMP_PATH
 
 
 class TestJailFactoryComparison:

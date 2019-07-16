@@ -7,10 +7,10 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from jmanager.models.jail import Jail
-from src.test.globals import TMP_PATH
 from jmanager.utils.ansible import Ansible
+from test.globals import TMP_PATH, RESOURCES_PATH
 
-TEST_RESOURCES_PLAYBOOK = PosixPath('src/test/resources/playbook')
+TEST_RESOURCES_PLAYBOOK = RESOURCES_PATH.joinpath('playbook')
 
 
 class MockingAnsible(Ansible):
@@ -19,7 +19,7 @@ class MockingAnsible(Ansible):
 
 
 def configure_ansible_template(temp_folder_path: str, filename: str):
-    with open('src/test/resources/ansible.cfg', 'r') as template:
+    with open(RESOURCES_PATH.joinpath('ansible.cfg').as_posix(), 'r') as template:
         with open(f"{temp_folder_path}/{filename}", 'w') as temp_file:
             temp_file.write(template.read().replace('%temp%', temp_folder_path))
 
@@ -60,7 +60,7 @@ class TestProvision:
             config_dir_path = PosixPath(config_dir)
             MockingAnsible().write_inventory([Jail('test1'), Jail('test2')], config_dir_path)
             assert filecmp.cmp(config_dir_path.joinpath('ansible_inventory').as_posix(),
-                               'src/test/resources/ansible_inventory')
+                               RESOURCES_PATH.joinpath('ansible_inventory').as_posix())
 
     def test_run_provision_cmd(self):
         cmd = 'echo true'

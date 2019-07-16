@@ -6,8 +6,8 @@ import pytest
 import yaml
 
 from jmanager.models.jmanagerfile import JManagerFile
-from src.configuration import parse_jmanagerfile
-from src.test.globals import RESOURCES_PATH, TEST_DISTRIBUTION
+from jmanager.utils.configuration import parse_jmanagerfile
+from test.globals import RESOURCES_PATH, TEST_DISTRIBUTION
 
 SAMPLE_JMANAGER_FILE = RESOURCES_PATH.joinpath('test_jmanagerfile.yaml')
 JAIL_CONFIGURATION_EXAMPLE: List[Dict] = [

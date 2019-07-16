@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 import yaml
 
 from jmanager.models.distribution import Distribution, Version, VersionType, Architecture, Component
-from src.test.globals import TEST_DISTRIBUTION
+from test.globals import TEST_DISTRIBUTION, RESOURCES_PATH
 
 
 class TestModelDistribution:
@@ -51,7 +51,7 @@ class TestModelDistribution:
         with TemporaryDirectory() as temp_dir:
             TEST_DISTRIBUTION.write_config_file(PosixPath(temp_dir).joinpath('test'))
 
-            assert filecmp.cmp(f"{temp_dir}/test", "src/test/resources/dist.conf", shallow=False)
+            assert filecmp.cmp(f"{temp_dir}/test", RESOURCES_PATH.joinpath("dist.conf").as_posix(), shallow=False)
 
     def test_write_configuration_with_multiple_components(self):
         distribution = Distribution(
@@ -73,5 +73,5 @@ class TestModelDistribution:
             assert component.value in configuration['components']
 
     def test_read_configuration_file(self):
-        distribution = Distribution.read_config_file(PosixPath('src/test/resources/dist.conf'))
+        distribution = Distribution.read_config_file(RESOURCES_PATH.joinpath('dist.conf'))
         assert distribution == TEST_DISTRIBUTION
