@@ -1,4 +1,16 @@
+# WARN: bmake syntax
+#
+###################################
+# Makefile for JManager
+#
+# useful targets:
+#   make clean ----- clean up
+#   make test ------ runs the tests on the machine
+#   make pre-test -- configures a FreeBSD machine to run real HW tests
+
 SET_USER?=		${USER}
+PREFIX?=	/usr/local
+
 JMANAGER_COMMAND=	python3.6 -m jmanager
 JMANAGER_OPTIONS=	--jmanager-config src/test/resources/jmanager.conf
 
@@ -9,6 +21,9 @@ COVERAGE_FOLDERS=	jmanager/factories \
 
 LIST_TYPE=jail
 
+.PHONY:  all
+all: clean build install
+
 .PHONY: clean
 clean:
 	@echo "Cleaning current directory ..."
@@ -17,6 +32,14 @@ clean:
 	rm -rf htmlcov .coverage
 	@echo "Cleaning pytest cache ..."
 	rm -rf .pytest_cache
+
+.PHONY: build
+build:
+	python3.6 setup.py build
+
+.PHONY: install
+install:
+	python3.6 setup.py install --prefix ${PREFIX}
 
 .PHONY: pre-test
 pre-test:
