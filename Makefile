@@ -2,12 +2,19 @@ SET_USER?=		${USER}
 JMANAGER_COMMAND=	python3.6 -m jmanager
 JMANAGER_OPTIONS=	--jmanager-config src/test/resources/jmanager.conf
 
+COVERAGE_FOLDERS=	jmanager/factories \
+			jmanager/models \
+			jmanager/utils \
+			test
+
 LIST_TYPE=jail
 
 pre-test:
 	scripts/zfs_init.sh ${SET_USER}
 test: pre-test
-	pipenv run pytest --cov-report html --cov=src --cov=models
+	for folder in ${COVERAGE_FOLDERS} ; do \
+		echo "--cov=$${folder}" ; \
+	done | xargs pipenv run pytest --cov-report html
 
 test_commands: test_help test_create test_destroy
 
