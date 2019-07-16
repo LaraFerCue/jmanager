@@ -57,3 +57,4 @@ fabric.properties
 /htmlcov/
 *.swp
 /.idea/sonarlint/
+/build/
