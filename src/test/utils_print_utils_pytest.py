@@ -1,4 +1,4 @@
-from src.utils.print_utils import get_progress_text
+from jmanager.utils.print_utils import get_progress_text
 
 PROGRESS_TEXT = "test |=========================                         | 50.0%"
 

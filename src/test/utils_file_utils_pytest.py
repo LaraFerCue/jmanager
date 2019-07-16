@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from src.utils.file_utils import set_flags_to_folder_recursively
+from jmanager.utils.file_utils import set_flags_to_folder_recursively
 
 
 def create_immutable_folder(temp_dir: str):

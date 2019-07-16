@@ -1,4 +1,4 @@
-from src.utils.print_utils import get_progress_text
+from jmanager.utils.print_utils import get_progress_text
 
 
 def print_progress_bar_extract(msg: str, iteration: int, total: int):

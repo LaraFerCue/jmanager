@@ -7,8 +7,8 @@ from urllib.error import URLError
 import pytest
 
 from jmanager.models.distribution import Architecture, Version, VersionType, Component
+from jmanager.utils.fetch import HTTPFetcher
 from src.test.globals import TEST_DISTRIBUTION
-from src.utils.fetch import HTTPFetcher
 
 TEMPORARY_RELEASE_FTP_DIR = "releases/amd64/12.0-RELEASE"
 TEMPORARY_SNAPSHOT_FTP_DIR = "snapshots/amd64/12.0-STABLE"

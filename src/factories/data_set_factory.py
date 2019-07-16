@@ -1,7 +1,7 @@
 from pathlib import PosixPath
 from typing import List, Dict
 
-from src.utils.zfs import ZFS, ZFSProperty, ZFSType
+from jmanager.utils.zfs import ZFS, ZFSProperty, ZFSType
 
 
 class DataSetFactory:

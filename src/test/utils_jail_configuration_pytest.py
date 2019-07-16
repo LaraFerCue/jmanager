@@ -1,7 +1,7 @@
 from pathlib import PosixPath
 from tempfile import TemporaryDirectory
 
-from src.utils.jail_configuration import configure_ssh_service_configuration_file, configure_services, \
+from jmanager.utils.jail_configuration import configure_ssh_service_configuration_file, configure_services, \
     create_private_key, write_public_key, read_port_from_config_file
 
 

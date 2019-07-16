@@ -3,7 +3,7 @@ import platform
 import pytest
 
 from src.test.globals import TEST_DATA_SET, MockingZFS
-from src.utils.zfs import ZFSError, ZFSProperty, ZFS, ZFSType
+from jmanager.utils.zfs import ZFSError, ZFSProperty, ZFS, ZFSType
 
 
 def pytest_generate_tests(metafunc):

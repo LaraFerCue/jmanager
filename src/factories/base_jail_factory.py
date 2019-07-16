@@ -3,8 +3,8 @@ from typing import List, Callable
 
 from jmanager.models.distribution import Distribution, Component, Version, Architecture
 from jmanager.models.jail import JailError
+from jmanager.utils.file_utils import remove_immutable_path, extract_tarball_into
 from src.factories.data_set_factory import DataSetFactory
-from src.utils.file_utils import extract_tarball_into, remove_immutable_path
 
 
 class BaseJailFactory:

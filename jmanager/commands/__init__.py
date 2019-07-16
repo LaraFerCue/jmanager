@@ -7,11 +7,11 @@ from typing import Dict
 from jmanager.commands.create import create_command
 from jmanager.commands.list import print_list_of_jails, list_command
 from jmanager.jail_manager import JailManager
+from jmanager.utils.fetch import HTTPFetcher
 from src.configuration import read_configuration_file
 from src.factories.base_jail_factory import BaseJailFactory
 from src.factories.data_set_factory import DataSetFactory
 from src.factories.jail_factory import JailFactory
-from src.utils.fetch import HTTPFetcher
 
 
 def execute_commands(args: Namespace):

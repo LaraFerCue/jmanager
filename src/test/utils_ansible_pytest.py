@@ -8,7 +8,7 @@ import pytest
 
 from jmanager.models.jail import Jail
 from src.test.globals import TMP_PATH
-from src.utils.ansible import Ansible
+from jmanager.utils.ansible import Ansible
 
 TEST_RESOURCES_PLAYBOOK = PosixPath('src/test/resources/playbook')
 
