@@ -4,7 +4,8 @@ from pathlib import PosixPath
 from typing import Dict, List
 
 from jmanager.models.distribution import Distribution, Version
-from jmanager.models.jail import Jail, JailParameter, JailError
+from jmanager.models.jail import Jail, JailError
+from jmanager.models.jail_parameter import JailParameter
 from jmanager.factories.base_jail_factory import BaseJailFactory
 
 

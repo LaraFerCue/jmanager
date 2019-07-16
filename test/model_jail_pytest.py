@@ -4,7 +4,8 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from jmanager.models.jail import Jail, JailParameter
+from jmanager.models.jail import Jail
+from jmanager.models.jail_parameter import JailParameter
 from test.globals import RESOURCES_PATH, TEST_DISTRIBUTION
 
 JAIL_CONFIGURATION_DICT = {

@@ -4,7 +4,7 @@ from typing import List, Dict, Union, Any
 from yaml import load, Loader
 
 from jmanager.models.distribution import Architecture, Component, Version
-from jmanager.models.jail import JailParameter
+from jmanager.models.jail_parameter import JailParameter
 from jmanager.models.jmanagerfile import JManagerFile
 
 CONFIGURATION_SCHEMA: Dict[str, type] = {

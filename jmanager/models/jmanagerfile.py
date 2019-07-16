@@ -5,7 +5,8 @@ from typing import List, Dict, Any
 import yaml
 
 from jmanager.models.distribution import Distribution, Version, Architecture, Component
-from jmanager.models.jail import Jail, JailParameter
+from jmanager.models.jail import Jail
+from jmanager.models.jail_parameter import JailParameter
 
 
 class JManagerFile:

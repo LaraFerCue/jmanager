@@ -1,25 +1,8 @@
-from enum import Enum
 from pathlib import PosixPath
 from typing import Dict, List
 
 from jmanager.models.distribution import Distribution
-
-
-class JailParameter(Enum):
-    PATH = 'path'
-    HOSTNAME = 'host.hostname'
-    OS_RELEASE = 'osrelease'
-    OS_REL_DATE = 'osreldate'
-    EXEC_START = 'exec.start'
-    EXEC_STOP = 'exec.stop'
-    IP4 = 'ip4'
-    IP4_ADDR = 'ip4.addr'
-    IP4_SADDR_SEL = 'ip4.saddrsel'
-    IP6 = 'ip6'
-    IP6_ADDR = 'ip6.addr'
-    IP6_SADDR_SEL = 'ip6.saddrsel'
-    MOUNT_DEVFS = 'mount.devfs'
-
+from jmanager.models.jail_parameter import JailParameter
 
 HEADER = '# This file has been writen with JManager. Please, do not modify it\n' \
          '# If any change is needed use JManager to modify the options and/or\n' \
