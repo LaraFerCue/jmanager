@@ -3,7 +3,7 @@ import shutil
 import tarfile
 from pathlib import PosixPath
 
-from models.distribution import Distribution, Version, VersionType, Architecture
+from jmanager.models.distribution import Distribution, Version, VersionType, Architecture
 from src.factories.base_jail_factory import BaseJailFactory
 from src.factories.data_set_factory import DataSetFactory
 from src.factories.jail_factory import JailFactory
@@ -36,7 +36,7 @@ class MockingBaseJailFactory(BaseJailFactory):
 def create_dummy_tarball_in_folder(path_to_folder: PosixPath):
     os.makedirs(path_to_folder.as_posix(), exist_ok=True)
     with tarfile.open(name=path_to_folder.joinpath('base.txz').as_posix(), mode='w|xz') as tar_file:
-        tar_file.add('models', recursive=True)
+        tar_file.add('jmanager/models', recursive=True)
     with tarfile.open(name=path_to_folder.joinpath('src.txz').as_posix(), mode='w|xz') as tar_file:
         tar_file.add('src', recursive=True)
     with tarfile.open(name=path_to_folder.joinpath('lib32.txz').as_posix(), mode='w|xz') as tar_file:

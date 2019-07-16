@@ -6,7 +6,7 @@ from urllib.error import URLError
 
 import pytest
 
-from models.distribution import Architecture, Version, VersionType, Component
+from jmanager.models.distribution import Architecture, Version, VersionType, Component
 from src.test.globals import TEST_DISTRIBUTION
 from src.utils.fetch import HTTPFetcher
 

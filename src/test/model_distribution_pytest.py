@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 
 import yaml
 
-from models.distribution import Distribution, Version, VersionType, Architecture, Component
+from jmanager.models.distribution import Distribution, Version, VersionType, Architecture, Component
 from src.test.globals import TEST_DISTRIBUTION
 
 

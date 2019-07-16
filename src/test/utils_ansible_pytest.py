@@ -6,7 +6,7 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from models.jail import Jail
+from jmanager.models.jail import Jail
 from src.test.globals import TMP_PATH
 from src.utils.ansible import Ansible
 

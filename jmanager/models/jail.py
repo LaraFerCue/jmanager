@@ -2,7 +2,7 @@ from enum import Enum
 from pathlib import PosixPath
 from typing import Dict, List
 
-from models.distribution import Distribution
+from jmanager.models.distribution import Distribution
 
 
 class JailParameter(Enum):

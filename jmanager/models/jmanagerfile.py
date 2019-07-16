@@ -4,8 +4,8 @@ from typing import List, Dict, Any
 
 import yaml
 
-from models.distribution import Distribution, Version, Architecture, Component
-from models.jail import Jail, JailParameter
+from jmanager.models.distribution import Distribution, Version, Architecture, Component
+from jmanager.models.jail import Jail, JailParameter
 
 
 class JManagerFile:

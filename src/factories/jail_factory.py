@@ -3,8 +3,8 @@ import shutil
 from pathlib import PosixPath
 from typing import Dict, List
 
-from models.distribution import Distribution, Version
-from models.jail import Jail, JailParameter, JailError
+from jmanager.models.distribution import Distribution, Version
+from jmanager.models.jail import Jail, JailParameter, JailError
 from src.factories.base_jail_factory import BaseJailFactory
 
 

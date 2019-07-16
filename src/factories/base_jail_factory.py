@@ -1,8 +1,8 @@
 from pathlib import PosixPath
 from typing import List, Callable
 
-from models.distribution import Distribution, Component, Version, Architecture
-from models.jail import JailError
+from jmanager.models.distribution import Distribution, Component, Version, Architecture
+from jmanager.models.jail import JailError
 from src.factories.data_set_factory import DataSetFactory
 from src.utils.file_utils import extract_tarball_into, remove_immutable_path
 

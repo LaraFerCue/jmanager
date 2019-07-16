@@ -5,7 +5,7 @@ from typing import List, Dict
 import pytest
 import yaml
 
-from models.jmanagerfile import JManagerFile
+from jmanager.models.jmanagerfile import JManagerFile
 from src.configuration import parse_jmanagerfile
 from src.test.globals import RESOURCES_PATH, TEST_DISTRIBUTION
 

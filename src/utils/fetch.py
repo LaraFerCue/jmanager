@@ -3,7 +3,7 @@ from time import time
 from typing import Callable, List
 from urllib.request import urlopen
 
-from models.distribution import Architecture, Version, VersionType, Component
+from jmanager.models.distribution import Architecture, Version, VersionType, Component
 
 
 class HTTPFetcher:

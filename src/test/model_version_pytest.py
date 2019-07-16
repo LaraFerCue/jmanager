@@ -1,6 +1,6 @@
 import pytest
 
-from models.distribution import Version, VersionType
+from jmanager.models.distribution import Version, VersionType
 
 
 class TestModelVersion:

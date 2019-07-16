@@ -1,4 +1,4 @@
-from models.jail import Jail, JailParameter
+from jmanager.models.jail import Jail, JailParameter
 from src.test.globals import get_mocking_jail_factory, create_dummy_base_jail, TEST_DISTRIBUTION, TMP_PATH, \
     TEST_DATA_SET, destroy_dummy_base_jail, destroy_dummy_jail, MockingZFS
 

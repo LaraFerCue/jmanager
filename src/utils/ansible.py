@@ -4,7 +4,7 @@ from typing import List, Dict
 
 import yaml
 
-from models.jail import Jail
+from jmanager.models.jail import Jail
 
 
 class Ansible:

@@ -3,7 +3,7 @@ import shutil
 
 import pytest
 
-from models.jail import Jail, JailError
+from jmanager.models.jail import Jail, JailError
 from src.test.globals import TEST_DATA_SET, TEST_DISTRIBUTION, create_dummy_base_jail, \
     get_mocking_jail_factory, TMP_PATH, destroy_dummy_base_jail, destroy_dummy_jail, MockingZFS
 

@@ -6,8 +6,8 @@ from tempfile import TemporaryDirectory
 from typing import List
 
 from jmanager.utils.console_utils import print_progress_bar_extract, print_progress_bar_fetch
-from models.distribution import Distribution
-from models.jail import Jail, JailError
+from jmanager.models.distribution import Distribution
+from jmanager.models.jail import Jail, JailError
 from src.factories.jail_factory import JailFactory
 from src.utils.ansible import Ansible
 from src.utils.fetch import HTTPFetcher
