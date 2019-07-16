@@ -9,6 +9,15 @@ COVERAGE_FOLDERS=	jmanager/factories \
 
 LIST_TYPE=jail
 
+.PHONY: clean
+clean:
+	@echo "Cleaning current directory ..."
+	rm -rf build
+	@echo "Cleaning coverage report ..."
+	rm -rf htmlcov .coverage
+	@echo "Cleaning pytest cache ..."
+	rm -rf .pytest_cache
+
 .PHONY: pre-test
 pre-test:
 	scripts/zfs_init.sh ${SET_USER}
