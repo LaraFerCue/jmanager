@@ -10,8 +10,8 @@ from jmanager.factories.base_jail_factory import BaseJailFactory
 from jmanager.factories.data_set_factory import DataSetFactory
 from jmanager.factories.jail_factory import JailFactory
 from jmanager.jail_manager import JailManager
-from jmanager.utils.fetch import HTTPFetcher
 from jmanager.utils.configuration import read_configuration_file
+from jmanager.utils.fetch import HTTPFetcher
 
 
 def execute_commands(args: Namespace):
@@ -45,6 +45,9 @@ def execute_commands(args: Namespace):
         jail_manager.stop(jail_name=args.jail_name)
     elif args.command == 'configure':
         jail_manager.configure_jail(jail_name=args.jail_name)
+    elif args.command == 'provision':
+        jail_manager.provision_jail(jail_name=args.jail_name,
+                                    provision_file=PosixPath(args.provision_file))
 
 
 def initialize_program(jail_config_folder: PosixPath, jail_root_path: PosixPath):
